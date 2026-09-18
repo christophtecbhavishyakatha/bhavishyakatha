@@ -1,0 +1,10 @@
+<resources>
+  <string name="app_name">Bhavishya Katha</string>
+  <string name="expo_system_ui_user_interface_style" translatable="false">automatic</string>
+  <string name="expo_splash_screen_resize_mode" translatable="false">contain</string>
+  <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
+  <string name="facebook_app_id">1748681800600603</string>
+<string name="facebook_client_token">3b169f7b004aa74be7407feb56c0c22a</string>
+<string name="fb_login_protocol_scheme">fb1748681800600603</string>
+<string name="facebook_display_name">Bhavishya Katha</string>
+</resources>
