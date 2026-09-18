@@ -1,0 +1,75 @@
+{
+  "expo": {
+    "name": "Bhavishya Connect",
+    "slug": "bhavishyaconnect",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "astrologerapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "notification": {
+      "icon": "./assets/images/icon.png"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.astrologer.bhavishyakatha",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses your camera for video consultations.",
+        "NSMicrophoneUsageDescription": "This app uses your microphone for audio and video consultations.",
+        "UIBackgroundModes": [
+          "audio",
+          "voip",
+          "fetch"
+        ]
+      }
+    },
+    "android": {
+      "package": "com.astrologer.bhavishyakatha",
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_CAMERA",
+        "android.permission.WAKE_LOCK",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE_MICROPHONE",
+        "android.permission.POST_NOTIFICATIONS"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/images/icon.png"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-notifications",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "@react-native-firebase/app",
+      "@react-native-firebase/messaging",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
+          },
+          "ios": {
+            "deploymentTarget": "15.1",
+            "useFrameworks": "static"
+          }
+        }
+      ]
+    ]
+  }
+}

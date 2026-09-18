@@ -1,0 +1,2 @@
+keytool -genkeypair -v -storetype PKCS12 -keystore christophtecastro.keystore -alias christophtecastro -keyalg RSA -keysize 2048 -validity 10000
+password: user#christ

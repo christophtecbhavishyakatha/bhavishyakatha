@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "495397469377",
+    "project_id": "customer-app-e7626",
+    "storage_bucket": "customer-app-e7626.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:495397469377:android:40729b8a541469249d6840",
+        "android_client_info": {
+          "package_name": "com.snsrk9.astrocristoptec"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVDTEO1JzxpKDyczS-dSQBi-BXoZwTLu8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

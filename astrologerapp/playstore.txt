@@ -1,0 +1,2 @@
+keytool -genkeypair -v -storetype PKCS12 -keystore bhavisyaconnect.keystore -alias bhavisyaconnect -keyalg RSA -keysize 2048 -validity 10000
+password: snsrk9
