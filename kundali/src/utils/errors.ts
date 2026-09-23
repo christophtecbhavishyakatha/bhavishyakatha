@@ -1,0 +1,1 @@
+export class AppError extends Error{constructor(public readonly statusCode:number,message:string,public readonly code="APP_ERROR",public readonly details?:unknown){super(message);this.name="AppError"}}export const isRetryableStatus=(s:number)=>s===408||s===425||s===429||s>=500;

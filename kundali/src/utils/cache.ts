@@ -1,0 +1,1 @@
+type E<T>={value:T;expiresAt:number};export class MemoryCache<T>{private m=new Map<string,E<T>>();constructor(private ttl:number){}get(k:string){const e=this.m.get(k);if(!e)return; if(e.expiresAt<=Date.now()){this.m.delete(k);return}return e.value}set(k:string,v:T){this.m.set(k,{value:v,expiresAt:Date.now()+this.ttl})}}

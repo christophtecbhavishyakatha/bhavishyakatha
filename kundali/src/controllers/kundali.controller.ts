@@ -1,0 +1,1 @@
+import type {Request,Response} from "express";import {generateKundali} from "../services/kundali.service.js";import type {ValidatedKundaliRequest} from "../validators/kundali.js";export async function generate(req:Request,res:Response){res.json({success:true,data:await generateKundali(req.body as ValidatedKundaliRequest)})}
