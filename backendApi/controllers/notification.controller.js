@@ -1,15 +1,10 @@
-import db from "../config/db.js";
-import pool from "../config/db.js";
-import { userApp, astrologerApp } from "../config/firebase.js";
+import { default as db, default as pool } from "../config/db.js";
+import { astrologerApp, userApp } from "../config/firebase.js";
+import { sendFCMNotification } from "../services/pushNotification.service.js";
 
 export const sendNotification = async (req, res) => {
   try {
-    const {
-      recipientType,
-      targetType,
-      title,
-      message,
-    } = req.body;
+    const { recipientType, targetType, title, message } = req.body;
 
     // ---------------------------------------------
     // Validation
@@ -64,10 +59,7 @@ export const sendNotification = async (req, res) => {
     }
 
     if (recipientType === "astrologer") {
-      const allowed = [
-        "all",
-        "incomplete_profile",
-      ];
+      const allowed = ["all", "incomplete_profile"];
 
       if (!allowed.includes(targetType)) {
         return res.status(400).json({
@@ -103,7 +95,6 @@ export const sendNotification = async (req, res) => {
       // -------------------------------------------
       // PREVIOUS CONSULTATION
       // -------------------------------------------
-
       else if (targetType === "previous_consultation") {
         const [result] = await db.execute(`
           SELECT DISTINCT
@@ -123,7 +114,6 @@ export const sendNotification = async (req, res) => {
       // -------------------------------------------
       // NO CONSULTATION YET
       // -------------------------------------------
-
       else if (targetType === "no_consultation") {
         const [result] = await db.execute(`
           SELECT
@@ -146,7 +136,6 @@ export const sendNotification = async (req, res) => {
       // -------------------------------------------
       // ALL USERS
       // -------------------------------------------
-
       else if (targetType === "all") {
         const [result] = await db.execute(`
           SELECT id, fcmToken
@@ -163,11 +152,7 @@ export const sendNotification = async (req, res) => {
       // -------------------------------------------
 
       const tokens = [
-        ...new Set(
-          rows
-            .map((row) => row.fcmToken)
-            .filter(Boolean)
-        ),
+        ...new Set(rows.map((row) => row.fcmToken).filter(Boolean)),
       ];
 
       if (tokens.length === 0) {
@@ -184,14 +169,15 @@ export const sendNotification = async (req, res) => {
       // Send using USER Firebase app
       // -------------------------------------------
 
-      const result = await sendFCMNotification(
-        userApp,
-        tokens,
+      const result = await sendFCMNotification(userApp, tokens, {
         title,
         message,
-        recipientType,
-        targetType
-      );
+        data: {
+          notificationType: "admin_notification",
+          recipientType,
+          targetType,
+        },
+      });
 
       return res.status(200).json({
         success: true,
@@ -228,7 +214,6 @@ export const sendNotification = async (req, res) => {
       // -------------------------------------------
       // INCOMPLETE PROFILE
       // -------------------------------------------
-
       else if (targetType === "incomplete_profile") {
         const [result] = await pool.execute(`
           SELECT id, fcmToken
@@ -249,11 +234,7 @@ export const sendNotification = async (req, res) => {
       // -------------------------------------------
 
       const tokens = [
-        ...new Set(
-          rows
-            .map((row) => row.fcmToken)
-            .filter(Boolean)
-        ),
+        ...new Set(rows.map((row) => row.fcmToken).filter(Boolean)),
       ];
 
       if (tokens.length === 0) {
@@ -270,14 +251,15 @@ export const sendNotification = async (req, res) => {
       // Send using ASTROLOGER Firebase app
       // -------------------------------------------
 
-      const result = await sendFCMNotification(
-        astrologerApp,
-        tokens,
+      const result = await sendFCMNotification(astrologerApp, tokens, {
         title,
         message,
-        recipientType,
-        targetType
-      );
+        data: {
+          notificationType: "admin_notification",
+          recipientType,
+          targetType,
+        },
+      });
 
       return res.status(200).json({
         success: true,
@@ -293,7 +275,6 @@ export const sendNotification = async (req, res) => {
       success: false,
       message: "Invalid recipientType",
     });
-
   } catch (error) {
     console.error("sendNotification error:", error);
 
@@ -303,81 +284,4 @@ export const sendNotification = async (req, res) => {
       error: error.message,
     });
   }
-};
-
-
-// =====================================================
-// FCM HELPER
-// =====================================================
-
-const sendFCMNotification = async (
-  firebaseApp,
-  tokens,
-  title,
-  message,
-  recipientType,
-  targetType
-) => {
-  let successCount = 0;
-  let failureCount = 0;
-
-  const batchSize = 500;
-
-  for (let i = 0; i < tokens.length; i += batchSize) {
-    const batch = tokens.slice(i, i + batchSize);
-
-    const messaging = firebaseApp.messaging();
-
-    // Send notification
-    const response = await messaging.sendEachForMulticast({
-      tokens: batch,
-
-      notification: {
-        title: title.trim(),
-        body: message.trim(),
-      },
-
-      data: {
-        notificationType: "admin_notification",
-        recipientType: String(recipientType),
-        targetType: String(targetType),
-      },
-
-      android: {
-        priority: "high",
-
-        notification: {
-          sound: "default",
-        },
-      },
-    });
-
-    // Count
-    successCount += response.successCount;
-    failureCount += response.failureCount;
-
-    // ---------------------------------------------
-    // Print exact FCM errors
-    // ---------------------------------------------
-
-    response.responses.forEach((result, index) => {
-      if (!result.success) {
-        console.log("================================");
-        console.log("FCM FAILED");
-        console.log("Token:", batch[index]);
-        console.log("Code:", result.error?.code);
-        console.log("Message:", result.error?.message);
-        console.log("================================");
-      }
-    });
-
-    console.log(
-      `FCM batch: ${response.successCount} success, ${response.failureCount} failed`
-    );
-  }
-
-  return {
-    successCount,
-    failureCount,
-  };
 };

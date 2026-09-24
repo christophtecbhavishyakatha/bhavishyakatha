@@ -1,0 +1,12 @@
+export interface ResolvedPlace{input:string;displayName:string;latitude:number;longitude:number;timezone:string;utcOffsetMinutes:number}
+export interface ProviderPayload{year:number;month:number;date:number;hours:number;minutes:number;seconds:number;latitude:number;longitude:number;timezone:number;settings:{observation_point:"geocentric"|"topocentric";ayanamsha:string;language:"en"}}
+export interface Position{longitude:number;sign:{id:number;name:string;lord:string};degree:number;minutes:number;seconds:number;retrograde:boolean}
+export interface Nakshatra{number:number;name:string;pada:number;lord:string}
+export interface Planet{name:string;position:Position;house:number;nakshatra:Nakshatra}
+export interface Ascendant{position:Position;house:number;nakshatra:Nakshatra}
+export interface D1Chart{ascendant:Ascendant;planets:Record<string,Planet>;referenceSign:string;julianDayUt:number;utcDatetime:string}
+export interface D9Placement{longitude:number;sign:string;house:number}
+export interface D9Chart{referenceSign:string;placements:Record<string,D9Placement>}
+export interface Vimshottari{yearMode:string;balance:{lord:string;elapsedFraction:number;remainingFraction:number;balanceYears:number};mahadashas:{lord:string;start:string;end:string;durationDays:number}[]}
+export interface ChartImage{format:"png";encoding:"base64";mimeType:"image/png";width:number;height:number;data:string}
+export interface KundaliResponse{schemaVersion:"1.0";provider:{name:"navamsha";calculation:{ayanamsha:string;observationPoint:string}};birth:{date:string;time:string;place:ResolvedPlace};charts:{d1?:D1Chart|undefined;d9?:D9Chart|undefined;moon?:unknown|undefined;images?:{lagna?:ChartImage|undefined;navamsa?:ChartImage|undefined;moon?:ChartImage|undefined}|undefined};panchang?:unknown|undefined;dashas?:{vimshottari:Vimshottari}|undefined}

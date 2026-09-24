@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Terms & Conditions | Privacy Policy | Bhavishya Katha</title>
+  <meta name="description" content="Terms & Conditions and Privacy Policy for Bhavishya Katha – Online Vedic Astrology Consultation Platform.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#07050f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Noto+Sans+Bengali:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #07050f;
+      --surface:  #100d1e;
+      --border:   rgba(212,175,55,0.18);
+      --gold:     #d4af37;
+      --gold-lt:  #f0d060;
+      --gold-pale:#fff4c0;
+      --cream:    #f2e8d0;
+      --muted:    #9a8a68;
+      --dim:      #5a5040;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--cream); font-family: 'Libre Baskerville', Georgia, serif; overflow-x: hidden; min-height: 100vh; }
+
+    #cvs { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .wrap { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 0 1.8rem; }
+
+    /* NAV */
+    nav { display:flex; align-items:center; justify-content:space-between; padding:1.4rem 0; border-bottom:1px solid var(--border); animation:slideDown .9s ease both; gap:1rem; position:relative; }
+    .logo-wrap { text-decoration:none; }
+    .logo-en { font-family:'Cinzel Decorative',serif; font-size:1.05rem; color:var(--gold-lt); letter-spacing:.04em; white-space:nowrap; }
+    .logo-bn { font-family:'Noto Sans Bengali',sans-serif; font-size:.78rem; color:var(--muted); margin-top:.15rem; }
+    .nav-toggle { display:none; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:4px; flex-shrink:0; }
+    .nav-toggle span { display:block; width:22px; height:2px; background:var(--gold); border-radius:2px; transition:transform .3s,opacity .3s; }
+    .nav-toggle.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    .nav-toggle.open span:nth-child(2) { opacity:0; }
+    .nav-toggle.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+    .nav-links { display:flex; gap:2rem; list-style:none; }
+    .nav-links a { color:var(--muted); text-decoration:none; font-size:.88rem; letter-spacing:.07em; transition:color .25s; white-space:nowrap; }
+    .nav-links a:hover { color:var(--gold-lt); }
+    @media(max-width:600px){
+      .nav-toggle{display:flex;}
+      .nav-links{display:none;flex-direction:column;gap:0;position:absolute;top:0;left:0;right:0;background:rgba(10,7,20,.97);border-bottom:1px solid var(--border);padding:5rem 2rem 2rem;z-index:100;}
+      .nav-links.open{display:flex;}
+      .nav-links li{border-bottom:1px solid var(--border);}
+      .nav-links a{display:block;padding:.9rem 0;font-size:1rem;}
+    }
+
+    /* FLOAT APP */
+    .float-app { position:fixed; right:0; top:50%; transform:translateY(-50%); z-index:200; display:flex; flex-direction:column; align-items:center; background:linear-gradient(180deg,#1a1230,#0e0a1e); border:1px solid rgba(212,175,55,.4); border-right:none; border-radius:10px 0 0 10px; padding:.9rem .6rem .7rem; text-decoration:none; gap:.45rem; box-shadow:-4px 0 24px rgba(212,175,55,.12); transition:padding .3s,box-shadow .3s; }
+    .float-app:hover { padding-right:.9rem; box-shadow:-6px 0 32px rgba(212,175,55,.25); border-color:var(--gold); }
+    .float-app svg { width:26px; height:26px; }
+    .float-label { writing-mode:vertical-rl; text-orientation:mixed; transform:rotate(180deg); font-family:'Cinzel Decorative',serif; font-size:.5rem; letter-spacing:.12em; color:var(--gold-lt); white-space:nowrap; }
+    .float-pulse { width:7px; height:7px; border-radius:50%; background:var(--gold); animation:pulse 2s ease infinite; }
+
+    /* BREADCRUMB */
+    .breadcrumb { display:flex; align-items:center; gap:.5rem; font-size:.78rem; color:var(--dim); padding:1.5rem 0 0; animation:slideDown .7s ease both; }
+    .breadcrumb a { color:var(--dim); text-decoration:none; transition:color .2s; }
+    .breadcrumb a:hover { color:var(--gold-lt); }
+    .breadcrumb .sep { color:var(--gold); opacity:.5; }
+
+    /* PAGE HERO */
+    .page-hero { text-align:center; padding:4rem 0 2.5rem; animation:riseUp 1.1s ease .15s both; }
+    .page-eyebrow { font-family:'Noto Sans Bengali',sans-serif; font-size:.85rem; color:var(--gold); letter-spacing:.2em; margin-bottom:1rem; opacity:.9; }
+    .page-hero h1 { font-family:'Cinzel Decorative',serif; font-size:clamp(1.4rem,3.5vw,2.4rem); color:var(--gold-pale); line-height:1.2; text-shadow:0 0 60px rgba(212,175,55,.3); margin-bottom:.5rem; }
+    .page-hero-sub { font-family:'Noto Sans Bengali',sans-serif; font-size:.9rem; color:var(--muted); }
+    .rule { display:flex; align-items:center; gap:1rem; margin:1.3rem auto; max-width:220px; }
+    .rule::before,.rule::after { content:''; flex:1; height:1px; background:linear-gradient(to right,transparent,var(--gold)); }
+    .rule::after { background:linear-gradient(to left,transparent,var(--gold)); }
+    .rule span { color:var(--gold); font-size:1rem; }
+
+    /* TABS */
+    .tabs-wrap { margin:2rem 0 2.5rem; animation:riseUp .8s ease .3s both; }
+    .tabs { display:flex; border:1px solid var(--border); border-radius:6px; overflow:hidden; background:rgba(16,13,30,.6); }
+    .tab {
+      flex:1; padding:.9rem 1rem; text-align:center; cursor:pointer;
+      font-family:'Cinzel Decorative',serif; font-size:.68rem; letter-spacing:.09em;
+      color:var(--muted); border:none; background:transparent;
+      transition:all .3s; border-right:1px solid var(--border);
+      display:flex; align-items:center; justify-content:center; gap:.5rem;
+    }
+    .tab:last-child { border-right:none; }
+    .tab:hover { color:var(--gold-lt); background:rgba(212,175,55,.04); }
+    .tab.active {
+      background:linear-gradient(135deg,rgba(160,120,32,.3),rgba(232,200,80,.15));
+      color:var(--gold-lt);
+      box-shadow:inset 0 -2px 0 var(--gold);
+    }
+    .tab-icon { font-size:.95rem; }
+    @media(max-width:500px){
+      .tabs { flex-direction:column; }
+      .tab { border-right:none; border-bottom:1px solid var(--border); }
+      .tab:last-child { border-bottom:none; }
+    }
+
+    /* CARD */
+    .policy-card {
+      background:linear-gradient(150deg,rgba(22,16,40,.95),rgba(10,7,20,.98));
+      border:1px solid var(--border); border-radius:8px;
+      padding:3rem 3.5rem; position:relative; overflow:hidden;
+      min-height:320px; margin-bottom:5rem;
+      animation:riseUp .9s ease .4s both;
+    }
+    .policy-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+    @media(max-width:640px){ .policy-card{padding:2rem 1.4rem;} }
+
+    /* META */
+    .content-meta { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.8rem; margin-bottom:2rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border); }
+    .meta-tag { font-family:'Cinzel Decorative',serif; font-size:.62rem; letter-spacing:.12em; color:var(--gold); background:rgba(212,175,55,.08); border:1px solid rgba(212,175,55,.2); border-radius:20px; padding:.3rem .9rem; }
+    .meta-date { font-size:.78rem; color:var(--dim); font-style:italic; }
+
+    /* LOADING */
+    .loading-state { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4rem 2rem; gap:1.5rem; }
+    .spinner { width:56px; height:56px; position:relative; }
+    .spinner::before,.spinner::after { content:''; position:absolute; inset:0; border-radius:50%; border:2px solid transparent; }
+    .spinner::before { border-top-color:var(--gold); border-right-color:var(--gold); animation:spin 1.2s linear infinite; }
+    .spinner::after { border-bottom-color:rgba(212,175,55,.35); border-left-color:rgba(212,175,55,.35); animation:spin 1.9s linear infinite reverse; inset:8px; }
+    .spinner-star { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:var(--gold); font-size:1rem; animation:blink 2s ease infinite; }
+    .loading-text { font-family:'Noto Sans Bengali',sans-serif; font-size:.85rem; color:var(--muted); }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    @keyframes blink { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+    /* ERROR */
+    .error-state { text-align:center; padding:3rem 2rem; }
+    .error-icon { font-size:2.2rem; margin-bottom:1rem; opacity:.5; }
+    .error-msg { color:var(--muted); font-style:italic; line-height:1.8; margin-bottom:1.5rem; font-size:.93rem; }
+    .retry-btn { font-family:'Cinzel Decorative',serif; font-size:.68rem; letter-spacing:.1em; padding:.6rem 1.6rem; border-radius:3px; cursor:pointer; background:transparent; color:var(--gold-lt); border:1px solid rgba(212,175,55,.4); transition:all .3s; }
+    .retry-btn:hover { background:rgba(212,175,55,.07); border-color:var(--gold); }
+
+    /* POLICY CONTENT */
+    .policy-body { line-height:1.9; }
+    .policy-body h1 { font-family:'Cinzel Decorative',serif; font-size:clamp(1rem,2.2vw,1.35rem); color:var(--gold-pale); margin:2rem 0 .9rem; }
+    .policy-body h2 { font-family:'Cinzel Decorative',serif; font-size:clamp(.82rem,1.8vw,1.05rem); color:var(--gold-lt); margin:1.8rem 0 .8rem; }
+    .policy-body h3 { font-family:'Libre Baskerville',serif; font-size:.98rem; color:var(--gold); margin:1.4rem 0 .5rem; }
+    .policy-body p { font-size:.95rem; color:var(--muted); margin-bottom:1.1rem; }
+    .policy-body ul,.policy-body ol { margin:.6rem 0 1.1rem 1.5rem; }
+    .policy-body li { font-size:.93rem; color:var(--muted); margin-bottom:.45rem; }
+    .policy-body strong { color:var(--cream); }
+    .policy-body em { color:var(--cream); font-style:italic; }
+    .policy-body a { color:var(--gold); text-decoration:none; border-bottom:1px solid rgba(212,175,55,.3); transition:border-color .2s; }
+    .policy-body a:hover { border-bottom-color:var(--gold); }
+    .policy-body hr { border:none; border-top:1px solid var(--border); margin:2rem 0; }
+    .policy-body blockquote { border-left:3px solid var(--gold); padding:.9rem 1.4rem; background:rgba(212,175,55,.04); border-radius:0 4px 4px 0; margin:1.4rem 0; font-style:italic; color:var(--muted); }
+    .policy-body table { width:100%; border-collapse:collapse; margin:1.4rem 0; font-size:.88rem; }
+    .policy-body th { background:rgba(212,175,55,.08); color:var(--gold-lt); padding:.7rem 1rem; text-align:left; border:1px solid var(--border); font-family:'Cinzel Decorative',serif; font-size:.7rem; letter-spacing:.06em; }
+    .policy-body td { padding:.65rem 1rem; border:1px solid var(--border); color:var(--muted); vertical-align:top; }
+    .policy-body tr:nth-child(even) td { background:rgba(212,175,55,.03); }
+    .policy-plain { white-space:pre-wrap; font-size:.92rem; color:var(--muted); line-height:1.85; }
+
+    /* FOOTER */
+    footer { text-align:center; border-top:1px solid var(--border); padding:3rem 0 2.5rem; color:var(--dim); font-size:.82rem; }
+    .footer-logo { font-family:'Cinzel Decorative',serif; color:var(--gold); font-size:1rem; margin-bottom:.4rem; }
+    .footer-bn { font-family:'Noto Sans Bengali',sans-serif; color:var(--muted); font-size:.8rem; margin-bottom:1.2rem; }
+    footer a { color:var(--dim); text-decoration:none; }
+    footer a:hover { color:var(--gold-lt); }
+    .footer-links { display:flex; gap:2rem; justify-content:center; margin-top:1rem; flex-wrap:wrap; }
+
+    /* ANIMS */
+    @keyframes slideDown { from{opacity:0;transform:translateY(-18px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes riseUp   { from{opacity:0;transform:translateY(28px)}  to{opacity:1;transform:translateY(0)} }
+    @keyframes pulse    { 0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,.6)} 50%{box-shadow:0 0 0 5px rgba(212,175,55,0)} }
+  </style>
+</head>
+<body>
+
+<canvas id="cvs"></canvas>
+
+<div class="wrap">
+
+  <!-- FLOATING APP -->
+  <a href="https://play.google.com/store/apps/details?id=com.bhavishyakatha" target="_blank" class="float-app" title="Download on Google Play">
+    <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="fg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00c9ff"/><stop offset="100%" stop-color="#0080bb"/></linearGradient>
+        <linearGradient id="fg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff5252"/><stop offset="100%" stop-color="#bb0000"/></linearGradient>
+        <linearGradient id="fg3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffdd00"/><stop offset="100%" stop-color="#ff9900"/></linearGradient>
+        <linearGradient id="fg4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00e676"/><stop offset="100%" stop-color="#007733"/></linearGradient>
+      </defs>
+      <polygon points="55,18 55,494 285,256" fill="url(#fg1)"/>
+      <polygon points="55,18 285,256 430,138" fill="url(#fg4)"/>
+      <polygon points="55,494 285,256 430,374" fill="url(#fg2)"/>
+      <polygon points="285,256 430,138 430,374" fill="url(#fg3)"/>
+    </svg>
+    <span class="float-label">Download App</span>
+    <span class="float-pulse"></span>
+  </a>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="logo-wrap">
+      <div class="logo-en">✦ Bhavishya Katha</div>
+      <div class="logo-bn">ভবিষ্যৎ কথা · Since 2010</div>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/">Consult</a></li>
+      <li><a href="/">Astrologers</a></li>
+      <li><a href="/">Reviews</a></li>
+      <li><a href="/">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- BREADCRUMB -->
+  <div class="breadcrumb">
+    <a href="/">Home</a>
+    <span class="sep">›</span>
+    <span id="breadcrumbCurrent" style="color:var(--gold-lt)">Terms &amp; Conditions</span>
+  </div>
+
+  <!-- PAGE HERO -->
+  <div class="page-hero">
+    <p class="page-eyebrow" id="heroEyebrow">আইনি তথ্য</p>
+    <h1 id="heroTitle">Terms &amp; Conditions</h1>
+    <p class="page-hero-sub" id="heroSub">আমাদের পরিষেবা ব্যবহারের নিয়ম ও শর্ত</p>
+    <div class="rule"><span>✦</span></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-wrap">
+    <div class="tabs">
+      <button class="tab active" data-tab="user-terms" onclick="switchTab('user-terms')">
+        <span class="tab-icon">📋</span>
+        <span>Terms &amp; Conditions</span>
+      </button>
+      <button class="tab" data-tab="astro-privacy" onclick="switchTab('astro-privacy')">
+        <span class="tab-icon">🔒</span>
+        <span>Privacy Policy</span>
+      </button>
+      <button class="tab" data-tab="astro-terms" onclick="switchTab('astro-terms')">
+        <span class="tab-icon">⭐</span>
+        <span>Astrologer Terms</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- CARD -->
+  <div class="policy-card">
+    <div class="content-meta">
+      <span class="meta-tag" id="metaTag">Terms &amp; Conditions</span>
+      <span class="meta-date" id="metaDate">Bhavishya Katha · 2026</span>
+    </div>
+    <div id="policyContent">
+      <!-- loaded by JS -->
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">✦ Bhavishya Katha ✦</div>
+    <div class="footer-bn">ভবিষ্যৎ কথা — Your Cosmic Story, Written in the Stars</div>
+    <p>© 2026 Bhavishya Katha &nbsp;·&nbsp; Kolkata, West Bengal &nbsp;·&nbsp;
+      <a href="mailto:hello@bhavishyakatha.com">hello@bhavishyakatha.com</a> &nbsp;·&nbsp;
+      <a href="tel:+919830000000">+91 98300 00000</a>
+    </p>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="#" onclick="switchTab('user-terms');return false;">Terms &amp; Conditions</a>
+      <a href="#" onclick="switchTab('astro-privacy');return false;">Privacy Policy</a>
+      <a href="#" onclick="switchTab('astro-terms');return false;">Astrologer Terms</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+/* ── Starfield ── */
+const cvs = document.getElementById('cvs');
+const ctx = cvs.getContext('2d');
+let W, H, stars = [];
+function initStars() {
+  W = cvs.width = window.innerWidth;
+  H = cvs.height = window.innerHeight;
+  stars = Array.from({length:260}, () => ({
+    x:Math.random()*W, y:Math.random()*H,
+    r:Math.random()*1.1+.15,
+    sp:Math.random()*.4+.08,
+    ph:Math.random()*Math.PI*2
+  }));
+}
+function drawStars(t) {
+  ctx.clearRect(0,0,W,H);
+  const g = ctx.createRadialGradient(W*.3,H*.2,0,W*.5,H*.5,Math.max(W,H)*.8);
+  g.addColorStop(0,'#1a0a2e'); g.addColorStop(1,'#07050f');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  stars.forEach(s => {
+    const a=.25+.75*Math.abs(Math.sin(t*s.sp*.0008+s.ph));
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,248,200,${a})`; ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+window.addEventListener('resize', initStars);
+initStars(); requestAnimationFrame(drawStars);
+
+/* ── Nav hamburger ── */
+const tog = document.getElementById('navToggle');
+const nl  = document.getElementById('navLinks');
+tog.addEventListener('click', () => { tog.classList.toggle('open'); nl.classList.toggle('open'); });
+nl.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { tog.classList.remove('open'); nl.classList.remove('open'); }));
+
+/* ── API ── */
+const API_BASE = 'https://bhavishyakatha.in/express/api';
+
+/* Tab config */
+const TAB_CONFIG = {
+  'user-terms': {
+    url:        `https://bhavishyakatha.in/express/api/client/auth/terms`,
+    title:      'Terms & Conditions',
+    titleBn:    'আমাদের পরিষেবা ব্যবহারের নিয়ম ও শর্ত',
+    eyebrow:    'ব্যবহারের শর্তাবলী',
+    tag:        'Terms & Conditions',
+    breadcrumb: 'Terms & Conditions',
+  },
+  'astro-privacy': {
+    url:        `${API_BASE}/astrologer/privacy`,
+    title:      'Privacy Policy',
+    titleBn:    'আপনার তথ্য আমাদের কাছে সুরক্ষিত',
+    eyebrow:    'গোপনীয়তা নীতি',
+    tag:        'Privacy Policy',
+    breadcrumb: 'Privacy Policy',
+  },
+  'astro-terms': {
+    url:        `${API_BASE}/astrologer/terms`,
+    title:      'Astrologer Terms',
+    titleBn:    'জ্যোতিষী হিসাবে আমাদের শর্তাবলী',
+    eyebrow:    'জ্যোতিষী শর্তাবলী',
+    tag:        'Astrologer Terms',
+    breadcrumb: 'Astrologer Terms',
+  },
+};
+
+/* Cache so we don't re-fetch */
+const cache = {};
+let activeTab = null;
+
+/* ── Render helpers ── */
+function loadingHTML() {
+  return `<div class="loading-state">
+    <div class="spinner"><span class="spinner-star">✦</span></div>
+    <span class="loading-text">Loading content…</span>
+  </div>`;
+}
+
+function errorHTML(tabKey) {
+  return `<div class="error-state">
+    <div class="error-icon">🌙</div>
+    <p class="error-msg">Unable to load this content from the server.<br>Please check your connection and try again.</p>
+    <button class="retry-btn" onclick="loadTab('${tabKey}', true)">✦ &nbsp;Retry</button>
+  </div>`;
+}
+
+function renderContent(content) {
+  if (!content || !content.trim()) return `<p class="policy-plain" style="text-align:center;opacity:.5">No content available.</p>`;
+  const t = content.trim();
+  /* If the API returns HTML */
+  if (/<[a-z][\s\S]*>/i.test(t)) {
+    return `<div class="policy-body">${t}</div>`;
+  }
+  /* Markdown-ish plain text */
+  let html = t
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+    .replace(/^# (.+)$/gm,'<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/^\- (.+)$/gm,'<li>$1</li>')
+    .replace(/^(\d+)\. (.+)$/gm,'<li>$2</li>')
+    .replace(/(<li>[\s\S]+?<\/li>)(\n(?!<li>)|$)/g,'<ul>$1</ul>')
+    .replace(/\n\n+/g,'</p><p>')
+    .replace(/\n/g,'<br>');
+
+  const hasFormatting = /^(#{1,3} |\*\*|\- )/m.test(t);
+  if (hasFormatting) return `<div class="policy-body"><p>${html}</p></div>`;
+  return `<pre class="policy-plain">${t}</pre>`;
+}
+
+/* ── Load tab content ── */
+async function loadTab(tabKey, force = false) {
+  const el = document.getElementById('policyContent');
+
+  if (!force && cache[tabKey]) {
+    el.innerHTML = renderContent(cache[tabKey]);
+    return;
+  }
+
+  el.innerHTML = loadingHTML();
+
+  const cfg = TAB_CONFIG[tabKey];
+  try {
+    const res = await fetch(cfg.url, {
+      headers: { 'Accept': 'application/json' }
+    });
+    const data = await res.json();
+
+    if (data.success && data.content) {
+      cache[tabKey] = data.content;
+      /* Update date if available */
+      if (data.updatedAt || data.updated_at) {
+        const d = new Date(data.updatedAt || data.updated_at);
+        document.getElementById('metaDate').textContent =
+          'Last updated: ' + d.toLocaleDateString('en-IN', {year:'numeric',month:'long',day:'numeric'});
+      }
+      el.innerHTML = renderContent(data.content);
+    } else {
+      el.innerHTML = errorHTML(tabKey);
+    }
+  } catch (err) {
+    console.error(`[BK] Failed to load ${tabKey}:`, err);
+    el.innerHTML = errorHTML(tabKey);
+  }
+}
+
+/* ── Switch tab ── */
+function switchTab(tabKey) {
+  if (activeTab === tabKey) return;
+  activeTab = tabKey;
+
+  /* Update tab buttons */
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabKey);
+  });
+
+  /* Update hero & meta */
+  const cfg = TAB_CONFIG[tabKey];
+  document.getElementById('heroTitle').innerHTML     = cfg.title;
+  document.getElementById('heroSub').textContent     = cfg.titleBn;
+  document.getElementById('heroEyebrow').textContent = cfg.eyebrow;
+  document.getElementById('metaTag').innerHTML       = cfg.tag;
+  document.getElementById('breadcrumbCurrent').innerHTML = cfg.breadcrumb;
+  document.getElementById('metaDate').textContent    = 'Bhavishya Katha · 2026';
+
+  /* Update page title */
+  document.title = `${cfg.title} | Bhavishya Katha`;
+
+  /* Load content */
+  loadTab(tabKey);
+
+  /* Scroll to tabs */
+  document.querySelector('.tabs-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ── Init: load first tab ── */
+switchTab('user-terms');
+</script>
+</body>
+</html>

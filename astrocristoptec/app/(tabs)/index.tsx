@@ -964,8 +964,8 @@ console.log("Last call timestamp:", lastcall);
 
       setCoins(balance);
 
-      // Show modal only when balance is below ₹50
-      if (balance < 50) {
+      // Show modal only when balance is below ₹30
+      if (balance < 30) {
         setShowLowBalanceModal(true);
       } else {
         setShowLowBalanceModal(false);

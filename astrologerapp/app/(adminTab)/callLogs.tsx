@@ -1,16 +1,15 @@
+import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  RefreshControl,
-  Animated,
+    ActivityIndicator,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import DateTimePicker from "@react-native-community/datetimepicker";
 
 const API = "https://bhavishyakatha.in/express/api";
 
@@ -18,7 +17,9 @@ const CallLogsScreen = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<"today" | "week" | "custom">("today");
+  const [activeFilter, setActiveFilter] = useState<"today" | "week" | "custom">(
+    "today",
+  );
 
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -44,7 +45,13 @@ const CallLogsScreen = () => {
     }
   };
 
-  const formatDate = (date: Date) => date.toISOString().split("T")[0];
+  const formatDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
 
   useEffect(() => {
     const d = formatDate(new Date());
@@ -87,9 +94,21 @@ const CallLogsScreen = () => {
   };
 
   const getInitials = (name: string) =>
-    name?.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) || "??";
+    name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "??";
 
-  const AVATAR_COLORS = ["#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ef4444", "#06b6d4"];
+  const AVATAR_COLORS = [
+    "#f59e0b",
+    "#10b981",
+    "#3b82f6",
+    "#8b5cf6",
+    "#ef4444",
+    "#06b6d4",
+  ];
   const getAvatarColor = (name: string) => {
     const code = name?.charCodeAt(0) ?? 0;
     return AVATAR_COLORS[code % AVATAR_COLORS.length];
@@ -141,11 +160,15 @@ const CallLogsScreen = () => {
               <Text style={styles.statLabel}>Total</Text>
             </View>
             <View style={[styles.statCard, styles.statCardMid]}>
-              <Text style={[styles.statValue, { color: "#34d399" }]}>{completedCalls}</Text>
+              <Text style={[styles.statValue, { color: "#34d399" }]}>
+                {completedCalls}
+              </Text>
               <Text style={styles.statLabel}>Completed</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={[styles.statValue, { color: "#f59e0b" }]}>₹{totalEarning}</Text>
+              <Text style={[styles.statValue, { color: "#f59e0b" }]}>
+                ₹{totalEarning}
+              </Text>
               <Text style={styles.statLabel}>Earning</Text>
             </View>
           </View>
@@ -153,18 +176,34 @@ const CallLogsScreen = () => {
           {/* ── FILTER CHIPS ── */}
           <View style={styles.chipRow}>
             <TouchableOpacity
-              style={[styles.chip, activeFilter === "today" && styles.chipActive]}
+              style={[
+                styles.chip,
+                activeFilter === "today" && styles.chipActive,
+              ]}
               onPress={filterToday}
             >
-              <Text style={[styles.chipText, activeFilter === "today" && styles.chipTextActive]}>
+              <Text
+                style={[
+                  styles.chipText,
+                  activeFilter === "today" && styles.chipTextActive,
+                ]}
+              >
                 Today
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.chip, activeFilter === "week" && styles.chipActive]}
+              style={[
+                styles.chip,
+                activeFilter === "week" && styles.chipActive,
+              ]}
               onPress={filterLast7Days}
             >
-              <Text style={[styles.chipText, activeFilter === "week" && styles.chipTextActive]}>
+              <Text
+                style={[
+                  styles.chipText,
+                  activeFilter === "week" && styles.chipTextActive,
+                ]}
+              >
                 Last 7 Days
               </Text>
             </TouchableOpacity>
@@ -196,7 +235,10 @@ const CallLogsScreen = () => {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.applyBtn} onPress={applyCustomFilter}>
+            <TouchableOpacity
+              style={styles.applyBtn}
+              onPress={applyCustomFilter}
+            >
               <Text style={styles.applyBtnText}>Apply</Text>
             </TouchableOpacity>
           </View>
@@ -205,14 +247,20 @@ const CallLogsScreen = () => {
             <DateTimePicker
               value={startDate || new Date()}
               mode="date"
-              onChange={(e, d) => { setShowStartPicker(false); if (d) setStartDate(d); }}
+              onChange={(e, d) => {
+                setShowStartPicker(false);
+                if (d) setStartDate(d);
+              }}
             />
           )}
           {showEndPicker && (
             <DateTimePicker
               value={endDate || new Date()}
               mode="date"
-              onChange={(e, d) => { setShowEndPicker(false); if (d) setEndDate(d); }}
+              onChange={(e, d) => {
+                setShowEndPicker(false);
+                if (d) setEndDate(d);
+              }}
             />
           )}
 
@@ -229,7 +277,9 @@ const CallLogsScreen = () => {
             <View style={styles.emptyState}>
               <Text style={styles.emptyIcon}>📭</Text>
               <Text style={styles.emptyTitle}>No calls found</Text>
-              <Text style={styles.emptySubtitle}>Try a different date range</Text>
+              <Text style={styles.emptySubtitle}>
+                Try a different date range
+              </Text>
             </View>
           )}
 
@@ -241,23 +291,52 @@ const CallLogsScreen = () => {
             return (
               <View key={item.id} style={styles.card}>
                 {/* Card top accent */}
-                <View style={[styles.cardAccent, { backgroundColor: completed ? "#34d399" : "#f59e0b" }]} />
+                <View
+                  style={[
+                    styles.cardAccent,
+                    { backgroundColor: completed ? "#34d399" : "#f59e0b" },
+                  ]}
+                />
 
                 {/* Astrologer row */}
                 <View style={styles.cardTopRow}>
-                  <View style={[styles.avatar, { backgroundColor: avatarColor + "22", borderColor: avatarColor }]}>
+                  <View
+                    style={[
+                      styles.avatar,
+                      {
+                        backgroundColor: avatarColor + "22",
+                        borderColor: avatarColor,
+                      },
+                    ]}
+                  >
                     <Text style={[styles.avatarText, { color: avatarColor }]}>
                       {getInitials(item.astrologer_name)}
                     </Text>
                   </View>
 
                   <View style={styles.cardInfo}>
-                    <Text style={styles.astrologerName}>{item.astrologer_name}</Text>
-                    <Text style={styles.mobileText}>📞 {item.astrologer_mobile}</Text>
+                    <Text style={styles.astrologerName}>
+                      {item.astrologer_name}
+                    </Text>
+                    <Text style={styles.mobileText}>
+                      📞 {item.astrologer_mobile}
+                    </Text>
                   </View>
 
-                  <View style={[styles.badge, completed ? styles.badgeGreen : styles.badgeAmber]}>
-                    <Text style={[styles.badgeText, completed ? styles.badgeTextGreen : styles.badgeTextAmber]}>
+                  <View
+                    style={[
+                      styles.badge,
+                      completed ? styles.badgeGreen : styles.badgeAmber,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.badgeText,
+                        completed
+                          ? styles.badgeTextGreen
+                          : styles.badgeTextAmber,
+                      ]}
+                    >
                       {item.status}
                     </Text>
                   </View>
@@ -274,7 +353,9 @@ const CallLogsScreen = () => {
                     <Text style={styles.mobileText}>📞 {item.user_mobile}</Text>
                   </View>
                   <View style={styles.callTypePill}>
-                    <Text style={styles.callTypePillText}>{item.call_type}</Text>
+                    <Text style={styles.callTypePillText}>
+                      {item.call_type}
+                    </Text>
                   </View>
                 </View>
 
@@ -283,7 +364,9 @@ const CallLogsScreen = () => {
                   <View style={styles.metricsRow}>
                     <View style={styles.metric}>
                       <Text style={styles.metricIcon}>⏱</Text>
-                      <Text style={styles.metricVal}>{formatDuration(item.duration)}</Text>
+                      <Text style={styles.metricVal}>
+                        {formatDuration(item.duration)}
+                      </Text>
                       <Text style={styles.metricLabel}>Duration</Text>
                     </View>
                     <View style={styles.metricDivider} />

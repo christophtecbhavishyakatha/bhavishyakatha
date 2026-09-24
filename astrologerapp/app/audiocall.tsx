@@ -17,6 +17,8 @@ import createAgoraRtcEngine, {
   ClientRoleType,
   ConnectionChangedReasonType,
 } from "react-native-agora";
+import KundaliFloatingButton from "../components/KundaliFloatingButton";
+
 import {
   clearActiveCallSession,
   getCallEngine,
@@ -95,6 +97,8 @@ const {
   dateOfBirth,
   timeOfBirth,
   birthLocation,
+  longitude,
+  latitude,
 } = useLocalSearchParams<{
   fullName?: string;
   id?: string;
@@ -103,6 +107,8 @@ const {
   dateOfBirth?: string;
   timeOfBirth?: string;
   birthLocation?: string;
+  longitude?: string;
+  latitude?: string;
 }>();
 
   const callId = String(id ?? "");
@@ -542,6 +548,7 @@ const callBirthLocation = String(birthLocation ?? "");
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={{position: "absolute",top:50, alignItems: "center", marginBottom: 20 }}>
       <Text style={styles.name}>{callFullName}</Text>
       <Text style={styles.birthDetails}>
   DOB: {callDateOfBirth || "Not provided"}
@@ -554,11 +561,25 @@ const callBirthLocation = String(birthLocation ?? "");
 <Text style={styles.birthLocation}>
   Birth Place: {callBirthLocation || "Not provided"}
 </Text>
+</View>
       <Text style={styles.status}>{statusText}</Text>
       {session?.status === "connected" && (
         <Text style={styles.remaining}>Left {timeLeftLabel}</Text>
       )}
+      {session?.status === "connected" && (
+        
+<KundaliFloatingButton
+  userId={callUserId}
+  dateOfBirth={callDateOfBirth}
+  timeOfBirth={callTimeOfBirth}
+  latitude={Number(latitude)}
+  longitude={Number(longitude)}
 
+  birthLocation={callBirthLocation}
+  fullName={callFullName}
+
+/>
+      )}
       <View style={styles.controls}>
         <TouchableOpacity
           style={[styles.controlBtn, isMuted && styles.controlBtnActive]}

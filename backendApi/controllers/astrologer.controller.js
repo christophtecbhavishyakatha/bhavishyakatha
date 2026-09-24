@@ -1,14 +1,14 @@
 // controllers/astrologer.controller.js
 import db from "../config/db.js";
-import {userApp} from "../config/firebase.js";
-import {
-  upsertStatus,
-  getStatusWithProfile,
-} from "../services/astrologerStatus.service.js";
+import { userApp } from "../config/firebase.js";
 import redisClient from "../config/redis.js";
 import {
-  archiveChatMessages,
-  ensureChatArchiveTable,
+    getStatusWithProfile,
+    upsertStatus,
+} from "../services/astrologerStatus.service.js";
+import {
+    archiveChatMessages,
+    ensureChatArchiveTable,
 } from "../services/chatArchive.service.js";
 
 const normalizePhone = (value, fallback) => {
@@ -16,7 +16,12 @@ const normalizePhone = (value, fallback) => {
   return digits || String(fallback ?? "");
 };
 
-const buildChatChannelName = ({ astrologerPhone, astrologerId, userMobile, customerId }) => {
+const buildChatChannelName = ({
+  astrologerPhone,
+  astrologerId,
+  userMobile,
+  customerId,
+}) => {
   const astrologerMobile = normalizePhone(astrologerPhone, astrologerId);
   const customerMobile = normalizePhone(userMobile, customerId);
   return `${astrologerMobile}${customerMobile}`;
@@ -52,7 +57,9 @@ const sendCallCancelledNotification = async (call, reason = "cancelled") => {
     return;
   }
 
-  const callType = String(call.call_type || call.callType || "audio").toLowerCase();
+  const callType = String(
+    call.call_type || call.callType || "audio",
+  ).toLowerCase();
   const callerName = call.astrologer_name || "Astrologer";
   const title = getMissedCallTitle(callType);
   const body = getMissedCallBody(callType);
@@ -107,7 +114,7 @@ const getCallCancellationPayload = async (callId) => {
      LEFT JOIN call_timers ct ON ct.call_id = cr.id
      WHERE cr.id = ?
      LIMIT 1`,
-    [callId]
+    [callId],
   );
 
   return rows[0] || null;
@@ -124,7 +131,10 @@ const clearCallCancelledTimer = (callId) => {
 };
 
 const publishChatEndedIfNeeded = async (call) => {
-  if (String(call?.call_type || "").toLowerCase() !== "chat" || !call.channel_name) {
+  if (
+    String(call?.call_type || "").toLowerCase() !== "chat" ||
+    !call.channel_name
+  ) {
     return;
   }
 
@@ -141,11 +151,14 @@ const publishChatEndedIfNeeded = async (call) => {
       payload: {
         callId: String(call.id),
       },
-    })
+    }),
   );
 };
 
-const cancelUnansweredAcceptedCall = async (callId, reason = "unanswered_timeout") => {
+const cancelUnansweredAcceptedCall = async (
+  callId,
+  reason = "unanswered_timeout",
+) => {
   const [result] = await db.execute(
     `UPDATE call_requests cr
      SET cr.status = 'timeout',
@@ -160,7 +173,7 @@ const cancelUnansweredAcceptedCall = async (callId, reason = "unanswered_timeout
        AND NOT EXISTS (
          SELECT 1 FROM call_timers ct WHERE ct.call_id = cr.id
        )`,
-    [callId]
+    [callId],
   );
 
   if (!result.affectedRows) {
@@ -205,11 +218,13 @@ const insertUnchangedWalletLog = async ({
     `SELECT
         (SELECT COALESCE(wallet_balance, 0) FROM users WHERE id = ?) AS user_wallet_balance,
         (SELECT COALESCE(wallet_balance, 0) FROM astrologer_profiles WHERE astrologer_id = ?) AS astrologer_wallet_balance`,
-    [customerId, astrologerId]
+    [customerId, astrologerId],
   );
 
   const userWalletBalance = Number(wallets?.user_wallet_balance || 0);
-  const astrologerWalletBalance = Number(wallets?.astrologer_wallet_balance || 0);
+  const astrologerWalletBalance = Number(
+    wallets?.astrologer_wallet_balance || 0,
+  );
 
   await db.query(
     `INSERT INTO call_wallet_logs
@@ -230,7 +245,7 @@ const insertUnchangedWalletLog = async ({
       0,
       0,
       0,
-    ]
+    ],
   );
 };
 
@@ -252,11 +267,13 @@ export const getProfile = async (req, res) => {
        FROM astrologer_profiles p
        JOIN astrologers a ON a.id = p.astrologer_id
        WHERE p.astrologer_id = ?`,
-      [id]
+      [id],
     );
 
     if (!rows.length) {
-      return res.status(404).json({ success: false, message: "Profile not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Profile not found" });
     }
 
     const r = rows[0];
@@ -291,6 +308,7 @@ export const getHomeData = async (req, res) => {
          p.dp_name,
          p.wallet_balance,
          a.is_admin_verified,
+         a.blocked_by_admin,
          a.profile_completed,
          a.coupon_code,
 	 a.rank,
@@ -299,11 +317,13 @@ export const getHomeData = async (req, res) => {
        FROM astrologers a
        LEFT JOIN astrologer_profiles p ON p.astrologer_id = a.id
        WHERE a.id = ?`,
-      [id]
+      [id],
     );
 
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     const status = await getStatusWithProfile(id);
@@ -329,7 +349,9 @@ export const updateStatus = async (req, res) => {
   const { user_id, status, audio, video, chat } = req.body;
 
   if (!user_id) {
-    return res.status(400).json({ success: false, message: "user_id required" });
+    return res
+      .status(400)
+      .json({ success: false, message: "user_id required" });
   }
 
   try {
@@ -388,7 +410,6 @@ export const getStatus = async (req, res) => {
   }
 };
 
-
 // Get call requests with customer details for a specific astrologer
 export const getCallRequestsWithCustomer = async (req, res) => {
   const userId = req.body.user_id;
@@ -420,7 +441,7 @@ ORDER BY cr.created_at DESC;
 
   try {
     const [results] = await db.query(query, [userId]); // ✅ Use await instead of callback
-    
+
     return res.status(200).json({
       success: true,
       data: results,
@@ -433,7 +454,6 @@ ORDER BY cr.created_at DESC;
     });
   }
 };
-
 
 export const rejectCallRequest = async (req, res) => {
   try {
@@ -453,7 +473,7 @@ export const rejectCallRequest = async (req, res) => {
        WHERE id = ?
          AND astrologer_id = ?
          AND customer_id = ?`,
-      [id, astrologer_id, customer_id]
+      [id, astrologer_id, customer_id],
     );
 
     if (!rows.length) {
@@ -476,7 +496,7 @@ export const rejectCallRequest = async (req, res) => {
        SET status = 'rejected_by_astrologer',
            updated_at = NOW()
        WHERE id = ?`,
-      [id]
+      [id],
     );
 
     try {
@@ -495,7 +515,6 @@ export const rejectCallRequest = async (req, res) => {
       success: true,
       message: "Call request rejected successfully",
     });
-
   } catch (err) {
     console.error("Reject call error:", err);
     res.status(500).json({
@@ -504,8 +523,6 @@ export const rejectCallRequest = async (req, res) => {
     });
   }
 };
-
-
 
 export const acceptCall = async (req, res) => {
   let connection;
@@ -535,7 +552,7 @@ export const acceptCall = async (req, res) => {
       `SELECT *
        FROM call_requests
        WHERE id = ?`,
-      [id]
+      [id],
     );
 
     if (!callRows.length) {
@@ -556,7 +573,7 @@ export const acceptCall = async (req, res) => {
        FROM users
        WHERE id = ?
        FOR UPDATE`,
-      [call.customer_id]
+      [call.customer_id],
     );
 
     if (!userRows.length) {
@@ -576,7 +593,7 @@ export const acceptCall = async (req, res) => {
        FROM call_requests
        WHERE id = ?
        FOR UPDATE`,
-      [id]
+      [id],
     );
 
     if (!lockedCallRows.length) {
@@ -614,7 +631,7 @@ export const acceptCall = async (req, res) => {
          ON ap.astrologer_id = a.id
        WHERE a.id = ?
        LIMIT 1`,
-      [call.astrologer_id]
+      [call.astrologer_id],
     );
 
     const astrologer = astrologerRows[0] || {};
@@ -647,7 +664,7 @@ export const acceptCall = async (req, res) => {
              updated_at = NOW()
          WHERE id = ?
            AND status = 'pending'`,
-        [chatChannelName, id]
+        [chatChannelName, id],
       );
     } else {
       [updateResult] = await connection.execute(
@@ -657,7 +674,7 @@ export const acceptCall = async (req, res) => {
              updated_at = NOW()
          WHERE id = ?
            AND status = 'pending'`,
-        [id]
+        [id],
       );
     }
 
@@ -681,7 +698,7 @@ export const acceptCall = async (req, res) => {
        WHERE customer_id = ?
          AND id != ?
          AND status = 'pending'`,
-      [call.customer_id, id]
+      [call.customer_id, id],
     );
 
     // =========================================================
@@ -747,7 +764,7 @@ export const acceptCall = async (req, res) => {
     } catch (timeoutError) {
       console.error(
         "❌ Failed to schedule call cancellation timeout:",
-        timeoutError
+        timeoutError,
       );
     }
 
@@ -780,10 +797,6 @@ export const acceptCall = async (req, res) => {
   }
 };
 
-
-
-
-
 export const endCall = async (req, res) => {
   const connection = await db.getConnection();
 
@@ -802,7 +815,7 @@ export const endCall = async (req, res) => {
        FROM call_requests
        WHERE id = ?
        LIMIT 1`,
-      [call_id]
+      [call_id],
     );
 
     if (!existingCalls.length) {
@@ -820,7 +833,7 @@ export const endCall = async (req, res) => {
       "rejected_by_user",
       "rejected_by_astrologer",
       "no_answer",
-	"accepted_by_other"
+      "accepted_by_other",
     ]);
 
     if (closedStatuses.has(String(existingCall.status))) {
@@ -839,7 +852,7 @@ export const endCall = async (req, res) => {
        FROM call_requests 
        WHERE id = ? 
        LIMIT 1`,
-      [call_id]
+      [call_id],
     );
 
     if (calls.length === 0) {
@@ -856,19 +869,19 @@ export const endCall = async (req, res) => {
        SET status = 'callend',
            ended_at = NOW()
        WHERE id = ?`,
-      [call_id]
+      [call_id],
     );
 
-/* 🔹 Update call_timers */
-await connection.execute(
-  `UPDATE call_timers
+    /* 🔹 Update call_timers */
+    await connection.execute(
+      `UPDATE call_timers
    SET status = 'ongoing',
        expires_at = NOW(),
        max_duration_sec = TIMESTAMPDIFF(SECOND, started_at, NOW())
    WHERE call_id = ? 
      AND status = 'ongoing'`,
-  [call_id]
-);
+      [call_id],
+    );
 
     await connection.commit();
 
@@ -980,7 +993,7 @@ export const getAstrologerBio = async (req, res) => {
 
     const [rows] = await db.query(
       `SELECT bio FROM astrologer_profiles WHERE astrologer_id = ?`,
-      [astrologer_id]
+      [astrologer_id],
     );
 
     res.json({ bio: rows[0]?.bio || "" });
@@ -995,7 +1008,7 @@ export const updateAstrologerBio = async (req, res) => {
 
     await db.query(
       `UPDATE astrologer_profiles SET bio = ? WHERE astrologer_id = ?`,
-      [bio, astrologer_id]
+      [bio, astrologer_id],
     );
 
     res.json({ success: true });
@@ -1056,7 +1069,8 @@ export const getChatListByUser = async (req, res) => {
   }
 
   try {
-    const [result] = await db.query(`
+    const [result] = await db.query(
+      `
       SELECT cmh.room_id,
              cmh.message_text,
              cmh.sent_at,
@@ -1103,16 +1117,16 @@ export const getChatListByUser = async (req, res) => {
       ON ap.astrologer_id = cr.astrologer_id
 
       ORDER BY cmh.sent_at DESC
-    `, [user_id, user_id]);
+    `,
+      [user_id, user_id],
+    );
 
     res.json({ success: true, data: result });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 };
-
 
 export const getChatMessages = async (req, res) => {
   const { room_id } = req.params;
@@ -1166,7 +1180,7 @@ export const getChatMessages = async (req, res) => {
         ORDER BY cr.id DESC
         LIMIT 1
       `,
-      [room_id]
+      [room_id],
     );
 
     res.json({
@@ -1175,13 +1189,11 @@ export const getChatMessages = async (req, res) => {
       hasMore: messages.length === 20, // useful for frontend
       conversation: conversationRows[0] || null,
     });
-
   } catch (err) {
     console.error("Get messages error:", err);
     res.status(500).json({ error: err.message });
   }
 };
-
 
 export const selfanalysis = async (req, res) => {
   try {
@@ -1213,7 +1225,7 @@ export const selfanalysis = async (req, res) => {
       WHERE id = ?
       LIMIT 1
       `,
-      [astrologer_id]
+      [astrologer_id],
     );
 
     if (astrologers.length === 0) {
@@ -1246,7 +1258,7 @@ export const selfanalysis = async (req, res) => {
       GROUP BY r.rating
       ORDER BY r.rating DESC
       `,
-      [astrologer_id]
+      [astrologer_id],
     );
 
     // ==========================================
@@ -1260,7 +1272,7 @@ export const selfanalysis = async (req, res) => {
       FROM feedback_rating
       WHERE astrologer_id = ?
       `,
-      [astrologer_id]
+      [astrologer_id],
     );
 
     // ==========================================
@@ -1283,7 +1295,7 @@ export const selfanalysis = async (req, res) => {
       WHERE fc.astrologer_id = ?
       ORDER BY fc.created_at DESC
       `,
-      [astrologer_id]
+      [astrologer_id],
     );
 
     // ==========================================
@@ -1321,7 +1333,7 @@ export const selfanalysis = async (req, res) => {
 
       rating: {
         average: Number(
-          Number(ratingSummary[0].average_rating || 0).toFixed(1)
+          Number(ratingSummary[0].average_rating || 0).toFixed(1),
         ),
 
         total: Number(ratingSummary[0].total_rating_count || 0),
@@ -1345,7 +1357,6 @@ export const selfanalysis = async (req, res) => {
         reply_created_at: item.reply_created_at,
       })),
     });
-
   } catch (error) {
     console.error("Self analysis error:", error);
 

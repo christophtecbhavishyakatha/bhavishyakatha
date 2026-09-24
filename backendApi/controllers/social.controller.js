@@ -1,4 +1,6 @@
 import db from "../config/db.js";
+import { userApp } from "../config/firebase.js";
+import { sendFCMNotification } from "../services/pushNotification.service.js";
 
 const ADMIN_REPLY_NAME = "Bhavishya Katha";
 const POST_MAX_LENGTH = 5000;
@@ -87,7 +89,7 @@ const buildPostStatus = (post) => {
 const normalizePagination = (query) => {
   const limit = Math.min(
     Math.max(Number(query.limit) || DEFAULT_POST_PAGE_SIZE, 1),
-    MAX_POST_PAGE_SIZE
+    MAX_POST_PAGE_SIZE,
   );
   const offset = Math.max(Number(query.offset) || 0, 0);
 
@@ -133,14 +135,14 @@ export const ensureSocialSchema = async () => {
       `);
 
       const [imageColumns] = await db.query(
-        `SHOW COLUMNS FROM social_posts LIKE 'image_base64'`
+        `SHOW COLUMNS FROM social_posts LIKE 'image_base64'`,
       );
 
       if (!imageColumns.length) {
         await db.query(
           `ALTER TABLE social_posts
            ADD COLUMN image_base64 MEDIUMTEXT DEFAULT NULL
-           AFTER content`
+           AFTER content`,
         );
       }
     })().catch((error) => {
@@ -164,7 +166,7 @@ const getAdminRecord = async (adminId) => {
      FROM admins
      WHERE admin_id = ?
      LIMIT 1`,
-    [normalizedAdminId]
+    [normalizedAdminId],
   );
 
   return admin || null;
@@ -184,7 +186,7 @@ const getVisiblePostById = async (postId) => {
        AND is_active = 1
        AND publish_at <= NOW()
      LIMIT 1`,
-    [normalizedPostId]
+    [normalizedPostId],
   );
 
   return post || null;
@@ -201,7 +203,7 @@ const mapCommentsByPost = async (postIds) => {
      FROM social_post_comments
      WHERE post_id IN (${placeholders})
      ORDER BY created_at ASC, id ASC`,
-    postIds
+    postIds,
   );
 
   const commentMap = new Map();
@@ -259,16 +261,15 @@ export const getPublicSocialPosts = async (req, res) => {
        FROM social_posts
        WHERE is_active = 1
          AND publish_at <= NOW()
-       ORDER BY publish_at DESC, id DESC`
-       + ` LIMIT ? OFFSET ?`,
-      [limit, offset]
+       ORDER BY publish_at DESC, id DESC` + ` LIMIT ? OFFSET ?`,
+      [limit, offset],
     );
 
     const [[countRow]] = await db.query(
       `SELECT COUNT(*) AS total
        FROM social_posts
        WHERE is_active = 1
-         AND publish_at <= NOW()`
+         AND publish_at <= NOW()`,
     );
 
     const data = await mapPostsResponse(posts);
@@ -321,7 +322,7 @@ export const addPublicSocialComment = async (req, res) => {
        FROM users
        WHERE id = ?
        LIMIT 1`,
-      [userId]
+      [userId],
     );
 
     if (!user) {
@@ -336,7 +337,7 @@ export const addPublicSocialComment = async (req, res) => {
     await db.query(
       `INSERT INTO social_post_comments (post_id, user_id, user_name, comment)
        VALUES (?, ?, ?, ?)`,
-      [postId, userId, commenterName, comment]
+      [postId, userId, commenterName, comment],
     );
 
     return res.status(201).json({
@@ -359,7 +360,7 @@ export const getAdminSocialPosts = async (req, res) => {
     const [posts] = await db.query(
       `SELECT id, admin_id, content, image_base64, publish_at, is_active, created_at, updated_at
        FROM social_posts
-       ORDER BY publish_at DESC, id DESC`
+       ORDER BY publish_at DESC, id DESC`,
     );
 
     const data = await mapPostsResponse(posts);
@@ -389,7 +390,8 @@ export const createAdminSocialPost = async (req, res) => {
     if (!adminId || (!content && !imageBase64)) {
       return res.status(400).json({
         success: false,
-        message: "Valid adminId and at least one of content or image are required",
+        message:
+          "Valid adminId and at least one of content or image are required",
       });
     }
 
@@ -414,18 +416,60 @@ export const createAdminSocialPost = async (req, res) => {
     const [result] = await db.query(
       `INSERT INTO social_posts (admin_id, content, image_base64, publish_at, is_active)
        VALUES (?, ?, ?, ?, 1)`,
-      [adminId, content, imageBase64 || null, publishAt]
+      [adminId, content, imageBase64 || null, publishAt],
     );
+
+    const isPublishedNow = publishDate.getTime() <= Date.now();
+    let notification = {
+      sent: false,
+      recipientCount: 0,
+      successCount: 0,
+      failureCount: 0,
+    };
+
+    if (isPublishedNow) {
+      try {
+        const [users] = await db.query(
+          `SELECT fcmToken
+           FROM users
+           WHERE fcmToken IS NOT NULL
+             AND fcmToken != ''`,
+        );
+
+        const tokens = users.map((user) => user.fcmToken).filter(Boolean);
+        notification.recipientCount = new Set(tokens).size;
+
+        if (tokens.length > 0) {
+          notification = {
+            ...notification,
+            sent: true,
+            ...(await sendFCMNotification(userApp, tokens, {
+              title: "New post from Bhavishya Katha",
+              message: content || "Check out our latest social post",
+              data: {
+                notificationType: "new_social_post",
+                postId: Number(result.insertId || 0),
+              },
+            })),
+          };
+        }
+      } catch (notificationError) {
+        console.error("New social post notification failed:", {
+          code: notificationError?.code,
+          message: notificationError?.message,
+        });
+      }
+    }
 
     return res.status(201).json({
       success: true,
-      message:
-        publishDate.getTime() > Date.now()
-          ? "Post scheduled successfully"
-          : "Post published successfully",
+      message: !isPublishedNow
+        ? "Post scheduled successfully"
+        : "Post published successfully",
       data: {
         id: Number(result.insertId || 0),
       },
+      notification,
     });
   } catch (error) {
     console.error("Create admin social post error:", error);
@@ -461,11 +505,12 @@ export const replyToSocialComment = async (req, res) => {
     }
 
     const [[comment]] = await db.query(
-      `SELECT id, admin_reply
-       FROM social_post_comments
-       WHERE id = ?
+      `SELECT spc.id, spc.post_id, spc.user_id, spc.admin_reply, u.fcmToken
+       FROM social_post_comments spc
+       LEFT JOIN users u ON u.id = spc.user_id
+       WHERE spc.id = ?
        LIMIT 1`,
-      [commentId]
+      [commentId],
     );
 
     if (!comment) {
@@ -479,12 +524,43 @@ export const replyToSocialComment = async (req, res) => {
       `UPDATE social_post_comments
        SET admin_reply = ?, admin_reply_at = NOW()
        WHERE id = ?`,
-      [reply, commentId]
+      [reply, commentId],
     );
+
+    let notification = {
+      sent: false,
+      successCount: 0,
+      failureCount: 0,
+    };
+
+    if (comment.fcmToken) {
+      try {
+        notification = {
+          sent: true,
+          ...(await sendFCMNotification(userApp, [comment.fcmToken], {
+            title: "Bhavishya Katha - Comment Reply",
+            message: reply,
+            data: {
+              notificationType: "social_post_reply",
+              commentId,
+              postId: comment.post_id,
+            },
+          })),
+        };
+      } catch (notificationError) {
+        console.error("Social comment notification failed:", {
+          code: notificationError?.code,
+          message: notificationError?.message,
+        });
+      }
+    }
 
     return res.status(200).json({
       success: true,
-      message: comment.admin_reply ? "Reply updated successfully" : "Reply added successfully",
+      message: comment.admin_reply
+        ? "Reply updated successfully"
+        : "Reply added successfully",
+      notification,
     });
   } catch (error) {
     console.error("Reply to social comment error:", error);
@@ -523,7 +599,7 @@ export const deleteAdminSocialPost = async (req, res) => {
        FROM social_posts
        WHERE id = ?
        LIMIT 1`,
-      [postId]
+      [postId],
     );
 
     if (!post) {
@@ -536,13 +612,13 @@ export const deleteAdminSocialPost = async (req, res) => {
     await db.query(
       `DELETE FROM social_post_comments
        WHERE post_id = ?`,
-      [postId]
+      [postId],
     );
 
     await db.query(
       `DELETE FROM social_posts
        WHERE id = ?`,
-      [postId]
+      [postId],
     );
 
     return res.status(200).json({
@@ -586,7 +662,7 @@ export const deleteAdminSocialComment = async (req, res) => {
        FROM social_post_comments
        WHERE id = ?
        LIMIT 1`,
-      [commentId]
+      [commentId],
     );
 
     if (!comment) {
@@ -599,7 +675,7 @@ export const deleteAdminSocialComment = async (req, res) => {
     await db.query(
       `DELETE FROM social_post_comments
        WHERE id = ?`,
-      [commentId]
+      [commentId],
     );
 
     return res.status(200).json({
@@ -611,6 +687,61 @@ export const deleteAdminSocialComment = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Unable to delete comment",
+    });
+  }
+};
+
+export const deleteAdminSocialCommentReply = async (req, res) => {
+  try {
+    await ensureSocialSchema();
+
+    const commentId = Number(req.params.commentId);
+    const adminId = Number(req.body.adminId || req.query.adminId);
+
+    if (!commentId || !adminId) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid commentId and adminId are required",
+      });
+    }
+
+    const admin = await getAdminRecord(adminId);
+    if (!admin) {
+      return res.status(404).json({ success: false, message: "Admin not found" });
+    }
+
+    const [[comment]] = await db.query(
+      `SELECT id, admin_reply
+       FROM social_post_comments
+       WHERE id = ?
+       LIMIT 1`,
+      [commentId],
+    );
+
+    if (!comment) {
+      return res.status(404).json({ success: false, message: "Comment not found" });
+    }
+
+    if (!comment.admin_reply) {
+      return res.status(404).json({ success: false, message: "Admin reply not found" });
+    }
+
+    await db.query(
+      `UPDATE social_post_comments
+       SET admin_reply = NULL, admin_reply_at = NULL
+       WHERE id = ?`,
+      [commentId],
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Admin reply deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete admin social comment reply error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to delete admin reply",
     });
   }
 };

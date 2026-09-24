@@ -427,6 +427,41 @@ export default function CommentController() {
     ]);
   };
 
+  const deleteWholeComment = (item: CommentItem) => {
+    Alert.alert(
+      "Delete Comment",
+      "Are you sure you want to permanently delete this whole comment?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const response = await fetch(
+                `${API_BASE_URL}/comments/admin/${item.id}`,
+                { method: "DELETE" },
+              );
+              const json = await response.json();
+
+              if (!response.ok || !json.success) {
+                throw new Error(json.message || "Failed to delete comment");
+              }
+
+              setComments((previous) =>
+                previous.filter((comment) => comment.id !== item.id),
+              );
+              Alert.alert("Success", "Comment deleted successfully");
+            } catch (error) {
+              console.error("Delete whole comment error:", error);
+              Alert.alert("Error", "Failed to delete comment");
+            }
+          },
+        },
+      ],
+    );
+  };
+
   /* =========================================================
      ASTROLOGER NAME
      ========================================================= */
@@ -494,6 +529,14 @@ export default function CommentController() {
           <Text style={styles.commentText}>{item.comment}</Text>
 
           <Text style={styles.dateText}>{formatDateTime(item.createdAt)}</Text>
+
+          <TouchableOpacity
+            style={styles.deleteWholeCommentButton}
+            onPress={() => deleteWholeComment(item)}
+          >
+            <Ionicons name="trash-outline" size={15} color="#B91C1C" />
+            <Text style={styles.deleteWholeCommentText}>Delete comment</Text>
+          </TouchableOpacity>
         </View>
 
         {/* REPLY */}
@@ -1247,6 +1290,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     color: "#333",
+  },
+
+  deleteWholeCommentButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 6,
+    marginTop: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 8,
+    backgroundColor: "#FEF2F2",
+    borderWidth: 1,
+    borderColor: "#FECACA",
+  },
+
+  deleteWholeCommentText: {
+    color: "#B91C1C",
+    fontSize: 12,
+    fontWeight: "700",
   },
 
   dateText: {

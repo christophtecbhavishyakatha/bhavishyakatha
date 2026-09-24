@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bhavishya Katha — Download on Play Store</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Karla:wght@400;500;600&display=swap');
+
+  :root{
+    --night:#151233;
+    --night-deep:#0c0a20;
+    --gold:#d9a94f;
+    --gold-soft:#f0d9a6;
+    --paper:#f6f1e6;
+    --line:rgba(217,169,79,0.35);
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(217,169,79,0.10), transparent 55%),
+      radial-gradient(ellipse at 80% 90%, rgba(217,169,79,0.08), transparent 55%),
+      var(--night);
+    color:var(--paper);
+    font-family:'Karla', sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:24px;
+  }
+
+  .card{
+    max-width:480px;
+    width:100%;
+    text-align:center;
+    padding:48px 36px 40px;
+    border:1px solid var(--line);
+    border-radius:18px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+    position:relative;
+    overflow:hidden;
+  }
+
+  .stars{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity:0.7;
+  }
+  .stars span{
+    position:absolute;
+    width:2px;
+    height:2px;
+    background:var(--gold-soft);
+    border-radius:50%;
+  }
+
+  .glyph{
+    width:64px;
+    height:64px;
+    margin:0 auto 22px;
+    display:block;
+  }
+
+  .eyebrow{
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    font-size:12px;
+    color:var(--gold);
+    margin-bottom:14px;
+    font-weight:600;
+  }
+
+  h1{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:700;
+    font-size:38px;
+    line-height:1.15;
+    margin:0 0 12px;
+    color:var(--paper);
+  }
+
+  h1 span{
+    color:var(--gold);
+  }
+
+  p.tagline{
+    font-size:15px;
+    line-height:1.6;
+    color:rgba(246,241,230,0.72);
+    margin:0 0 30px;
+  }
+
+  .download-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    padding:15px 28px;
+    background:var(--gold);
+    color:var(--night-deep);
+    text-decoration:none;
+    border-radius:9px;
+    font-weight:600;
+    font-size:16px;
+    letter-spacing:0.01em;
+    transition:transform 0.15s ease, background 0.15s ease;
+  }
+  .download-btn:hover{
+    background:var(--gold-soft);
+    transform:translateY(-1px);
+  }
+  .download-btn:focus-visible{
+    outline:2px solid var(--gold-soft);
+    outline-offset:3px;
+  }
+  .download-btn svg{ width:20px; height:20px; flex-shrink:0; }
+
+  .divider{
+    margin:28px 0 20px;
+    border:none;
+    border-top:1px solid var(--line);
+  }
+
+  .secondary-link{
+    display:block;
+    color:var(--gold-soft);
+    text-decoration:underline;
+    font-size:14px;
+    word-break:break-word;
+  }
+  .secondary-link:focus-visible{
+    outline:2px solid var(--gold-soft);
+    outline-offset:3px;
+  }
+
+  .footnote{
+    margin-top:26px;
+    font-size:12px;
+    color:rgba(246,241,230,0.45);
+  }
+
+  @media (max-width:480px){
+    h1{font-size:31px;}
+    .card{padding:38px 22px 32px;}
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="stars" aria-hidden="true">
+      <span style="top:8%;left:12%;"></span>
+      <span style="top:15%;left:80%;"></span>
+      <span style="top:75%;left:18%;"></span>
+      <span style="top:82%;left:88%;"></span>
+      <span style="top:40%;left:6%;"></span>
+      <span style="top:60%;left:92%;"></span>
+    </div>
+
+    <svg class="glyph" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="32" cy="32" r="30" stroke="#d9a94f" stroke-width="1.2" opacity="0.5"/>
+      <circle cx="32" cy="32" r="21" stroke="#d9a94f" stroke-width="1" opacity="0.35"/>
+      <path d="M32 6 L34.5 26 L54 28 L34.5 30 L32 50 L29.5 30 L10 28 L29.5 26 Z" fill="#d9a94f"/>
+    </svg>
+
+    <div class="eyebrow">For Astrologers</div>
+    <h1>Bhavishya <span>Connect</span></h1>
+    <p class="tagline">Chat and call with your customers, manage consultations, and grow your astrology practice — get the app on Google Play.</p>
+
+    <a class="download-btn"
+       href="https://play.google.com/store/apps/details?id=com.astrologer.bhavishyakatha"
+       target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5V3.5C3 2.91 3.34 2.39 3.84 2.15L13.69 12L3.84 21.85C3.34 21.61 3 21.09 3 20.5M16.81 15.12L6.05 21.34L14.54 12.85L16.81 15.12M20.16 10.81C20.5 11.08 20.75 11.5 20.75 12C20.75 12.5 20.5 12.92 20.16 13.19L17.89 14.5L15.39 12L17.89 9.5L20.16 10.81M6.05 2.66L16.81 8.88L14.54 11.15L6.05 2.66Z"/></svg>
+      Download from Play Store
+    </a>
+
+    <hr class="divider">
+
+    <a class="secondary-link"
+       href="https://play.google.com/store/apps/details?id=com.astrologer.bhavishyakatha"
+       target="_blank" rel="noopener">
+      play.google.com/store/apps/details?id=com.astrologer.bhavishyakatha
+    </a>
+
+    <p class="footnote">Available on Google Play for Android devices.</p>
+  </div>
+</body>
+</html>

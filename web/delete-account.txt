@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Delete Account | Bhavishya Katha</title>
+  <meta name="description" content="Request account deletion for Bhavishya Katha. Please read all warnings before proceeding.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#07050f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Noto+Sans+Bengali:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #07050f;
+      --surface:   #100d1e;
+      --border:    rgba(212,175,55,0.18);
+      --gold:      #d4af37;
+      --gold-lt:   #f0d060;
+      --gold-pale: #fff4c0;
+      --cream:     #f2e8d0;
+      --muted:     #9a8a68;
+      --dim:       #5a5040;
+      --red:       #e05252;
+      --red-dark:  #b83535;
+      --red-bg:    rgba(224,82,82,0.08);
+      --red-border:rgba(224,82,82,0.3);
+      --warn-bg:   rgba(212,175,55,0.07);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--cream); font-family: 'Libre Baskerville', Georgia, serif; overflow-x: hidden; min-height: 100vh; }
+
+    #cvs { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .wrap { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 0 1.8rem; }
+
+    /* NAV */
+    nav { display:flex; align-items:center; justify-content:space-between; padding:1.4rem 0; border-bottom:1px solid var(--border); animation:slideDown .9s ease both; gap:1rem; position:relative; }
+    .logo-wrap { text-decoration:none; }
+    .logo-en { font-family:'Cinzel Decorative',serif; font-size:1.05rem; color:var(--gold-lt); letter-spacing:.04em; white-space:nowrap; }
+    .logo-bn { font-family:'Noto Sans Bengali',sans-serif; font-size:.78rem; color:var(--muted); margin-top:.15rem; }
+    .nav-toggle { display:none; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:4px; flex-shrink:0; }
+    .nav-toggle span { display:block; width:22px; height:2px; background:var(--gold); border-radius:2px; transition:transform .3s,opacity .3s; }
+    .nav-toggle.open span:nth-child(1){ transform:translateY(7px) rotate(45deg); }
+    .nav-toggle.open span:nth-child(2){ opacity:0; }
+    .nav-toggle.open span:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
+    .nav-links { display:flex; gap:2rem; list-style:none; }
+    .nav-links a { color:var(--muted); text-decoration:none; font-size:.88rem; letter-spacing:.07em; transition:color .25s; }
+    .nav-links a:hover { color:var(--gold-lt); }
+    @media(max-width:600px){
+      .nav-toggle{display:flex;}
+      .nav-links{display:none;flex-direction:column;gap:0;position:absolute;top:0;left:0;right:0;background:rgba(10,7,20,.97);border-bottom:1px solid var(--border);padding:5rem 2rem 2rem;z-index:100;}
+      .nav-links.open{display:flex;}
+      .nav-links li{border-bottom:1px solid var(--border);}
+      .nav-links a{display:block;padding:.9rem 0;font-size:1rem;}
+    }
+
+    /* FLOAT APP */
+    .float-app { position:fixed; right:0; top:50%; transform:translateY(-50%); z-index:200; display:flex; flex-direction:column; align-items:center; background:linear-gradient(180deg,#1a1230,#0e0a1e); border:1px solid rgba(212,175,55,.4); border-right:none; border-radius:10px 0 0 10px; padding:.9rem .6rem .7rem; text-decoration:none; gap:.45rem; box-shadow:-4px 0 24px rgba(212,175,55,.12); transition:padding .3s,box-shadow .3s; }
+    .float-app:hover { padding-right:.9rem; box-shadow:-6px 0 32px rgba(212,175,55,.25); border-color:var(--gold); }
+    .float-app svg { width:26px; height:26px; }
+    .float-label { writing-mode:vertical-rl; text-orientation:mixed; transform:rotate(180deg); font-family:'Cinzel Decorative',serif; font-size:.5rem; letter-spacing:.12em; color:var(--gold-lt); white-space:nowrap; }
+    .float-pulse { width:7px; height:7px; border-radius:50%; background:var(--gold); animation:pulse 2s ease infinite; }
+
+    /* BREADCRUMB */
+    .breadcrumb { display:flex; align-items:center; gap:.5rem; font-size:.78rem; color:var(--dim); padding:1.5rem 0 0; }
+    .breadcrumb a { color:var(--dim); text-decoration:none; transition:color .2s; }
+    .breadcrumb a:hover { color:var(--gold-lt); }
+    .breadcrumb .sep { color:var(--gold); opacity:.5; }
+
+    /* HERO */
+    .page-hero { text-align:center; padding:3.5rem 0 2.5rem; animation:riseUp 1s ease .1s both; }
+    .danger-icon { width:64px; height:64px; border-radius:50%; background:var(--red-bg); border:1px solid var(--red-border); display:flex; align-items:center; justify-content:center; margin:0 auto 1.4rem; font-size:1.8rem; }
+    .page-hero h1 { font-family:'Cinzel Decorative',serif; font-size:clamp(1.5rem,3.5vw,2.3rem); color:#f09090; line-height:1.2; margin-bottom:.5rem; text-shadow:0 0 50px rgba(224,82,82,.2); }
+    .page-hero-bn { font-family:'Noto Sans Bengali',sans-serif; font-size:.92rem; color:var(--muted); margin-bottom:1rem; }
+    .page-hero p { font-size:.95rem; color:var(--muted); font-style:italic; max-width:480px; margin:0 auto; line-height:1.8; }
+
+    .rule { display:flex; align-items:center; gap:1rem; margin:1.5rem auto; max-width:200px; }
+    .rule::before,.rule::after { content:''; flex:1; height:1px; }
+    .rule-red::before,.rule-red::after { background:linear-gradient(to right,transparent,var(--red)); }
+    .rule-red::after { background:linear-gradient(to left,transparent,var(--red)); }
+    .rule span { color:var(--red); font-size:1rem; opacity:.7; }
+
+    /* ACCOUNT TYPE SELECTOR */
+    .selector-wrap { margin:2rem 0; animation:riseUp .8s ease .25s both; }
+    .selector-label { text-align:center; font-family:'Cinzel Decorative',serif; font-size:.75rem; color:var(--muted); letter-spacing:.12em; margin-bottom:1rem; }
+    .selector { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    @media(max-width:480px){ .selector { grid-template-columns:1fr; } }
+    .sel-card {
+      border:1px solid var(--border); border-radius:8px; padding:1.8rem 1.4rem;
+      text-align:center; cursor:pointer; transition:all .3s;
+      background:linear-gradient(150deg,rgba(22,16,40,.7),rgba(10,7,20,.9));
+      position:relative; overflow:hidden;
+    }
+    .sel-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:0; transition:opacity .3s; }
+    .sel-card:hover { border-color:rgba(212,175,55,.4); transform:translateY(-4px); }
+    .sel-card:hover::before { opacity:1; }
+    .sel-card.active { border-color:var(--red-border); background:var(--red-bg); }
+    .sel-card.active::before { background:linear-gradient(90deg,transparent,var(--red),transparent); opacity:1; }
+    .sel-icon { font-size:2rem; margin-bottom:.8rem; display:block; }
+    .sel-title { font-family:'Cinzel Decorative',serif; font-size:.8rem; color:var(--gold-lt); letter-spacing:.06em; margin-bottom:.3rem; }
+    .sel-title-bn { font-family:'Noto Sans Bengali',sans-serif; font-size:.75rem; color:var(--dim); margin-bottom:.6rem; }
+    .sel-desc { font-size:.82rem; color:var(--muted); line-height:1.6; }
+    .sel-card.active .sel-title { color:#f09090; }
+
+    /* MAIN CONTENT — steps */
+    .steps-wrap { margin:2.5rem 0 5rem; animation:riseUp .9s ease .35s both; }
+
+    /* WARNING BOX */
+    .warn-box {
+      border:1px solid var(--red-border); border-radius:8px;
+      background:var(--red-bg); padding:2rem 2.2rem; margin-bottom:1.8rem; position:relative;
+    }
+    .warn-box::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--red),transparent); border-radius:8px 8px 0 0; }
+    .warn-header { display:flex; align-items:center; gap:.8rem; margin-bottom:1.2rem; }
+    .warn-skull { font-size:1.4rem; }
+    .warn-title { font-family:'Cinzel Decorative',serif; font-size:.85rem; color:var(--red); letter-spacing:.06em; }
+    .warn-list { list-style:none; display:flex; flex-direction:column; gap:.75rem; }
+    .warn-list li { display:flex; align-items:flex-start; gap:.9rem; font-size:.9rem; color:var(--cream); line-height:1.65; }
+    .warn-bullet { width:20px; height:20px; border-radius:50%; background:rgba(224,82,82,.18); border:1px solid var(--red-border); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:.65rem; color:var(--red); margin-top:.15rem; }
+    .warn-no-refund {
+      margin-top:1.4rem; padding:1rem 1.4rem; border-radius:6px;
+      background:rgba(224,82,82,.15); border:1px solid var(--red-border);
+      font-family:'Cinzel Decorative',serif; font-size:.75rem; letter-spacing:.08em;
+      color:var(--red); text-align:center;
+    }
+
+    /* FORM CARD */
+    .form-card {
+      background:linear-gradient(150deg,rgba(22,16,40,.95),rgba(10,7,20,.98));
+      border:1px solid var(--border); border-radius:8px;
+      padding:2.5rem 2.8rem; position:relative; overflow:hidden;
+    }
+    .form-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+    @media(max-width:560px){ .form-card { padding:1.8rem 1.4rem; } }
+
+    .form-section { margin-bottom:1.8rem; }
+    .form-label { display:block; font-size:.82rem; color:var(--muted); letter-spacing:.07em; margin-bottom:.55rem; }
+    .form-label span { color:var(--red); margin-left:.2rem; }
+    .form-input {
+      width:100%; background:rgba(7,5,15,.7); border:1px solid rgba(212,175,55,.2);
+      border-radius:4px; padding:.8rem 1rem; color:var(--cream);
+      font-family:'Libre Baskerville',serif; font-size:.92rem;
+      transition:border-color .25s; outline:none;
+    }
+    .form-input:focus { border-color:rgba(212,175,55,.5); }
+    .form-input::placeholder { color:var(--dim); font-style:italic; }
+    textarea.form-input { resize:vertical; min-height:90px; }
+
+    /* CONFIRM CHECK */
+    .confirm-checks { display:flex; flex-direction:column; gap:.9rem; margin-bottom:2rem; }
+    .check-item { display:flex; align-items:flex-start; gap:.85rem; cursor:pointer; }
+    .check-item input[type="checkbox"] { display:none; }
+    .check-box {
+      width:20px; height:20px; flex-shrink:0; border-radius:3px;
+      border:1px solid var(--red-border); background:rgba(224,82,82,.06);
+      display:flex; align-items:center; justify-content:center;
+      transition:all .25s; margin-top:.1rem;
+    }
+    .check-item input:checked + .check-box { background:var(--red); border-color:var(--red); }
+    .check-tick { display:none; color:#fff; font-size:.75rem; }
+    .check-item input:checked + .check-box .check-tick { display:block; }
+    .check-text { font-size:.88rem; color:var(--muted); line-height:1.65; }
+    .check-text strong { color:var(--cream); }
+
+    /* SUBMIT BUTTON */
+    .btn-delete {
+      width:100%; padding:1rem; border-radius:4px; border:none; cursor:pointer;
+      font-family:'Cinzel Decorative',serif; font-size:.78rem; letter-spacing:.12em;
+      background:var(--red); color:#fff; transition:all .3s;
+      box-shadow:0 4px 24px rgba(224,82,82,.2);
+      opacity:.4; pointer-events:none;
+    }
+    .btn-delete.ready { opacity:1; pointer-events:all; }
+    .btn-delete.ready:hover { background:var(--red-dark); box-shadow:0 6px 32px rgba(224,82,82,.35); transform:translateY(-2px); }
+    .btn-delete.ready:active { transform:translateY(0); }
+    .btn-note { text-align:center; margin-top:.9rem; font-size:.78rem; color:var(--dim); font-style:italic; line-height:1.6; }
+    .btn-note a { color:var(--gold); text-decoration:none; border-bottom:1px solid rgba(212,175,55,.3); }
+    .btn-note a:hover { border-bottom-color:var(--gold); }
+
+    /* SUCCESS STATE */
+    .success-state {
+      text-align:center; padding:3rem 2rem;
+      display:none;
+    }
+    .success-state.show { display:block; }
+    .success-icon { font-size:3rem; margin-bottom:1.2rem; }
+    .success-title { font-family:'Cinzel Decorative',serif; font-size:1.1rem; color:var(--gold-lt); margin-bottom:.6rem; }
+    .success-msg { color:var(--muted); font-size:.92rem; line-height:1.8; max-width:440px; margin:0 auto 1.5rem; }
+    .success-email { display:inline-block; background:rgba(212,175,55,.08); border:1px solid rgba(212,175,55,.25); border-radius:4px; padding:.5rem 1.2rem; font-family:'Cinzel Decorative',serif; font-size:.72rem; color:var(--gold-lt); letter-spacing:.08em; }
+
+    /* ASTROLOGER-ONLY NOTICE */
+    .astro-notice {
+      border:1px solid rgba(212,175,55,.25); border-radius:6px;
+      background:var(--warn-bg); padding:1.2rem 1.6rem; margin-bottom:1.8rem;
+      display:none;
+    }
+    .astro-notice.show { display:block; }
+    .astro-notice-title { font-family:'Cinzel Decorative',serif; font-size:.72rem; color:var(--gold); letter-spacing:.1em; margin-bottom:.5rem; }
+    .astro-notice p { font-size:.85rem; color:var(--muted); line-height:1.7; }
+
+    /* FOOTER */
+    footer { text-align:center; border-top:1px solid var(--border); padding:3rem 0 2.5rem; color:var(--dim); font-size:.82rem; }
+    .footer-logo { font-family:'Cinzel Decorative',serif; color:var(--gold); font-size:1rem; margin-bottom:.4rem; }
+    .footer-bn { font-family:'Noto Sans Bengali',sans-serif; color:var(--muted); font-size:.8rem; margin-bottom:1.2rem; }
+    footer a { color:var(--dim); text-decoration:none; }
+    footer a:hover { color:var(--gold-lt); }
+    .footer-links { display:flex; gap:2rem; justify-content:center; margin-top:1rem; flex-wrap:wrap; }
+
+    @keyframes slideDown { from{opacity:0;transform:translateY(-18px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes riseUp   { from{opacity:0;transform:translateY(28px)}  to{opacity:1;transform:translateY(0)} }
+    @keyframes pulse    { 0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,.6)} 50%{box-shadow:0 0 0 5px rgba(212,175,55,0)} }
+    @keyframes shake    { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+    .shake { animation:shake .4s ease; }
+  </style>
+</head>
+<body>
+
+<canvas id="cvs"></canvas>
+
+<div class="wrap">
+
+  <!-- FLOATING APP -->
+  <a href="https://play.google.com/store/apps/details?id=com.bhavishyakatha" target="_blank" class="float-app" title="Download on Google Play">
+    <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="fg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00c9ff"/><stop offset="100%" stop-color="#0080bb"/></linearGradient>
+        <linearGradient id="fg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff5252"/><stop offset="100%" stop-color="#bb0000"/></linearGradient>
+        <linearGradient id="fg3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffdd00"/><stop offset="100%" stop-color="#ff9900"/></linearGradient>
+        <linearGradient id="fg4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00e676"/><stop offset="100%" stop-color="#007733"/></linearGradient>
+      </defs>
+      <polygon points="55,18 55,494 285,256" fill="url(#fg1)"/>
+      <polygon points="55,18 285,256 430,138" fill="url(#fg4)"/>
+      <polygon points="55,494 285,256 430,374" fill="url(#fg2)"/>
+      <polygon points="285,256 430,138 430,374" fill="url(#fg3)"/>
+    </svg>
+    <span class="float-label">Download App</span>
+    <span class="float-pulse"></span>
+  </a>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="logo-wrap">
+      <div class="logo-en">✦ Bhavishya Katha</div>
+      <div class="logo-bn">ভবিষ্যৎ কথা · Since 2010</div>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/">Consult</a></li>
+      <li><a href="/">Astrologers</a></li>
+      <li><a href="/">Reviews</a></li>
+      <li><a href="/">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- BREADCRUMB -->
+  <div class="breadcrumb">
+    <a href="/">Home</a>
+    <span class="sep">›</span>
+    <span style="color:#f09090">Delete Account</span>
+  </div>
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <div class="danger-icon">⚠️</div>
+    <h1>Delete Account</h1>
+    <p class="page-hero-bn">অ্যাকাউন্ট মুছে ফেলার অনুরোধ</p>
+    <div class="rule rule-red"><span>✦</span></div>
+    <p>This action is permanent and cannot be undone. Please read all warnings carefully before proceeding.</p>
+  </div>
+
+  <!-- ACCOUNT TYPE SELECTOR -->
+  <div class="selector-wrap">
+    <p class="selector-label">Select your account type · আপনার অ্যাকাউন্টের ধরন বেছে নিন</p>
+    <div class="selector">
+      <div class="sel-card active" id="card-user" onclick="selectType('user')">
+        <span class="sel-icon">👤</span>
+        <p class="sel-title">User Account</p>
+        <p class="sel-title-bn">সাধারণ ব্যবহারকারী</p>
+        <p class="sel-desc">I consult astrologers on the Bhavishya Katha platform.</p>
+      </div>
+      <div class="sel-card" id="card-astrologer" onclick="selectType('astrologer')">
+        <span class="sel-icon">🔮</span>
+        <p class="sel-title">Astrologer Account</p>
+        <p class="sel-title-bn">জ্যোতিষী</p>
+        <p class="sel-desc">I provide astrological consultations on the platform.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps-wrap">
+
+    <!-- WARNING -->
+    <div class="warn-box">
+      <div class="warn-header">
+        <span class="warn-skull">💀</span>
+        <span class="warn-title">Permanent Deletion Warning · স্থায়ী মুছে ফেলার সতর্কতা</span>
+      </div>
+      <ul class="warn-list">
+        <li>
+          <span class="warn-bullet">!</span>
+          Your account and all personal data will be <strong>permanently deleted</strong> and cannot be recovered.
+        </li>
+        <li>
+          <span class="warn-bullet">!</span>
+          All your consultation history, saved charts, and messages will be erased forever.
+        </li>
+        <li id="warn-wallet" style="display:none">
+          <span class="warn-bullet">!</span>
+          Any remaining wallet balance will be forfeited. <strong>No refunds will be issued.</strong>
+        </li>
+        <li id="warn-earnings" style="display:none">
+          <span class="warn-bullet">!</span>
+          Pending earnings will be settled as per our payment cycle. Ensure your bank details are updated before requesting deletion.
+        </li>
+        <li id="warn-reviews" style="display:none">
+          <span class="warn-bullet">!</span>
+          Your astrologer profile, ratings, and all client reviews will be permanently removed.
+        </li>
+        <li>
+          <span class="warn-bullet">!</span>
+          You will be immediately logged out of all devices and lose access to the app.
+        </li>
+      </ul>
+      <div class="warn-no-refund" id="refundNotice">
+        ⚠ &nbsp; NO REFUND POLICY — Wallet balance is non-refundable upon deletion &nbsp; ⚠
+      </div>
+    </div>
+
+    <!-- ASTROLOGER EXTRA NOTICE -->
+    <div class="astro-notice" id="astroNotice">
+      <p class="astro-notice-title">✦ &nbsp; Important for Astrologers</p>
+      <p>Before submitting your deletion request, please ensure all active consultation sessions are completed and no clients are waiting. Deleting your account mid-session may affect your rating record. Our team will process your request within <strong>7 working days</strong>.</p>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="form-card" id="formCard">
+      <div id="formView">
+        <div class="form-section">
+          <label class="form-label">Registered Email Address <span>*</span></label>
+          <input type="email" class="form-input" id="emailInput" placeholder="your@email.com" autocomplete="email">
+        </div>
+
+        <div class="form-section">
+          <label class="form-label">Registered Mobile Number <span>*</span></label>
+          <input type="tel" class="form-input" id="phoneInput" placeholder="+91 XXXXX XXXXX" autocomplete="tel">
+        </div>
+
+        <div class="form-section">
+          <label class="form-label">Reason for Deletion <span>*</span></label>
+          <textarea class="form-input" id="reasonInput" placeholder="Please briefly describe why you wish to delete your account…"></textarea>
+        </div>
+
+        <!-- CONFIRMATIONS -->
+        <div class="confirm-checks" id="confirmChecks">
+          <label class="check-item">
+            <input type="checkbox" id="chk1" onchange="updateButton()">
+            <span class="check-box"><span class="check-tick">✓</span></span>
+            <span class="check-text">I understand that deleting my account is <strong>permanent and irreversible</strong>.</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" id="chk2" onchange="updateButton()">
+            <span class="check-box"><span class="check-tick">✓</span></span>
+            <span class="check-text">I accept that my <strong>wallet balance will not be refunded</strong> under any circumstances.</span>
+          </label>
+          <label class="check-item" id="chk3-wrap" style="display:none">
+            <input type="checkbox" id="chk3" onchange="updateButton()">
+            <span class="check-box"><span class="check-tick">✓</span></span>
+            <span class="check-text">I confirm that all my <strong>active sessions are closed</strong> and my bank details for pending earnings are updated.</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" id="chk4" onchange="updateButton()">
+            <span class="check-box"><span class="check-tick">✓</span></span>
+            <span class="check-text">I have read and agree to the <strong>account deletion policy</strong> of Bhavishya Katha.</span>
+          </label>
+        </div>
+
+        <button class="btn-delete" id="deleteBtn" onclick="submitDeletion()">
+          ⚠ &nbsp; Send Deletion Request
+        </button>
+
+        <p class="btn-note">
+          Your request will be sent to <a href="mailto:account@bhavishyakatha.in">account@bhavishyakatha.in</a> and processed within <strong>7 working days</strong>.<br>
+          Changed your mind? <a href="/">Go back to Home</a>.
+        </p>
+      </div>
+
+      <!-- SUCCESS -->
+      <div class="success-state" id="successState">
+        <div class="success-icon">📨</div>
+        <p class="success-title">Request Sent Successfully</p>
+        <p class="success-msg">
+          Your account deletion request has been received. Our team will process it within <strong>7 working days</strong> and send a confirmation to your registered email.<br><br>
+          If you have any questions, contact us directly at:
+        </p>
+        <span class="success-email">account@bhavishyakatha.in</span>
+      </div>
+    </div>
+
+  </div><!-- /steps-wrap -->
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">✦ Bhavishya Katha ✦</div>
+    <div class="footer-bn">ভবিষ্যৎ কথা — Your Cosmic Story, Written in the Stars</div>
+    <p>© 2026 Bhavishya Katha &nbsp;·&nbsp; Kolkata, West Bengal &nbsp;·&nbsp;
+      <a href="mailto:hello@bhavishyakatha.com">hello@bhavishyakatha.com</a> &nbsp;·&nbsp;
+      <a href="tel:+919830000000">+91 98300 00000</a>
+    </p>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="legal.html">Terms &amp; Conditions</a>
+      <a href="legal.html">Privacy Policy</a>
+    </div>
+  </footer>
+
+</div><!-- /wrap -->
+
+<script>
+/* ── Starfield ── */
+const cvs = document.getElementById('cvs');
+const ctx = cvs.getContext('2d');
+let W, H, stars = [];
+function initStars() {
+  W = cvs.width = window.innerWidth;
+  H = cvs.height = window.innerHeight;
+  stars = Array.from({length:220}, () => ({
+    x:Math.random()*W, y:Math.random()*H,
+    r:Math.random()*1.1+.15,
+    sp:Math.random()*.4+.08,
+    ph:Math.random()*Math.PI*2
+  }));
+}
+function drawStars(t) {
+  ctx.clearRect(0,0,W,H);
+  const g = ctx.createRadialGradient(W*.3,H*.2,0,W*.5,H*.5,Math.max(W,H)*.8);
+  g.addColorStop(0,'#1a0a2e'); g.addColorStop(1,'#07050f');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  stars.forEach(s => {
+    const a=.25+.75*Math.abs(Math.sin(t*s.sp*.0008+s.ph));
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,248,200,${a})`; ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+window.addEventListener('resize', initStars);
+initStars(); requestAnimationFrame(drawStars);
+
+/* ── Nav ── */
+const tog = document.getElementById('navToggle');
+const nl  = document.getElementById('navLinks');
+tog.addEventListener('click', () => { tog.classList.toggle('open'); nl.classList.toggle('open'); });
+nl.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { tog.classList.remove('open'); nl.classList.remove('open'); }));
+
+/* ── Type selection ── */
+let currentType = 'user';
+
+function selectType(type) {
+  currentType = type;
+
+  document.getElementById('card-user').classList.toggle('active', type === 'user');
+  document.getElementById('card-astrologer').classList.toggle('active', type === 'astrologer');
+
+  const isAstro = type === 'astrologer';
+
+  /* Toggle astrologer-specific warnings */
+  document.getElementById('warn-earnings').style.display = isAstro ? 'flex' : 'none';
+  document.getElementById('warn-reviews').style.display  = isAstro ? 'flex' : 'none';
+  document.getElementById('warn-wallet').style.display   = isAstro ? 'none' : 'flex';
+
+  /* Toggle refund notice (user only) */
+  document.getElementById('refundNotice').style.display = isAstro ? 'none' : 'block';
+
+  /* Toggle astro notice */
+  document.getElementById('astroNotice').classList.toggle('show', isAstro);
+
+  /* Toggle astro-only checkbox */
+  document.getElementById('chk3-wrap').style.display = isAstro ? 'flex' : 'none';
+  if (!isAstro) document.getElementById('chk3').checked = false;
+
+  updateButton();
+}
+
+/* ── Checkbox gate ── */
+function updateButton() {
+  const chk1 = document.getElementById('chk1').checked;
+  const chk2 = document.getElementById('chk2').checked;
+  const chk3 = currentType === 'astrologer' ? document.getElementById('chk3').checked : true;
+  const chk4 = document.getElementById('chk4').checked;
+  const btn   = document.getElementById('deleteBtn');
+  btn.classList.toggle('ready', chk1 && chk2 && chk3 && chk4);
+}
+
+/* ── Submit ── */
+function submitDeletion() {
+  const email  = document.getElementById('emailInput').value.trim();
+  const phone  = document.getElementById('phoneInput').value.trim();
+  const reason = document.getElementById('reasonInput').value.trim();
+
+  if (!email || !phone || !reason) {
+    const fc = document.getElementById('formCard');
+    fc.classList.add('shake');
+    setTimeout(() => fc.classList.remove('shake'), 450);
+    /* Highlight empty fields */
+    [['emailInput', email], ['phoneInput', phone], ['reasonInput', reason]].forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (!val) { el.style.borderColor = 'rgba(224,82,82,.6)'; el.focus(); }
+      else { el.style.borderColor = ''; }
+    });
+    return;
+  }
+
+  /* Build mailto */
+  const accountType = currentType === 'astrologer' ? 'Astrologer' : 'User';
+  const subject = encodeURIComponent(`Account Deletion Request – ${accountType} – ${email}`);
+  const body = encodeURIComponent(
+    `Account Deletion Request\n` +
+    `========================\n\n` +
+    `Account Type : ${accountType}\n` +
+    `Email        : ${email}\n` +
+    `Mobile       : ${phone}\n` +
+    `Reason       : ${reason}\n\n` +
+    `The user has acknowledged:\n` +
+    `- Deletion is permanent and irreversible\n` +
+    `- No refund on wallet balance\n` +
+    (currentType === 'astrologer' ? `- All active sessions closed and bank details updated\n` : '') +
+    `- Account deletion policy accepted\n\n` +
+    `Please process this request within 7 working days.`
+  );
+
+  window.location.href = `mailto:account@bhavishyakatha.in?subject=${subject}&body=${body}`;
+
+  /* Show success */
+  setTimeout(() => {
+    document.getElementById('formView').style.display = 'none';
+    document.getElementById('successState').classList.add('show');
+  }, 800);
+}
+
+/* ── Init ── */
+selectType('user');
+</script>
+</body>
+</html>

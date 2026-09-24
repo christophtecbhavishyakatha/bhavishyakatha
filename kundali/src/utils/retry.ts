@@ -1,0 +1,1 @@
+export async function withRetry<T>(op:()=>Promise<T>,max:number,retry:(e:unknown)=>boolean){let a=0;for(;;){try{return await op()}catch(e){if(a>=max||!retry(e))throw e;await new Promise(r=>setTimeout(r,Math.min(250*2**a,2000)));a++}}}

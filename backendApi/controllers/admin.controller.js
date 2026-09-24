@@ -1,5 +1,35 @@
-import bcrypt from 'bcrypt'; // ✅ ES module
+import bcrypt from "bcrypt"; // ✅ ES module
 import db from "../config/db.js"; // your DB connection
+import { astrologerApp, userApp } from "../config/firebase.js";
+import { sendFCMNotification } from "../services/pushNotification.service.js";
+
+const notifyTicketOwner = async (ticket, notification) => {
+  const isAstrologer = ticket.customer_type === "astrologer";
+  const token = isAstrologer
+    ? ticket.astrologer_fcm_token
+    : ticket.user_fcm_token;
+
+  if (!token) {
+    return;
+  }
+
+  try {
+    await sendFCMNotification(isAstrologer ? astrologerApp : userApp, [token], {
+      title: notification.title,
+      message: notification.message,
+      data: {
+        notificationType: notification.notificationType,
+        ticketId: ticket.id,
+        ...(notification.status ? { status: notification.status } : {}),
+      },
+    });
+  } catch (error) {
+    console.error("Ticket notification failed:", {
+      code: error?.code,
+      message: error?.message,
+    });
+  }
+};
 
 export const adminLogin = async (req, res) => {
   try {
@@ -8,20 +38,20 @@ export const adminLogin = async (req, res) => {
     if (!userId || !password) {
       return res.status(400).json({
         status: false,
-        message: 'User ID and password are required',
+        message: "User ID and password are required",
       });
     }
 
     // 🔍 Find admin by user_id
     const [rows] = await db.query(
-      'SELECT admin_id, password, name FROM admins WHERE user_id = ?',
-      [userId]
+      "SELECT admin_id, password, name FROM admins WHERE user_id = ?",
+      [userId],
     );
 
     if (rows.length === 0) {
       return res.status(401).json({
         status: false,
-        message: 'Invalid credentials',
+        message: "Invalid credentials",
       });
     }
 
@@ -33,23 +63,22 @@ export const adminLogin = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         status: false,
-        message: 'Invalid credentials',
+        message: "Invalid credentials",
       });
     }
 
     // ✅ Success
     return res.json({
       status: true,
-      message: 'Login successful',
+      message: "Login successful",
       admin_id: admin.admin_id, // 👈 SEND admin_id
       name: admin.name,
     });
-
   } catch (error) {
-    console.error('Admin login error:', error);
+    console.error("Admin login error:", error);
     return res.status(500).json({
       status: false,
-      message: 'Server error',
+      message: "Server error",
     });
   }
 };
@@ -57,21 +86,21 @@ export const adminLogin = async (req, res) => {
 export const getAdminProfile = async (req, res) => {
   try {
     const { adminId } = req.params;
-if (!adminId) {
+    if (!adminId) {
       return res.status(400).json({
         success: false,
-        message: 'Admin ID is required',
+        message: "Admin ID is required",
       });
     }
     const [rows] = await db.query(
-      'SELECT admin_id, name FROM admins WHERE admin_id = ?',
-      [adminId]
+      "SELECT admin_id, name FROM admins WHERE admin_id = ?",
+      [adminId],
     );
 
     if (rows.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Admin not found',
+        message: "Admin not found",
       });
     }
 
@@ -79,12 +108,11 @@ if (!adminId) {
       success: true,
       data: rows[0],
     });
-
   } catch (error) {
-    console.error('Get admin profile error:', error);
+    console.error("Get admin profile error:", error);
     return res.status(500).json({
       success: false,
-      message: 'Server error',
+      message: "Server error",
     });
   }
 };
@@ -118,14 +146,13 @@ export const getPendingAstrologers = async (req, res) => {
   }
 };
 
-
 export const verifyAstrologer = async (req, res) => {
   const conn = await db.getConnection();
 
   try {
     const { astrologerId } = req.params;
 
-      const {
+    const {
       rank,
       dp_name,
       experience,
@@ -155,10 +182,10 @@ export const verifyAstrologer = async (req, res) => {
 
     await conn.beginTransaction();
 
-/* ===================== 1?? INSERT / UPDATE FEES ===================== */
+    /* ===================== 1?? INSERT / UPDATE FEES ===================== */
 
-await conn.query(
-  `
+    await conn.query(
+      `
   INSERT INTO astrologer_fees (
     astrologer_id,
 
@@ -195,25 +222,25 @@ await conn.query(
     chat_rate = VALUES(chat_rate),
     chat_platform_fee = VALUES(chat_platform_fee)
   `,
-  [
-    astrologerId,
+      [
+        astrologerId,
 
-    audio_total_charge,
-    audio_commission_percent,
-    audio_call_rate,
-    audio_platform_fee,
+        audio_total_charge,
+        audio_commission_percent,
+        audio_call_rate,
+        audio_platform_fee,
 
-    video_total_charge,
-    video_commission_percent,
-    video_call_rate,
-    video_platform_fee,
+        video_total_charge,
+        video_commission_percent,
+        video_call_rate,
+        video_platform_fee,
 
-    chat_total_charge,
-    chat_commission_percent,
-    chat_rate,
-    chat_platform_fee,
-  ]
-);
+        chat_total_charge,
+        chat_commission_percent,
+        chat_rate,
+        chat_platform_fee,
+      ],
+    );
     /* ===================== 2️⃣ ADMIN VERIFY + RANK ===================== */
 
     await conn.query(
@@ -226,7 +253,7 @@ await conn.query(
 
       WHERE id = ?
       `,
-      [rank, astrologerId]
+      [rank, astrologerId],
     );
 
     /* ===================== 3️⃣ UPDATE PROFILE (DP NAME + EXP) ===================== */
@@ -239,7 +266,7 @@ await conn.query(
         experience = ?
       WHERE astrologer_id = ?
       `,
-      [dp_name, experience, astrologerId]
+      [dp_name, experience, astrologerId],
     );
 
     await conn.commit();
@@ -248,7 +275,6 @@ await conn.query(
       status: true,
       message: "Astrologer verified successfully",
     });
-
   } catch (error) {
     await conn.rollback();
     console.error("Verify astrologer error:", error);
@@ -297,14 +323,14 @@ export const getVerifiedAstrologers = async (req, res) => {
       LEFT JOIN astrologer_fees f ON f.astrologer_id = a.id
       WHERE a.is_admin_verified = 1
       ORDER BY a.rank DESC
-      `
+      `,
     );
 
     return res.json({
       status: true,
       data: rows,
     });
-console.log(data)
+    console.log(data);
   } catch (error) {
     console.error("Get verified astrologers error:", error);
     return res.status(500).json({
@@ -313,7 +339,6 @@ console.log(data)
     });
   }
 };
-
 
 export const updateVerifiedAstrologer = async (req, res) => {
   const conn = await db.getConnection();
@@ -332,12 +357,12 @@ export const updateVerifiedAstrologer = async (req, res) => {
       chat_rate,
       chat_platform_fee,
       is_blocked,
-         totalAudio,
-          totalVideo,
-          totalChat,
-          audioCommission,
-          videoCommission,
-          chatCommission
+      totalAudio,
+      totalVideo,
+      totalChat,
+      audioCommission,
+      videoCommission,
+      chatCommission,
     } = req.body;
 
     if (!astrologerId) {
@@ -359,7 +384,7 @@ export const updateVerifiedAstrologer = async (req, res) => {
         blocked_by_admin = ?
       WHERE id = ?
       `,
-      [rank, is_blocked ? 1 : 0, astrologerId]
+      [rank, is_blocked ? 1 : 0, astrologerId],
     );
 
     /* ===== 2️⃣ UPDATE PROFILE ===== */
@@ -372,13 +397,13 @@ export const updateVerifiedAstrologer = async (req, res) => {
         experience = ?
       WHERE astrologer_id = ?
       `,
-      [dp_name, experience, astrologerId]
+      [dp_name, experience, astrologerId],
     );
 
     /* ===== 3️⃣ UPSERT FEES ===== */
 
-   await conn.query(
-  `
+    await conn.query(
+      `
   UPDATE astrologer_fees
   SET
     audio_call_rate = ?,
@@ -398,32 +423,31 @@ export const updateVerifiedAstrologer = async (req, res) => {
 
   WHERE astrologer_id = ?
   `,
-  [
-    audio_call_rate,
-    audio_platform_fee,
-    audioCommission,
-    totalAudio,
+      [
+        audio_call_rate,
+        audio_platform_fee,
+        audioCommission,
+        totalAudio,
 
-    video_call_rate,
-    video_platform_fee,
-    videoCommission,
-    totalVideo,
+        video_call_rate,
+        video_platform_fee,
+        videoCommission,
+        totalVideo,
 
-    chat_rate,
-    chat_platform_fee,
-    chatCommission,
-    totalChat,
+        chat_rate,
+        chat_platform_fee,
+        chatCommission,
+        totalChat,
 
-    astrologerId,
-  ]
-);
+        astrologerId,
+      ],
+    );
     await conn.commit();
 
     return res.json({
       status: true,
       message: "Astrologer updated successfully",
     });
-
   } catch (error) {
     await conn.rollback();
     console.error("Update verified astrologer error:", error);
@@ -456,14 +480,13 @@ export const blockAstrologer = async (req, res) => {
       SET blocked_by_admin = 1
       WHERE id = ?
       `,
-      [astrologerId]
+      [astrologerId],
     );
 
     return res.json({
       status: true,
       message: "Astrologer blocked successfully",
     });
-
   } catch (error) {
     console.error("Block astrologer error:", error);
     return res.status(500).json({
@@ -490,14 +513,13 @@ export const unblockAstrologer = async (req, res) => {
       SET blocked_by_admin = 0
       WHERE id = ?
       `,
-      [astrologerId]
+      [astrologerId],
     );
 
     return res.json({
       status: true,
       message: "Astrologer unblocked successfully",
     });
-
   } catch (error) {
     console.error("Unblock astrologer error:", error);
     return res.status(500).json({
@@ -507,24 +529,26 @@ export const unblockAstrologer = async (req, res) => {
   }
 };
 
-
 export const getAllTickets = async (req, res) => {
   try {
     const { limit = 200, from, to } = req.query;
- 
+
     const isDateRange = from && to;
- 
+
     // Build the WHERE clause and params dynamically
     let whereClause = "";
     const params = [];
- 
+
     if (isDateRange) {
-      whereClause = "WHERE st.created_at >= ? AND st.created_at < DATE_ADD(?, INTERVAL 1 DAY)";
+      whereClause =
+        "WHERE st.created_at >= ? AND st.created_at < DATE_ADD(?, INTERVAL 1 DAY)";
       params.push(from, to);
     }
- 
-    const limitClause = isDateRange ? "" : `LIMIT ${Math.min(parseInt(limit) || 200, 1000)}`;
- 
+
+    const limitClause = isDateRange
+      ? ""
+      : `LIMIT ${Math.min(parseInt(limit) || 200, 1000)}`;
+
     const [tickets] = await db.query(
       `
       SELECT
@@ -572,16 +596,38 @@ export const getAllTickets = async (req, res) => {
       ORDER BY st.created_at DESC
       ${limitClause}
       `,
-      params
+      params,
     );
- 
+
     return res.json({ success: true, data: tickets });
   } catch (error) {
     console.error("getAllTickets error:", error);
-    return res.status(500).json({ success: false, message: "Failed to fetch tickets" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch tickets" });
   }
 };
- 
+
+export const getPendingTicketCount = async (_req, res) => {
+  try {
+    const [[result]] = await db.query(
+      `SELECT COUNT(*) AS count
+       FROM support_tickets
+       WHERE status IN ('open', 'in-progress')`,
+    );
+
+    return res.json({
+      success: true,
+      count: Number(result?.count || 0),
+    });
+  } catch (error) {
+    console.error("Get pending ticket count error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch pending ticket count",
+    });
+  }
+};
 
 /**
  * GET /api/admin/tickets/:ticketId
@@ -593,7 +639,7 @@ export const getTicketWithComments = async (req, res) => {
     // Ticket
     const [[ticket]] = await db.query(
       `SELECT * FROM support_tickets WHERE id = ?`,
-      [ticketId]
+      [ticketId],
     );
 
     if (!ticket) {
@@ -617,7 +663,7 @@ export const getTicketWithComments = async (req, res) => {
       WHERE ticket_id = ?
       ORDER BY created_at ASC
       `,
-      [ticketId]
+      [ticketId],
     );
 
     return res.json({
@@ -650,14 +696,39 @@ export const addTicketComment = async (req, res) => {
       });
     }
 
+    const [[ticket]] = await db.query(
+      `SELECT st.id, st.customer_type, st.astrologer_id, st.status,
+              u.fcmToken AS user_fcm_token,
+              a.fcmToken AS astrologer_fcm_token
+       FROM support_tickets st
+       LEFT JOIN users u ON u.id = st.astrologer_id AND st.customer_type = 'user'
+       LEFT JOIN astrologers a ON a.id = st.astrologer_id AND st.customer_type = 'astrologer'
+       WHERE st.id = ?
+       LIMIT 1`,
+      [ticket_id],
+    );
+
+    if (!ticket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found",
+      });
+    }
+
     await db.query(
       `
       INSERT INTO support_ticket_comments 
       (ticket_id, user_id, user_type, comment)
       VALUES (?, ?, ?, ?)
       `,
-      [ticket_id, user_id, user_type, comment]
+      [ticket_id, user_id, user_type, comment],
     );
+
+    await notifyTicketOwner(ticket, {
+      notificationType: "ticket_comment",
+      title: "New support ticket reply",
+      message: String(comment).trim(),
+    });
 
     return res.json({
       success: true,
@@ -680,14 +751,40 @@ export const updateTicketStatus = async (req, res) => {
     const { ticketId } = req.params;
     const { status, response } = req.body;
 
+    const [[ticket]] = await db.query(
+      `SELECT st.id, st.customer_type, st.astrologer_id,
+              u.fcmToken AS user_fcm_token,
+              a.fcmToken AS astrologer_fcm_token
+       FROM support_tickets st
+       LEFT JOIN users u ON u.id = st.astrologer_id AND st.customer_type = 'user'
+       LEFT JOIN astrologers a ON a.id = st.astrologer_id AND st.customer_type = 'astrologer'
+       WHERE st.id = ?
+       LIMIT 1`,
+      [ticketId],
+    );
+
+    if (!ticket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found",
+      });
+    }
+
     await db.query(
       `
       UPDATE support_tickets
       SET status = ?, response = ?, resolved_at = IF(? = 'resolved', NOW(), resolved_at)
       WHERE id = ?
       `,
-      [status, response || null, status, ticketId]
+      [status, response || null, status, ticketId],
     );
+
+    await notifyTicketOwner(ticket, {
+      notificationType: "ticket_status_changed",
+      title: "Support ticket status updated",
+      message: `Your ticket status is now ${String(status).replace("-", " ")}.`,
+      status,
+    });
 
     return res.json({
       success: true,
@@ -742,7 +839,7 @@ export const getRechargeLogs = async (req, res) => {
       ${where}
       ORDER BY w.id DESC
       `,
-      params
+      params,
     );
 
     res.json(rows || []);
@@ -798,7 +895,7 @@ export const getCallLogs = async (req, res) => {
       ${where}
       ORDER BY c.id DESC
       `,
-      params
+      params,
     );
 
     res.json(rows || []);
@@ -851,7 +948,7 @@ export const getUsers = async (req, res) => {
       ORDER BY id DESC
       LIMIT ? OFFSET ?
       `,
-      [...params, limit, offset]
+      [...params, limit, offset],
     );
 
     res.json(rows || []);
@@ -887,7 +984,7 @@ export const getAstrologers = async (req, res) => {
       ${where}
       ORDER BY a.id DESC
       `,
-      params
+      params,
     );
 
     res.json(rows || []);
@@ -899,7 +996,9 @@ export const getAstrologers = async (req, res) => {
 export const getAstrologerCalls = async (req, res) => {
   try {
     const { astrologer_id } = req.params;
-    const before_id = req.query.before_id ? parseInt(req.query.before_id) : null;
+    const before_id = req.query.before_id
+      ? parseInt(req.query.before_id)
+      : null;
 
     const params = [astrologer_id];
     let whereClause = "WHERE c.astrologer_id = ?";
@@ -929,7 +1028,7 @@ export const getAstrologerCalls = async (req, res) => {
       ORDER BY c.id DESC
       LIMIT ?
       `,
-      params
+      params,
     );
 
     res.json(rows || []);
@@ -942,7 +1041,9 @@ export const getAstrologerCalls = async (req, res) => {
 export const getAstrologerWalletLogs = async (req, res) => {
   try {
     const { astrologer_id } = req.params;
-    const before_id = req.query.before_id ? parseInt(req.query.before_id) : null;
+    const before_id = req.query.before_id
+      ? parseInt(req.query.before_id)
+      : null;
 
     const params = [astrologer_id];
     let whereClause = "WHERE astrologer_id = ?";
@@ -969,7 +1070,7 @@ export const getAstrologerWalletLogs = async (req, res) => {
       ORDER BY id DESC
       LIMIT ?
       `,
-      params
+      params,
     );
 
     res.json(rows || []);

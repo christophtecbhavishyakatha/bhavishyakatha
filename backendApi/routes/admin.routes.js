@@ -1,38 +1,54 @@
 import express from "express";
-const router = express.Router();
-import  {adminLogin, getAdminProfile,getPendingAstrologers,verifyAstrologer, 
-    getVerifiedAstrologers, updateVerifiedAstrologer,blockAstrologer,unblockAstrologer,
-getAllTickets,
-  getTicketWithComments,
-  addTicketComment,
-  getRechargeLogs,getCallLogs, getUsers,getAstrologers,getAstrologerCalls,getAstrologerWalletLogs,
-  updateTicketStatus}  from "../controllers/admin.controller.js";
 import {
-  createAdminSocialPost,
-  deleteAdminSocialComment,
-  deleteAdminSocialPost,
-  getAdminSocialPosts,
-  replyToSocialComment,
-} from "../controllers/social.controller.js";
+    addTicketComment,
+    adminLogin,
+    blockAstrologer,
+    getAdminProfile,
+    getAllTickets,
+    getAstrologerCalls,
+    getAstrologers,
+    getAstrologerWalletLogs,
+    getCallLogs,
+    getPendingAstrologers,
+    getPendingTicketCount,
+    getRechargeLogs,
+    getTicketWithComments,
+    getUsers,
+    getVerifiedAstrologers,
+    unblockAstrologer,
+    updateTicketStatus,
+    updateVerifiedAstrologer,
+    verifyAstrologer,
+} from "../controllers/admin.controller.js";
 import {
-  getAllAstrologers,
-  transferToBank,
-  getPayoutHistory,
-  updatePayoutStatus,
+    getAllAstrologers,
+    getPayoutHistory,
+    transferToBank,
+    updatePayoutStatus,
 } from "../controllers/payout.controller.js";
+import {
+    createAdminSocialPost,
+    deleteAdminSocialComment,
+    deleteAdminSocialCommentReply,
+    deleteAdminSocialPost,
+    getAdminSocialPosts,
+    replyToSocialComment,
+} from "../controllers/social.controller.js";
+const router = express.Router();
 
 import { sendNotification } from "../controllers/notification.controller.js";
 
 router.post("/send-notification", sendNotification);
 
-router.post('/admin-login', adminLogin);
-router.get('/admin-profile/:adminId', getAdminProfile);
-router.get('/pending', getPendingAstrologers);
-router.post('/verify/:astrologerId', verifyAstrologer);    
-router.get('/verified', getVerifiedAstrologers); 
-router.put('/update/:astrologerId', updateVerifiedAstrologer);
-router.post('/block/:astrologerId', blockAstrologer);
-router.post('/unblock/:astrologerId', unblockAstrologer);
+router.post("/admin-login", adminLogin);
+router.get("/admin-profile/:adminId", getAdminProfile);
+router.get("/pending", getPendingAstrologers);
+router.post("/verify/:astrologerId", verifyAstrologer);
+router.get("/verified", getVerifiedAstrologers);
+router.put("/update/:astrologerId", updateVerifiedAstrologer);
+router.post("/block/:astrologerId", blockAstrologer);
+router.post("/unblock/:astrologerId", unblockAstrologer);
+router.get("/tickets/pending-count", getPendingTicketCount);
 router.get("/tickets", getAllTickets);
 router.get("/tickets/:ticketId", getTicketWithComments);
 router.post("/tickets/comment", addTicketComment);
@@ -42,6 +58,7 @@ router.post("/social/posts", createAdminSocialPost);
 router.delete("/social/posts/:postId", deleteAdminSocialPost);
 router.post("/social/comments/:commentId/reply", replyToSocialComment);
 router.delete("/social/comments/:commentId", deleteAdminSocialComment);
+router.delete("/social/comments/:commentId/reply", deleteAdminSocialCommentReply);
 
 router.get("/astrologers", getAllAstrologers);
 router.post("/transfer", transferToBank);

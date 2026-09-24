@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <!-- ═══ PRIMARY SEO ═══ -->
+  <title>Bhavishya Katha | Talk to Astrologer Online – Chat, Call & Video | ₹15/min</title>
+  <meta name="description" content="Talk to expert Vedic astrologers online via chat, voice call or video call — starting at just ₹15/min. Get personalised guidance on love, career, marriage & health. Trusted by thousands across West Bengal & India. Download the Bhavishya Katha app now.">
+  <meta name="keywords" content="talk to astrologer online, astrologer online India, vedic astrology consultation, online jyotish, kundali reading online, astrology chat, astrology call, Bengali astrologer online, jyotishi online, bhavishya katha, best astrology app India, horoscope consultation, love astrology, career astrology, marriage astrology, জ্যোতিষ পরামর্শ, অনলাইন জ্যোতিষী, ভবিষ্যৎ কথা, কুণ্ডলী বিশ্লেষণ">
+  <meta name="author" content="Bhavishya Katha">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="theme-color" content="#07050f">
+  <meta name="rating" content="general">
+  <meta name="revisit-after" content="7 days">
+  <meta name="language" content="English, Bengali">
+  <link rel="canonical" href="https://www.bhavishyakatha.in/">
+
+  <!-- ═══ OPEN GRAPH / FACEBOOK ═══ -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.bhavishyakatha.in/">
+  <meta property="og:title" content="Bhavishya Katha | Talk to Astrologer Online | ₹15/min">
+  <meta property="og:description" content="Connect with expert Vedic astrologers via chat, voice or video call. Get personalised guidance on love, career, marriage & health — starting at ₹15/min. Trusted by thousands across India.">
+  <meta property="og:image" content="https://www.bhavishyakatha.in/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Bhavishya Katha – Talk to Vedic Astrologer Online">
+  <meta property="og:locale" content="en_IN">
+  <meta property="og:locale:alternate" content="bn_IN">
+  <meta property="og:site_name" content="Bhavishya Katha">
+
+  <!-- ═══ TWITTER CARD ═══ -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@bhavishyakatha">
+  <meta name="twitter:url" content="https://www.bhavishyakatha.in/">
+  <meta name="twitter:title" content="Bhavishya Katha | Talk to Astrologer Online | ₹15/min">
+  <meta name="twitter:description" content="Connect with expert Vedic astrologers via chat, voice or video call. Personalised guidance on love, career & health starting at ₹15/min.">
+  <meta name="twitter:image" content="https://www.bhavishyakatha.in/og-image.jpg">
+  <meta name="twitter:image:alt" content="Bhavishya Katha – Vedic Astrology App">
+
+  <!-- ═══ GEO & LANGUAGE ═══ -->
+  <meta name="geo.region" content="IN-WB">
+  <meta name="geo.placename" content="Kolkata, West Bengal, India">
+  <meta name="geo.position" content="22.5726;88.3639">
+  <meta name="ICBM" content="22.5726, 88.3639">
+  <link rel="alternate" hreflang="en-IN" href="https://www.bhavishyakatha.in/">
+  <link rel="alternate" hreflang="bn-IN" href="https://www.bhavishyakatha.in/bn/">
+  <link rel="alternate" hreflang="x-default" href="https://www.bhavishyakatha.in/">
+
+  <!-- ═══ SCHEMA.ORG JSON-LD ═══ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://www.bhavishyakatha.in/#website",
+        "url": "https://www.bhavishyakatha.in/",
+        "name": "Bhavishya Katha",
+        "description": "Talk to expert Vedic astrologers online via chat, voice or video call starting at ₹15/min.",
+        "inLanguage": ["en-IN", "bn-IN"],
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://www.bhavishyakatha.in/search?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "MobileApplication",
+        "@id": "https://www.bhavishyakatha.in/#app",
+        "name": "Bhavishya Katha",
+        "operatingSystem": "Android",
+        "applicationCategory": "LifestyleApplication",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "INR"
+        },
+        "installUrl": "https://play.google.com/store/apps/details?id=com.snsrk9.astrocristoptec",
+        "description": "Talk to Vedic astrologers via chat, voice or video call. Get kundali readings, daily horoscope & cosmic guidance."
+      },
+      {
+        "@type": "LocalBusiness",
+        "@id": "https://www.bhavishyakatha.in/#business",
+        "name": "Bhavishya Katha",
+        "alternateName": "ভবিষ্যৎ কথা",
+        "description": "Online Vedic astrology consultation platform offering chat, voice call and video call sessions with expert astrologers starting at ₹15/min.",
+        "url": "https://www.bhavishyakatha.in",
+        "logo": "https://www.bhavishyakatha.in/logo.png",
+        "image": "https://www.bhavishyakatha.in/og-image.jpg",
+        "telephone": "",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Kolkata",
+          "addressRegion": "West Bengal",
+          "postalCode": "700001",
+          "addressCountry": "IN"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 22.5726,
+          "longitude": 88.3639
+        },
+        "priceRange": "₹15 - ₹999",
+        "currenciesAccepted": "INR",
+        "paymentAccepted": "Cash, Credit Card, UPI, Net Banking",
+        "areaServed": {
+          "@type": "Country",
+          "name": "India"
+        },
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Astrology Consultation Services",
+          "itemListElement": [
+            {
+              "@type": "Offer",
+              "name": "Chat with Astrologer",
+              "description": "Text-based astrology consultation with expert Vedic astrologers",
+              "price": "15",
+              "priceCurrency": "INR",
+              "unitText": "per minute"
+            },
+            {
+              "@type": "Offer",
+              "name": "Voice Call with Astrologer",
+              "description": "Private voice call astrology consultation",
+              "price": "15",
+              "priceCurrency": "INR",
+              "unitText": "per minute"
+            },
+            {
+              "@type": "Offer",
+              "name": "Video Call with Astrologer",
+              "description": "Face-to-face video call astrology consultation with kundali reading",
+              "price": "15",
+              "priceCurrency": "INR",
+              "unitText": "per minute"
+            }
+          ]
+        },
+        "sameAs": [
+          "https://play.google.com/store/apps/details?id=com.snsrk9.astrocristoptec"
+        ],
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "reviewCount": "2400",
+          "bestRating": "5",
+          "worstRating": "1"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How much does it cost to talk to an astrologer on Bhavishya Katha?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Consultations on Bhavishya Katha start at just ₹15 per minute for chat, voice call and video call sessions with expert Vedic astrologers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I consult an astrologer in Bengali on Bhavishya Katha?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes! Bhavishya Katha offers consultations in Bengali as well as other Indian languages. Our astrologers are fluent in Bengali and can provide guidance in your native language."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I talk to an astrologer online?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Download the Bhavishya Katha app, create an account, browse available astrologers and choose to connect via chat, voice call or video call. Sessions start at ₹15/min."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Noto+Sans+Bengali:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #07050f;
+      --surface:  #100d1e;
+      --border:   rgba(212,175,55,0.18);
+      --gold:     #d4af37;
+      --gold-lt:  #f0d060;
+      --gold-pale:#fff4c0;
+      --cream:    #f2e8d0;
+      --muted:    #9a8a68;
+      --dim:      #5a5040;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Libre Baskerville', Georgia, serif;
+      overflow-x: hidden;
+    }
+
+    #cvs { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    .wrap { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 0 1.8rem; }
+
+    /* NAV */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.4rem 0;
+      border-bottom: 1px solid var(--border);
+      animation: slideDown .9s ease both;
+      gap: 1rem;
+    }
+    .logo-en { font-family: 'Cinzel Decorative', serif; font-size: 1.05rem; color: var(--gold-lt); letter-spacing:.04em; white-space: nowrap; }
+    .logo-bn { font-family: 'Noto Sans Bengali', sans-serif; font-size:.78rem; color: var(--muted); margin-top:.15rem; }
+
+    /* Hamburger */
+    .nav-toggle {
+      display: none; flex-direction: column; gap: 5px; cursor: pointer;
+      background: none; border: none; padding: 4px; flex-shrink: 0;
+      position: relative;
+      z-index: 301;
+    }
+    .nav-toggle span {
+      display: block; width: 22px; height: 2px;
+      background: var(--gold); border-radius: 2px;
+      transition: transform .3s, opacity .3s;
+    }
+    .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-toggle.open span:nth-child(2) { opacity: 0; }
+    .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .nav-links { display:flex; gap:2rem; list-style:none; }
+    .nav-links a { color:var(--muted); text-decoration:none; font-size:.88rem; letter-spacing:.07em; transition:color .25s; white-space: nowrap; }
+    .nav-links a:hover { color:var(--gold-lt); }
+
+    @media(max-width: 600px) {
+      .nav-toggle { display: flex; }
+      .nav-links {
+        display: none; flex-direction: column; gap: 0;
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: #0a0714;
+        border-bottom: 1px solid var(--border);
+        padding: 5rem 2rem 2rem;
+        z-index: 300;
+        animation: fadeIn .25s ease;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links li { border-bottom: 1px solid var(--border); }
+      .nav-links a { display: block; padding: .9rem 0; font-size: 1rem; }
+    }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+
+    /* FLOATING DOWNLOAD BUTTON */
+    .float-app {
+      position: fixed; right: 1.4rem; bottom: 1.4rem;
+      z-index: 200;
+      display: flex; flex-direction: row; align-items: center;
+      background: linear-gradient(135deg,#1a1230,#0e0a1e);
+      border: 1px solid rgba(212,175,55,.4);
+      border-radius: 999px;
+      padding: .7rem 1.2rem .7rem .8rem;
+      text-decoration: none;
+      gap: .6rem;
+      box-shadow: 0 4px 24px rgba(212,175,55,.14), 0 4px 20px rgba(0,0,0,.4);
+      transition: transform .3s, box-shadow .3s, border-color .3s;
+    }
+    .float-app:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(212,175,55,.28), 0 6px 24px rgba(0,0,0,.45);
+      border-color: var(--gold);
+    }
+    .float-app svg { width: 24px; height: 24px; flex-shrink: 0; }
+    .float-label {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: .62rem; letter-spacing: .1em;
+      color: var(--gold-lt); white-space: nowrap;
+    }
+    .float-pulse {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--gold); flex-shrink: 0;
+      animation: pulse 2s ease infinite;
+    }
+    @media(max-width: 600px) {
+      .float-app { right: 1rem; bottom: 1rem; padding: .65rem 1rem .65rem .7rem; }
+      .float-label { font-size: .58rem; }
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(212,175,55,.6); }
+      50%      { box-shadow: 0 0 0 5px rgba(212,175,55,0); }
+    }
+
+    /* HERO */
+    .hero { text-align:center; padding:7rem 0 4rem; animation: riseUp 1.1s ease .15s both; }
+    .hero-tag { font-family:'Noto Sans Bengali',sans-serif; font-size:1rem; color:var(--gold); letter-spacing:.18em; margin-bottom:1.5rem; opacity:.9; }
+    .hero h1 {
+      font-family:'Cinzel Decorative',serif;
+      font-size:clamp(2.2rem,5.5vw,4.2rem);
+      color:var(--gold-pale); line-height:1.18;
+      text-shadow:0 0 80px rgba(212,175,55,.35);
+      margin-bottom:.5rem;
+    }
+    .hero h1 em { font-style:italic; color:var(--gold-lt); }
+    .hero-bn { font-family:'Noto Sans Bengali',sans-serif; font-size:1.1rem; color:var(--muted); margin:.5rem 0 1.8rem; }
+    .hero-desc { max-width:560px; margin:0 auto 2.8rem; font-size:1.05rem; color:var(--muted); line-height:1.85; font-style:italic; }
+
+    .rule { display:flex; align-items:center; gap:1rem; margin:1.8rem auto; max-width:300px; }
+    .rule::before,.rule::after { content:''; flex:1; height:1px; background:linear-gradient(to right,transparent,var(--gold)); }
+    .rule::after { background:linear-gradient(to left,transparent,var(--gold)); }
+    .rule span { color:var(--gold); font-size:1.1rem; }
+
+    /* CTA */
+    .hero-btns { display:flex; gap:1.1rem; justify-content:center; flex-wrap:wrap; }
+    .btn-gold {
+      background:linear-gradient(135deg,#a07820,#e8c850,#a07820); background-size:200% auto;
+      color:#1a0e00; padding:.85rem 2.4rem; border:none; border-radius:3px;
+      font-family:'Cinzel Decorative',serif; font-size:.78rem; letter-spacing:.1em;
+      cursor:pointer; text-decoration:none;
+      transition:background-position .5s,box-shadow .3s;
+      box-shadow:0 4px 28px rgba(212,175,55,.3);
+    }
+    .btn-gold:hover { background-position:right center; box-shadow:0 6px 40px rgba(212,175,55,.5); }
+    .btn-ghost {
+      background:transparent; color:var(--gold-lt);
+      padding:.85rem 2.4rem; border:1px solid rgba(212,175,55,.4); border-radius:3px;
+      font-family:'Cinzel Decorative',serif; font-size:.78rem; letter-spacing:.1em;
+      cursor:pointer; text-decoration:none; transition:all .3s;
+    }
+    .btn-ghost:hover { background:rgba(212,175,55,.07); border-color:var(--gold); }
+
+    /* CONSULT CARDS */
+    .section-head { text-align:center; margin:5rem 0 .6rem; font-family:'Cinzel Decorative',serif; font-size:clamp(.9rem,2vw,1.3rem); color:var(--gold-lt); scroll-margin-top: 2rem; }
+    .section-sub { text-align:center; color:var(--muted); font-size:.93rem; font-style:italic; margin-bottom:2.5rem; }
+    .section-sub .bn { font-family:'Noto Sans Bengali',sans-serif; font-style:normal; }
+
+    .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:1.4rem; margin-bottom:5rem; scroll-margin-top: 2rem; }
+    @media(max-width:640px){ .cards { grid-template-columns:1fr; } }
+
+    .card {
+      background:linear-gradient(150deg,rgba(22,16,40,.95),rgba(10,7,20,.98));
+      border:1px solid var(--border); border-radius:6px;
+      padding:2.4rem 1.8rem 2rem; text-align:center;
+      position:relative; overflow:hidden;
+      transition:transform .4s,border-color .4s,box-shadow .4s;
+    }
+    .card::after {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg,transparent,var(--gold),transparent);
+      opacity:0; transition:opacity .4s;
+    }
+    .card:hover { transform:translateY(-8px); border-color:rgba(212,175,55,.4); box-shadow:0 24px 60px rgba(212,175,55,.1); }
+    .card:hover::after { opacity:1; }
+    .card-icon { font-size:2.6rem; margin-bottom:1.1rem; display:block; }
+    .card-title-en { font-family:'Cinzel Decorative',serif; font-size:.85rem; color:var(--gold-lt); letter-spacing:.05em; margin-bottom:.3rem; }
+    .card-title-bn { font-family:'Noto Sans Bengali',sans-serif; font-size:.8rem; color:var(--dim); margin-bottom:1rem; }
+    .card p { font-size:.9rem; color:var(--muted); line-height:1.75; }
+    .card-price { margin-top:1.4rem; padding-top:1.2rem; border-top:1px solid var(--border); font-family:'Cinzel Decorative',serif; font-size:.78rem; color:var(--gold); letter-spacing:.06em; }
+
+    /* MARQUEE */
+    .marquee-wrap { overflow:hidden; border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:1.2rem 0; margin-bottom:5rem; }
+    .marquee-track { display:flex; gap:2.5rem; align-items:center; animation:marquee 22s linear infinite; width:max-content; }
+    .marquee-track span { color:var(--gold); font-size:1.6rem; opacity:.55; }
+    @keyframes marquee { to { transform:translateX(-50%); } }
+
+    /* REVIEWS */
+    .reviews { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:1.4rem; margin-bottom:5.5rem; }
+    .review {
+      border:1px solid var(--border); border-left:3px solid var(--gold); border-radius:4px;
+      background:rgba(16,13,30,.7); padding:1.8rem 1.6rem;
+      transition:box-shadow .3s;
+    }
+    .review:hover { box-shadow:0 8px 40px rgba(212,175,55,.08); }
+    .stars { color:var(--gold); font-size:.9rem; margin-bottom:.9rem; letter-spacing:.1em; }
+    .review blockquote { font-style:italic; font-size:.98rem; line-height:1.82; color:var(--cream); margin-bottom:1.1rem; }
+    .review-name { font-size:.82rem; color:var(--gold); letter-spacing:.08em; display:block; }
+    .review-lang { font-family:'Noto Sans Bengali',sans-serif; font-size:.78rem; color:var(--dim); display:block; }
+    .review-mode { font-size:.7rem; color:var(--dim); letter-spacing:.1em; text-transform:uppercase; margin-top:.3rem; display:block; }
+
+    /* APP */
+    .app-section {
+      text-align:center;
+      border:1px solid var(--border); border-radius:8px;
+      background:linear-gradient(135deg,rgba(22,16,40,.98),rgba(7,5,15,.98));
+      padding:4.5rem 2rem 4rem; margin-bottom:5rem; position:relative; overflow:hidden;
+      scroll-margin-top: 2rem;
+    }
+    .app-section::before {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(ellipse at 50% 0%,rgba(212,175,55,.07),transparent 65%);
+      pointer-events:none;
+    }
+    .app-section h2 { font-family:'Cinzel Decorative',serif; font-size:clamp(1.1rem,2.5vw,1.6rem); color:var(--gold-pale); margin-bottom:.4rem; }
+    .app-bn { font-family:'Noto Sans Bengali',sans-serif; color:var(--muted); font-size:.95rem; margin-bottom:.8rem; }
+    .app-section p { color:var(--muted); font-style:italic; margin-bottom:2.5rem; font-size:.95rem; }
+
+    .play-btn {
+      display:inline-flex; align-items:center; gap:1.1rem;
+      background:#111122; border:1.5px solid rgba(212,175,55,.45); border-radius:10px;
+      padding:1rem 2.2rem; text-decoration:none; color:var(--cream);
+      transition:all .3s; box-shadow:0 4px 24px rgba(0,0,0,.5);
+    }
+    .play-btn:hover { border-color:var(--gold); box-shadow:0 8px 40px rgba(212,175,55,.22); transform:translateY(-3px); }
+    .play-btn svg { width:34px; height:34px; flex-shrink:0; }
+    .play-text small { display:block; font-size:.6rem; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
+    .play-text strong { display:block; font-family:'Cinzel Decorative',serif; font-weight:400; font-size:1.05rem; color:var(--gold-lt); margin-top:.1rem; }
+
+    /* FOOTER */
+    footer { text-align:center; border-top:1px solid var(--border); padding:3rem 0 2.5rem; color:var(--dim); font-size:.82rem; scroll-margin-top: 2rem; }
+    .footer-logo { font-family:'Cinzel Decorative',serif; color:var(--gold); font-size:1rem; margin-bottom:.4rem; }
+    .footer-bn { font-family:'Noto Sans Bengali',sans-serif; color:var(--muted); font-size:.8rem; margin-bottom:1.2rem; }
+    footer a { color:var(--dim); text-decoration:none; }
+    footer a:hover { color:var(--gold-lt); }
+
+    /* TRUST BAR */
+    .trust-bar {
+      display: flex; align-items: center; justify-content: center;
+      flex-wrap: wrap; gap: 1rem;
+      border: 1px solid var(--border); border-radius: 6px;
+      background: linear-gradient(135deg, rgba(22,16,40,.7), rgba(10,7,20,.8));
+      padding: 1.8rem 2rem; margin-bottom: 5rem;
+    }
+    .trust-item { text-align: center; }
+    .trust-num { display: block; font-family: 'Cinzel Decorative', serif; font-size: 1.3rem; color: var(--gold-lt); }
+    .trust-label { display: block; font-size: .75rem; color: var(--muted); letter-spacing: .08em; margin-top: .2rem; text-transform: uppercase; }
+    .trust-sep { color: var(--gold); opacity: .4; font-size: .9rem; }
+    @media(max-width: 500px) { .trust-sep { display: none; } .trust-bar { gap: 1.8rem; } }
+
+    /* FAQ */
+    .faq-section { margin-bottom: 5rem; scroll-margin-top: 2rem; }
+    .faq-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: .8rem; }
+    .faq-item {
+      border: 1px solid var(--border); border-radius: 5px;
+      background: rgba(16,13,30,.6);
+      overflow: hidden; transition: border-color .3s;
+    }
+    .faq-item[open] { border-color: rgba(212,175,55,.35); }
+    .faq-item summary {
+      padding: 1.2rem 1.6rem; cursor: pointer;
+      font-family: 'Libre Baskerville', serif; font-size: .95rem;
+      color: var(--cream); list-style: none;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after {
+      content: '+'; color: var(--gold); font-size: 1.3rem;
+      flex-shrink: 0; transition: transform .3s;
+    }
+    .faq-item[open] summary::after { transform: rotate(45deg); }
+    .faq-item summary:hover { color: var(--gold-lt); }
+    .faq-item p {
+      padding: 1rem 1.6rem 1.4rem; font-size: .9rem;
+      color: var(--muted); line-height: 1.82;
+      border-top: 1px solid var(--border);
+    }
+    .faq-item strong { color: var(--gold-lt); }
+
+    /* ANIMS */
+    @keyframes slideDown { from{opacity:0;transform:translateY(-18px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes riseUp   { from{opacity:0;transform:translateY(28px)}  to{opacity:1;transform:translateY(0)} }
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .8s ease,transform .8s ease; }
+    .reveal.in { opacity:1; transform:translateY(0); }
+  </style>
+<!-- ═══ FAVICON ═══ -->
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+
+<canvas id="cvs"></canvas>
+
+<div class="wrap">
+
+  <!-- FLOATING APP DOWNLOAD -->
+  <a href="https://play.google.com/store/apps/details?id=com.snsrk9.astrocristoptec" target="_blank" class="float-app" title="Download on Google Play">
+    <svg viewBox="55 18 375 476" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="fg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00c9ff"/><stop offset="100%" stop-color="#0080bb"/></linearGradient>
+        <linearGradient id="fg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff5252"/><stop offset="100%" stop-color="#bb0000"/></linearGradient>
+        <linearGradient id="fg3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffdd00"/><stop offset="100%" stop-color="#ff9900"/></linearGradient>
+        <linearGradient id="fg4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00e676"/><stop offset="100%" stop-color="#007733"/></linearGradient>
+      </defs>
+      <polygon points="55,18 55,494 285,256" fill="url(#fg1)"/>
+      <polygon points="55,18 285,256 430,138" fill="url(#fg4)"/>
+      <polygon points="55,494 285,256 430,374" fill="url(#fg2)"/>
+      <polygon points="285,256 430,138 430,374" fill="url(#fg3)"/>
+    </svg>
+    <span class="float-label">Download App</span>
+    <span class="float-pulse"></span>
+  </a>
+
+  <!-- NAV -->
+  <nav style="position:relative;">
+    <div>
+      <div class="logo-en">✦ Bhavishya Katha</div>
+      <div class="logo-bn">ভবিষ্যৎ কথা</div>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#consult">Consult</a></li>
+      <li><a href="#astrologers">Astrologers</a></li>
+      <li><a href="#reviews">Reviews</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="hero-tag">জ্যোতিষ পরামর্শ নিন</p>
+    <h1>Know Your <em>Destiny</em></h1>
+    <p class="hero-bn">তারার আলোয় জানুন আপনার ভবিষ্যৎ</p>
+    <div class="rule"><span>✦</span></div>
+    <p class="hero-desc">
+      Connect with expert Vedic astrologers for guidance on love, career, health and life's deepest questions – starting at just ₹15.
+    </p>
+<div class="hero-btns">
+      <a href="https://play.google.com/store/apps/details?id=com.snsrk9.astrocristoptec" target="_blank" rel="noopener noreferrer" class="btn-gold">Talk to an Astrologer</a>
+      <a href="https://play.google.com/store/apps/details?id=com.snsrk9.astrocristoptec" target="_blank" rel="noopener noreferrer" class="btn-ghost">Browse Astrologers</a>
+    </div>
+
+  </section>
+
+  <!-- TRUST BAR -->
+  <div class="trust-bar reveal">
+    <div class="trust-item"><span class="trust-num">10,000+</span><span class="trust-label">Consultations Done</span></div>
+    <div class="trust-sep">✦</div>
+    <div class="trust-item"><span class="trust-num">500+</span><span class="trust-label">Expert Astrologers</span></div>
+    <div class="trust-sep">✦</div>
+    <div class="trust-item"><span class="trust-num">4.8 ★</span><span class="trust-label">Average Rating</span></div>
+    <div class="trust-sep">✦</div>
+    <div class="trust-item"><span class="trust-num">₹15/min</span><span class="trust-label">Starting Price</span></div>
+  </div>
+
+  <!-- CONSULT MODES -->
+  <h2 class="section-head reveal">Choose How You Connect</h2>
+  <p class="section-sub reveal">Three ways to reach your astrologer &nbsp;·&nbsp; <span class="bn">তিনটি উপায়ে জ্যোতিষীর সাথে কথা বলুন</span></p>
+
+  <div class="cards reveal" id="consult">
+    <div class="card">
+      <span class="card-icon">💬</span>
+      <p class="card-title-en">Chat</p>
+      <p class="card-title-bn">চ্যাট করুন</p>
+      <p>Type your questions and receive thoughtful, personalised astrological answers at your own pace – anytime, anywhere.</p>
+      <p class="card-price">Starting ₹15 / min</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">📞</span>
+      <p class="card-title-en">Voice Call</p>
+      <p class="card-title-bn">ফোনে কথা বলুন</p>
+      <p>Speak directly with a trusted astrologer in a private voice session for deeper, more personal guidance.</p>
+      <p class="card-price">Starting ₹15 / min</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">🎥</span>
+      <p class="card-title-en">Video Call</p>
+      <p class="card-title-bn">ভিডিও কলে কথা বলুন</p>
+      <p>Face-to-face with your astrologer – share your birth chart and receive real-time cosmic guidance live.</p>
+      <p class="card-price">Starting ₹15 / min</p>
+    </div>
+  </div>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap reveal">
+    <div class="marquee-track">
+      <span>♈</span><span>♉</span><span>♊</span><span>♋</span><span>♌</span><span>♍</span>
+      <span>♎</span><span>♏</span><span>♐</span><span>♑</span><span>♒</span><span>♓</span><span>✦</span>
+      <span>♈</span><span>♉</span><span>♊</span><span>♋</span><span>♌</span><span>♍</span>
+      <span>♎</span><span>♏</span><span>♐</span><span>♑</span><span>♒</span><span>♓</span><span>✦</span>
+    </div>
+  </div>
+
+  <!-- REVIEWS -->
+  <h2 class="section-head reveal" id="reviews">What Our Users Say</h2>
+  <p class="section-sub reveal">Real experiences from real seekers</p>
+
+  <div class="reviews reveal">
+    <div class="review">
+      <div class="stars">★★★★★</div>
+      <blockquote>"The chat session was astonishingly accurate. The astrologer predicted exactly what was happening in my career – I was stunned. Worth every rupee."</blockquote>
+      <span class="review-name">Priya Chatterjee</span>
+      <span class="review-lang">কলকাতা, পশ্চিমবঙ্গ</span>
+      <span class="review-mode">via Chat · ₹15/min</span>
+    </div>
+
+    <div class="review">
+      <div class="stars">★★★★★</div>
+      <blockquote>"I did a video call for marriage guidance and came away with so much clarity. The astrologer was warm, professional and deeply knowledgeable."</blockquote>
+      <span class="review-name">Rahul &amp; Meera Sen</span>
+      <span class="review-lang">বারাসাত, পশ্চিমবঙ্গ</span>
+      <span class="review-mode">via Video Call</span>
+    </div>
+
+    <div class="review">
+      <div class="stars">★★★★★</div>
+      <blockquote>"Called about my business struggles and the astrologer gave such specific remedies. Things have genuinely improved since I followed the advice."</blockquote>
+      <span class="review-name">Subhash Mondal</span>
+      <span class="review-lang">হাওড়া, পশ্চিমবঙ্গ</span>
+      <span class="review-mode">via Voice Call</span>
+    </div>
+
+    <div class="review">
+      <div class="stars">★★★★★</div>
+      <blockquote>"এই জ্যোতিষীর সাথে কথা বলে আমার জীবনের অনেক প্রশ্নের উত্তর পেয়েছি! সত্যিই অসাধারণ অভিজ্ঞতা – মন থেকে ধন্যবাদ।"</blockquote>
+      <span class="review-name">Ananya Bose</span>
+      <span class="review-lang">দুর্গাপুর, পশ্চিমবঙ্গ</span>
+      <span class="review-mode">via Chat · ₹15/min</span>
+    </div>
+
+    <div class="review">
+      <div class="stars">★★★★★</div>
+      <blockquote>"I was nervous about my first consultation but the voice call felt like talking to a wise elder. The analysis was spot-on and deeply reassuring."</blockquote>
+      <span class="review-name">Amit Roy</span>
+      <span class="review-lang">বিধাননগর, পশ্চিমবঙ্গ</span>
+      <span class="review-mode">via Voice Call</span>
+    </div>
+
+    <div class="review">
+      <div class="stars">★★★★★</div>
+      <blockquote>"ভিডিও কলে কথা বললাম – জ্যোতিষী আমার কুণ্ডলী দেখে এমন কথা বললেন যা শুনে অবাক হয়ে গেলাম। এখন অনেক ভালো আছি।"</blockquote>
+      <span class="review-name">Tanushree Das</span>
+      <span class="review-lang">আসানসোল, পশ্চিমবঙ্গ</span>
+      <span class="review-mode">via Video Call</span>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <section class="app-section reveal" id="astrologers">
+    <h2>Take the Stars With You</h2>
+    <p class="app-bn">ভবিষ্যৎ কথা অ্যাপটি এখনই ডাউনলোড করুন</p>
+    <p>Book sessions, chat with astrologers and get daily cosmic insights – all in the Bhavishya Katha app.</p>
+    <a href="https://play.google.com/store/apps/details?id=com.snsrk9.astrocristoptec" target="_blank" class="play-btn">
+      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00c9ff"/><stop offset="100%" stop-color="#0080bb"/></linearGradient>
+          <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff5252"/><stop offset="100%" stop-color="#bb0000"/></linearGradient>
+          <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffdd00"/><stop offset="100%" stop-color="#ff9900"/></linearGradient>
+          <linearGradient id="g4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00e676"/><stop offset="100%" stop-color="#007733"/></linearGradient>
+        </defs>
+        <polygon points="55,18 55,494 285,256" fill="url(#g1)"/>
+        <polygon points="55,18 285,256 430,138" fill="url(#g4)"/>
+        <polygon points="55,494 285,256 430,374" fill="url(#g2)"/>
+        <polygon points="285,256 430,138 430,374" fill="url(#g3)"/>
+      </svg>
+      <div class="play-text">
+        <small>Get it on</small>
+        <strong>Google Play</strong>
+      </div>
+    </a>
+  </section>
+
+  <!-- FAQ (SEO) -->
+  <section class="faq-section reveal" aria-label="Frequently Asked Questions" id="faq">
+    <h2 class="section-head">Frequently Asked Questions</h2>
+    <p class="section-sub">Everything you need to know before your first consultation</p>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>How much does it cost to talk to an astrologer?</summary>
+        <p>Consultations on Bhavishya Katha start at just <strong>₹15 per minute</strong> for chat, voice call and video call sessions. You only pay for the time you use — no hidden charges.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Can I consult an astrologer in Bengali?</summary>
+        <p>Yes! Bhavishya Katha has many Bengali-speaking astrologers who can guide you in your native language. You can filter astrologers by language in the app.</p>
+      </details>
+      <details class="faq-item">
+        <summary>What topics can I consult an astrologer about?</summary>
+        <p>Our astrologers provide guidance on love & relationships, marriage compatibility, career & business, health, finances, kundali (birth chart) reading, daily horoscope, gemstone recommendations and more.</p>
+      </details>
+      <details class="faq-item">
+        <summary>How do I get started on Bhavishya Katha?</summary>
+        <p>Download the Bhavishya Katha app from Google Play, create a free account, browse our verified astrologers and choose to connect via chat, voice call or video call — all starting at ₹15/min.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Are the astrologers on Bhavishya Katha verified?</summary>
+        <p>Yes. Every astrologer on our platform goes through a thorough verification process including expertise assessment and background checks before they can take consultations.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="contact">
+    <div class="footer-logo">✦ Bhavishya Katha ✦</div>
+    <div class="footer-bn">ভবিষ্যৎ কথা – Your Cosmic Story, Written in the Stars</div>
+    <p>© 2026 Bhavishya Katha &nbsp;·&nbsp; Kolkata, West Bengal</p>
+  </footer>
+
+</div>
+
+<script>
+/* Starfield */
+const cvs = document.getElementById('cvs');
+const ctx = cvs.getContext('2d');
+let W, H, stars = [];
+
+function init() {
+  W = cvs.width  = window.innerWidth;
+  H = cvs.height = window.innerHeight;
+  stars = Array.from({length: 260}, () => ({
+    x: Math.random() * W, y: Math.random() * H,
+    r: Math.random() * 1.1 + 0.15,
+    sp: Math.random() * 0.4 + 0.08,
+    ph: Math.random() * Math.PI * 2,
+  }));
+}
+
+function draw(t) {
+  ctx.clearRect(0, 0, W, H);
+  const g = ctx.createRadialGradient(W*.3,H*.2,0,W*.5,H*.5,Math.max(W,H)*.8);
+  g.addColorStop(0,'#1a0a2e'); g.addColorStop(1,'#07050f');
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  stars.forEach(s => {
+    const a = .25 + .75 * Math.abs(Math.sin(t * s.sp * .0008 + s.ph));
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(255,248,200,${a})`; ctx.fill();
+  });
+  requestAnimationFrame(draw);
+}
+
+window.addEventListener('resize', init);
+init(); requestAnimationFrame(draw);
+
+/* Hamburger */
+const tog = document.getElementById('navToggle');
+const nl  = document.getElementById('navLinks');
+tog.addEventListener('click', () => {
+  tog.classList.toggle('open');
+  nl.classList.toggle('open');
+  document.querySelector('.float-app').style.display = nl.classList.contains('open') ? 'none' : 'flex';
+});
+nl.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+  tog.classList.remove('open'); nl.classList.remove('open');
+  document.querySelector('.float-app').style.display = 'flex';
+}));
+
+/* Scroll reveal */
+const io = new IntersectionObserver(es => {
+  es.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold:.1 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

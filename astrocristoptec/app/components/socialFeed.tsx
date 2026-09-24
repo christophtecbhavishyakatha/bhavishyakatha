@@ -1,5 +1,5 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
@@ -83,6 +83,7 @@ const getImageUri = (base64?: string) =>
 
 export default function SocialFeed() {
   const router = useRouter();
+  const feedListRef = React.useRef<FlatList<SocialPost>>(null);
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -90,20 +91,16 @@ export default function SocialFeed() {
   const [hasMore, setHasMore] = useState(true);
   const [userId, setUserId] = useState("");
   const [posts, setPosts] = useState<SocialPost[]>([]);
-  const [commentDrafts, setCommentDrafts] = useState<
-    Record<number, string>
-  >({});
+  const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>(
+    {},
+  );
   const [expandedComments, setExpandedComments] = useState<
     Record<number, boolean>
   >({});
-  const [submittingPostId, setSubmittingPostId] = useState<number | null>(
-    null
-  );
+  const [submittingPostId, setSubmittingPostId] = useState<number | null>(null);
 
   // Fullscreen image
-  const [fullscreenImage, setFullscreenImage] = useState<string | null>(
-    null
-  );
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
 
   const loadFeed = useCallback(
     async (offset = 0, replace = false, resetExpandedComments = false) => {
@@ -121,7 +118,7 @@ export default function SocialFeed() {
         const [savedUserId, response] = await Promise.all([
           AsyncStorage.getItem("user_id"),
           fetch(
-            `${CLIENT_API_BASE_URL}/social/posts?limit=${PAGE_SIZE}&offset=${offset}`
+            `${CLIENT_API_BASE_URL}/social/posts?limit=${PAGE_SIZE}&offset=${offset}`,
           ),
         ]);
 
@@ -145,7 +142,7 @@ export default function SocialFeed() {
           const seen = new Set(current.map((post) => post.id));
 
           const nextPosts = (json.data || []).filter(
-            (post) => !seen.has(post.id)
+            (post) => !seen.has(post.id),
           );
 
           return [...current, ...nextPosts];
@@ -161,13 +158,13 @@ export default function SocialFeed() {
         setLoadingMore(false);
       }
     },
-    []
+    [],
   );
 
   useFocusEffect(
     useCallback(() => {
       void loadFeed(0, false, true);
-    }, [loadFeed])
+    }, [loadFeed]),
   );
 
   const handleLoadMore = () => {
@@ -193,6 +190,7 @@ export default function SocialFeed() {
 
     try {
       setSubmittingPostId(postId);
+      const postIndex = posts.findIndex((post) => post.id === postId);
 
       const response = await fetch(
         `${CLIENT_API_BASE_URL}/social/posts/${postId}/comments`,
@@ -205,7 +203,7 @@ export default function SocialFeed() {
             userId,
             comment,
           }),
-        }
+        },
       );
 
       const json = (await response.json()) as {
@@ -228,14 +226,24 @@ export default function SocialFeed() {
       }));
 
       await loadFeed(0, false, false);
+
+      if (postIndex >= 0) {
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            feedListRef.current?.scrollToIndex({
+              index: postIndex,
+              viewPosition: 0.15,
+              animated: false,
+            });
+          }, 80);
+        });
+      }
     } catch (error) {
       console.log("Submit social comment error:", error);
 
       Alert.alert(
         "Comment Failed",
-        error instanceof Error
-          ? error.message
-          : "Unable to post comment"
+        error instanceof Error ? error.message : "Unable to post comment",
       );
     } finally {
       setSubmittingPostId(null);
@@ -257,7 +265,7 @@ export default function SocialFeed() {
           <Text style={styles.replyName}>
             {comment.adminReplyName || "Bhavishya Katha"}
           </Text>
-{/* 
+          {/* 
           <Text style={styles.replyDate}>
             {formatDate(comment.adminReplyAt)}
           </Text>
@@ -373,16 +381,13 @@ export default function SocialFeed() {
             <TouchableOpacity
               style={[
                 styles.commentButton,
-                submittingPostId === post.id &&
-                  styles.commentButtonDisabled,
+                submittingPostId === post.id && styles.commentButtonDisabled,
               ]}
               onPress={() => void submitComment(post.id)}
               disabled={submittingPostId === post.id}
             >
               <Text style={styles.commentButtonText}>
-                {submittingPostId === post.id
-                  ? "Posting..."
-                  : "Comment"}
+                {submittingPostId === post.id ? "Posting..." : "Comment"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -455,38 +460,40 @@ export default function SocialFeed() {
       {/* ===================================================== */}
 
       <FlatList
+        ref={feedListRef}
         data={posts}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderPost}
         contentContainerStyle={styles.content}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.35}
+        onScrollToIndexFailed={({ index }) => {
+          setTimeout(() => {
+            feedListRef.current?.scrollToIndex({
+              index,
+              viewPosition: 0.15,
+              animated: false,
+            });
+          }, 120);
+        }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() =>
-              void loadFeed(0, true, true)
-            }
+            onRefresh={() => void loadFeed(0, true, true)}
           />
         }
         ListEmptyComponent={
           loading ? (
             <View style={styles.loaderWrap}>
-              <ActivityIndicator
-                size="large"
-                color="#2563EB"
-              />
+              <ActivityIndicator size="large" color="#2563EB" />
             </View>
           ) : (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyTitle}>
-                No posts available
-              </Text>
+              <Text style={styles.emptyTitle}>No posts available</Text>
 
               <Text style={styles.emptySubtitle}>
-                Admin posts will appear here once they are
-                published.
+                Admin posts will appear here once they are published.
               </Text>
             </View>
           )
@@ -494,10 +501,7 @@ export default function SocialFeed() {
         ListFooterComponent={
           loadingMore ? (
             <View style={styles.footerLoader}>
-              <ActivityIndicator
-                size="small"
-                color="#2563EB"
-              />
+              <ActivityIndicator size="small" color="#2563EB" />
             </View>
           ) : null
         }

@@ -258,8 +258,11 @@ export default function SocialPostsScreen() {
   const [replyDrafts, setReplyDrafts] = useState<Record<number, string>>({});
   const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
   const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null);
+  const [deletingReplyId, setDeletingReplyId] = useState<number | null>(null);
   const [expandedComments, setExpandedComments] = useState<Record<number, boolean>>({});
   const [dateFilter, setDateFilter] = useState("");
+  const [showLatestComments, setShowLatestComments] = useState(false);
+  const [latestCommentsLoading, setLatestCommentsLoading] = useState(false);
 
   const loadPosts = useCallback(async (isRefresh = false) => {
     try {
@@ -466,6 +469,40 @@ export default function SocialPostsScreen() {
     ]);
   };
 
+  const deleteReply = async (commentId: number) => {
+    try {
+      const adminId = await AsyncStorage.getItem("admin_id");
+      if (!adminId) { router.replace("/login"); return; }
+
+      setDeletingReplyId(commentId);
+      const response = await fetch(`${API_BASE}/social/comments/${commentId}/reply`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adminId }),
+      });
+
+      const json = (await response.json()) as { success: boolean; message?: string };
+      if (!response.ok || !json.success) {
+        throw new Error(json.message || "Unable to delete admin reply");
+      }
+
+      setReplyDrafts((current) => ({ ...current, [commentId]: "" }));
+      await loadPosts(true);
+    } catch (error) {
+      console.error("Delete social admin reply error:", error);
+      Alert.alert("Delete Failed", error instanceof Error ? error.message : "Unable to delete admin reply");
+    } finally {
+      setDeletingReplyId(null);
+    }
+  };
+
+  const confirmDeleteReply = (commentId: number) => {
+    Alert.alert("Delete Admin Reply", "Do you want to remove this reply from the database?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Delete", style: "destructive", onPress: () => void deleteReply(commentId) },
+    ]);
+  };
+
   const getDateKey = (value?: string | null) => {
     if (!value) return "";
     const parsed = new Date(value);
@@ -480,6 +517,24 @@ export default function SocialPostsScreen() {
   const filteredPosts = normalizedDateFilter
     ? posts.filter((post) => getDateKey(post.publishAt) === normalizedDateFilter)
     : posts;
+
+  const latestComments = posts
+    .flatMap((post) => (post.comments || []).map((comment) => ({ comment, post })))
+    .sort((a, b) => {
+      const first = new Date(a.comment.createdAt).getTime();
+      const second = new Date(b.comment.createdAt).getTime();
+      return (Number.isNaN(second) ? 0 : second) - (Number.isNaN(first) ? 0 : first);
+    });
+
+  const openLatestComments = async () => {
+    setShowLatestComments(true);
+    setLatestCommentsLoading(true);
+    try {
+      await loadPosts(true);
+    } finally {
+      setLatestCommentsLoading(false);
+    }
+  };
 
   // ── Status helpers ──────────────────────────────────────────────────────────
   const statusConfig = {
@@ -496,9 +551,32 @@ export default function SocialPostsScreen() {
           <Feather name="arrow-left" size={20} color="#1E293B" />
         </TouchableOpacity>
         <View style={styles.headerTextWrap}>
-          <Text style={styles.headerTitle}>Social Posts</Text>
-          <Text style={styles.headerSubtitle}>Publish now or schedule future posts</Text>
+          <Text style={styles.headerTitle}>
+            {showLatestComments ? "Latest Comments" : "Social Posts"}
+          </Text>
+          <Text style={styles.headerSubtitle}>
+            {showLatestComments ? "Review and reply to recent comments" : "Publish now or schedule future posts"}
+          </Text>
         </View>
+        <TouchableOpacity
+          style={styles.latestCommentsButton}
+          onPress={() => {
+            if (showLatestComments) {
+              setShowLatestComments(false);
+            } else {
+              void openLatestComments();
+            }
+          }}
+        >
+          <Feather
+            name={showLatestComments ? "arrow-left" : "message-square"}
+            size={16}
+            color="#7C3AED"
+          />
+          <Text style={styles.latestCommentsButtonText}>
+            {showLatestComments ? "Posts" : "Latest comments"}
+          </Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.refreshIconButton}
           onPress={() => void loadPosts(true)}
@@ -521,7 +599,112 @@ export default function SocialPostsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* ── Compose Card ── */}
-        <View style={styles.composeCard}>
+        {showLatestComments ? (
+          <View style={styles.latestCommentsSection}>
+            <View style={styles.latestCommentsIntro}>
+              <Text style={styles.latestCommentsTitle}>Latest comments</Text>
+              <Text style={styles.latestCommentsSubtitle}>
+                {latestComments.length} comment{latestComments.length === 1 ? "" : "s"}, newest first
+              </Text>
+            </View>
+            {latestCommentsLoading ? (
+              <View style={styles.latestCommentsLoading}>
+                <ActivityIndicator size="large" color="#7C3AED" />
+                <Text style={styles.latestCommentsLoadingText}>Loading latest comments...</Text>
+              </View>
+            ) : latestComments.length ? latestComments.map(({ comment, post }) => (
+              <View key={comment.id} style={styles.latestCommentCard}>
+                <View style={styles.latestCommentHeader}>
+                  <View style={styles.commentAvatarWrap}>
+                    <Text style={styles.commentAvatarText}>{comment.userName.charAt(0).toUpperCase()}</Text>
+                  </View>
+                  <View style={styles.commentTopText}>
+                    <Text style={styles.commentName}>{comment.userName}</Text>
+                    <Text style={styles.commentDate}>{formatDate(comment.createdAt)}</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.deleteCommentButton}
+                    onPress={() => confirmDeleteComment(comment.id)}
+                    disabled={deletingCommentId === comment.id}
+                  >
+                    {deletingCommentId === comment.id ? (
+                      <ActivityIndicator size="small" color="#DC2626" />
+                    ) : (
+                      <Feather name="trash-2" size={13} color="#DC2626" />
+                    )}
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.latestCommentText}>{comment.comment}</Text>
+                <View style={styles.originalPostPreview}>
+                  <Text style={styles.originalPostLabel}>Original post</Text>
+                  <Text style={styles.originalPostText} numberOfLines={2}>{post.content || "Image post"}</Text>
+                </View>
+                {comment.adminReply ? (
+                  <View style={styles.replyCard}>
+                    <View style={styles.replyHeaderRow}>
+                      <Text style={styles.replyName}>Admin reply</Text>
+                      <TouchableOpacity
+                        style={styles.deleteReplyButton}
+                        onPress={() => confirmDeleteReply(comment.id)}
+                        disabled={deletingReplyId === comment.id}
+                      >
+                        {deletingReplyId === comment.id ? (
+                          <ActivityIndicator size="small" color="#DC2626" />
+                        ) : (
+                          <Feather name="trash-2" size={13} color="#DC2626" />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styles.replyText}>{comment.adminReply}</Text>
+                  </View>
+                ) : null}
+                <TextInput
+                  value={replyDrafts[comment.id] || ""}
+                  onChangeText={(value) => setReplyDrafts((current) => ({ ...current, [comment.id]: value }))}
+                  placeholder={comment.adminReply ? "Edit reply..." : "Reply to this comment..."}
+                  placeholderTextColor="#94A3B8"
+                  style={styles.replyInput}
+                  multiline
+                  textAlignVertical="top"
+                />
+                <View style={styles.latestCommentActions}>
+                  <TouchableOpacity
+                    style={styles.originalPostButton}
+                    onPress={() => {
+                      setShowLatestComments(false);
+                      setExpandedComments((current) => ({ ...current, [post.id]: true }));
+                    }}
+                  >
+                    <Feather name="external-link" size={13} color="#6D28D9" />
+                    <Text style={styles.originalPostButtonText}>View original post</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.replyButton, replyingCommentId === comment.id && styles.buttonDisabled]}
+                    onPress={() => void submitReply(comment.id)}
+                    disabled={replyingCommentId === comment.id}
+                  >
+                    {replyingCommentId === comment.id ? (
+                      <ActivityIndicator size="small" color="#FFFFFF" />
+                    ) : (
+                      <>
+                        <Feather name="send" size={13} color="#FFFFFF" />
+                        <Text style={styles.replyButtonText}>Reply</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )) : (
+              <View style={styles.emptyState}>
+                <Feather name="message-circle" size={28} color="#C4B5FD" />
+                <Text style={styles.emptyTitle}>No comments yet</Text>
+                <Text style={styles.emptySubtitle}>New comments will appear here.</Text>
+              </View>
+            )}
+          </View>
+        ) : null}
+
+        <View style={[styles.composeCard, showLatestComments && styles.hidden]}>
           <View style={styles.composeCardHeader}>
             <View style={styles.composeTitleRow}>
               <View style={styles.composeDot} />
@@ -600,7 +783,7 @@ export default function SocialPostsScreen() {
         </View>
 
         {/* ── Feed ── */}
-        <View style={styles.feedSection}>
+        <View style={[styles.feedSection, showLatestComments && styles.hidden]}>
           <View style={styles.filterHeader}>
             <Text style={styles.cardTitle}>All Posts</Text>
             <DateFilterField value={dateFilter} onChange={setDateFilter} />
@@ -709,6 +892,17 @@ export default function SocialPostsScreen() {
                               · {formatDate(comment.adminReplyAt)}
                             </Text>
                           </View>
+                          <TouchableOpacity
+                            style={styles.deleteReplyButton}
+                            onPress={() => confirmDeleteReply(comment.id)}
+                            disabled={deletingReplyId === comment.id}
+                          >
+                            {deletingReplyId === comment.id ? (
+                              <ActivityIndicator size="small" color="#DC2626" />
+                            ) : (
+                              <Feather name="trash-2" size={13} color="#DC2626" />
+                            )}
+                          </TouchableOpacity>
                           <Text style={styles.replyText}>{comment.adminReply}</Text>
                         </View>
                       ) : null}
@@ -832,6 +1026,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3E8FF",
     alignItems: "center",
     justifyContent: "center",
+  },
+  latestCommentsButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: "#F3E8FF",
+  },
+  latestCommentsButtonText: {
+    color: "#6D28D9",
+    fontSize: 11,
+    fontWeight: "800",
   },
   headerTextWrap: {
     flex: 1,
@@ -1048,6 +1256,101 @@ const styles = StyleSheet.create({
   },
 
   // Feed section
+  hidden: {
+    display: "none",
+  },
+  latestCommentsSection: {
+    gap: 12,
+  },
+  latestCommentsIntro: {
+    backgroundColor: "#F5F3FF",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#DDD6FE",
+  },
+  latestCommentsTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#4C1D95",
+  },
+  latestCommentsSubtitle: {
+    marginTop: 4,
+    color: "#7C3AED",
+    fontSize: 13,
+  },
+  latestCommentsLoading: {
+    minHeight: 180,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+  },
+  latestCommentsLoadingText: {
+    color: "#6D28D9",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  latestCommentCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  latestCommentHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  latestCommentText: {
+    marginTop: 12,
+    color: "#1E293B",
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  originalPostPreview: {
+    marginTop: 12,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "#F8FAFC",
+    borderLeftWidth: 3,
+    borderLeftColor: "#A78BFA",
+  },
+  originalPostLabel: {
+    color: "#6D28D9",
+    fontSize: 11,
+    fontWeight: "800",
+    textTransform: "uppercase",
+  },
+  originalPostText: {
+    marginTop: 3,
+    color: "#475569",
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  latestCommentActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+    marginTop: 8,
+  },
+  originalPostButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 9,
+    borderRadius: 10,
+    backgroundColor: "#F5F3FF",
+  },
+  originalPostButtonText: {
+    color: "#6D28D9",
+    fontSize: 12,
+    fontWeight: "700",
+  },
   feedSection: {
     gap: 12,
   },
@@ -1334,6 +1637,15 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "700",
     fontSize: 13,
+  },
+  deleteReplyButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 9,
+    backgroundColor: "#FEE2E2",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: "auto",
   },
 
   // Misc

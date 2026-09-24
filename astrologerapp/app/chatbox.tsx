@@ -23,6 +23,7 @@ import {
   View
 } from "react-native";
 import ImageZoom from "react-native-image-pan-zoom";
+import KundaliFloatingButton from "../components/KundaliFloatingButton";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -237,6 +238,7 @@ const {
   birthLocation,
   channelName: initialChannelName,
   channel_name: initialChannelNameSnakeCase,
+  latitude,longitude
 } = useLocalSearchParams<{
   fullName?: string;
   id?: string;
@@ -247,6 +249,8 @@ const {
   birthLocation?: string;
   channelName?: string;
   channel_name?: string;
+  latitude?: string;
+  longitude?: string;
 }>();
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -1099,6 +1103,7 @@ const resolvedBirthLocation = String(birthLocation ?? "");
     )}
   </View>
 </View>
+
         <Modal
           visible={!!selectedImage}
           transparent
@@ -1218,7 +1223,15 @@ const resolvedBirthLocation = String(birthLocation ?? "");
           </View>
         </View>
       </KeyboardAvoidingView>
-
+<KundaliFloatingButton
+  userId={resolvedCustomerId}
+  dateOfBirth={resolvedDateOfBirth}
+  timeOfBirth={resolvedTimeOfBirth}
+  latitude={Number(latitude)}
+  longitude={Number(longitude)}
+  birthLocation={resolvedBirthLocation}
+  fullName={resolvedFullName}
+/>
       <Modal
         visible={quickMessageModal}
         transparent

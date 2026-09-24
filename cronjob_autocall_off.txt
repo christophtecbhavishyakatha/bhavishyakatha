@@ -1,0 +1,79 @@
+import cron from "node-cron";
+import  db  from "../config/db.js";
+import { forceRemoveUser } from "../services/agoraForceRemove.js";
+
+export const startCallExpiryCron = () => {
+  cron.schedule("*/5 * * * * *", async () => {
+    const connection = await db.getConnection();
+const sleep = (ms) => new Promise(res => setTimeout(res, ms));
+
+    try {
+      /* 🔍 Find expired ongoing calls */
+      const [calls] = await connection.execute(
+        `SELECT 
+           ct.call_id,
+           ct.customer_id,
+           ct.astrologer_id,
+           ct.call_type,
+           ct.user_uid,
+           ct.astrologer_uid,
+           cr.channel_name
+         FROM call_timers ct
+         JOIN call_requests cr ON cr.id = ct.call_id
+         WHERE ct.status = 'ongoing'
+           AND ct.expires_at <= NOW()`
+      );
+
+      if (calls.length === 0) return;
+
+      for (const call of calls) {
+        try {
+          /* 🚨 Force remove BOTH users */
+          await forceRemoveUser({
+            channelName: call.channel_name,
+            uid: call.user_uid,
+          });
+await sleep(1200); // 🔑 REQUIRED
+
+          await forceRemoveUser({
+            channelName: call.channel_name,
+            uid: call.astrologer_uid,
+          });
+
+          await connection.beginTransaction();
+
+          /* 🔄 Update call_requests */
+          await connection.execute(
+            `UPDATE call_requests
+             SET status = 'completed',
+                 ended_at = NOW()
+             WHERE id = ?`,
+            [call.call_id]
+          );
+
+          /* 🔄 Update call_timers */
+          await connection.execute(
+            `UPDATE call_timers
+             SET status = 'forced_end',
+                 expires_at = NOW()
+             WHERE call_id = ?`,
+            [call.call_id]
+          );
+
+          await connection.commit();
+
+          console.log(`⛔ Call ${call.call_id} force-ended`);
+        } catch (innerErr) {
+          await connection.rollback();
+          console.error("Force end failed:", innerErr);
+        }
+      }
+    } catch (err) {
+      console.error("Cron error:", err);
+    } finally {
+      connection.release();
+    }
+  });
+
+  console.log("⏱ Call expiry cron started (every 5 sec)");
+};

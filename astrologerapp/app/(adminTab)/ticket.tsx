@@ -1,29 +1,71 @@
-import React, { useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  ActivityIndicator,
-  Modal,
-  TextInput,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  Image,
-  RefreshControl,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from "expo-router";
-import ImageViewing from "react-native-image-viewing";
 import DateTimePicker, {
-  DateTimePickerEvent,
+    DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
+import {
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    Image,
+    KeyboardAvoidingView,
+    Linking,
+    Modal,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import ImageViewing from "react-native-image-viewing";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const API = "https://bhavishyakatha.in/express/api/admin";
 const INITIAL_LIMIT = 200;
+
+const formatTimestamp = (value?: string | null) => {
+  if (!value) return "--";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+
+  return date.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
+const openPhoneNumber = async (value?: string | null) => {
+  const phoneNumber = String(value ?? "").replace(/[\s()-]/g, "");
+
+  if (!phoneNumber) {
+    return;
+  }
+
+  const phoneUrl = `tel:${phoneNumber}`;
+
+  try {
+    if (await Linking.canOpenURL(phoneUrl)) {
+      await Linking.openURL(phoneUrl);
+    } else {
+      Alert.alert(
+        "Unable to call",
+        "This device cannot open the phone dialer.",
+      );
+    }
+  } catch (error) {
+    console.error("Open phone number error:", error);
+    Alert.alert("Unable to call", "Could not open the phone dialer.");
+  }
+};
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -67,7 +109,7 @@ function DateRangeModal({
 }) {
   const today = new Date();
   const [fromDate, setFromDate] = useState<Date>(
-    new Date(today.getFullYear(), today.getMonth(), 1)
+    new Date(today.getFullYear(), today.getMonth(), 1),
   );
   const [toDate, setToDate] = useState<Date>(today);
 
@@ -137,11 +179,7 @@ function DateRangeModal({
                   <Text style={drStyles.androidDateText}>
                     {formatDate(fromDate)}
                   </Text>
-                  <Ionicons
-                    name="chevron-down"
-                    size={14}
-                    color={C.textMuted}
-                  />
+                  <Ionicons name="chevron-down" size={14} color={C.textMuted} />
                 </TouchableOpacity>
                 {pickerMode === "from" && (
                   <DateTimePicker
@@ -185,11 +223,7 @@ function DateRangeModal({
                   <Text style={drStyles.androidDateText}>
                     {formatDate(toDate)}
                   </Text>
-                  <Ionicons
-                    name="chevron-down"
-                    size={14}
-                    color={C.textMuted}
-                  />
+                  <Ionicons name="chevron-down" size={14} color={C.textMuted} />
                 </TouchableOpacity>
                 {pickerMode === "to" && (
                   <DateTimePicker
@@ -389,7 +423,7 @@ export default function TicketsPage() {
   useFocusEffect(
     useCallback(() => {
       loadTickets();
-    }, [])
+    }, []),
   );
 
   const loadTickets = async (from?: string, to?: string) => {
@@ -399,7 +433,7 @@ export default function TicketsPage() {
       setLoadingMessage(
         isDateRange
           ? "Fetching tickets for date range…"
-          : "Loading latest 200 tickets…"
+          : "Loading latest 200 tickets…",
       );
 
       let url = `${API}/tickets?limit=${INITIAL_LIMIT}`;
@@ -422,7 +456,10 @@ export default function TicketsPage() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadTickets(dateRangeActive ? dateFrom : undefined, dateRangeActive ? dateTo : undefined);
+    await loadTickets(
+      dateRangeActive ? dateFrom : undefined,
+      dateRangeActive ? dateTo : undefined,
+    );
     setRefreshing(false);
   };
 
@@ -522,12 +559,12 @@ export default function TicketsPage() {
         prev.map((t) =>
           t.id === selectedTicket.id
             ? { ...t, status: newStatus, response: reply || t.response }
-            : t
-        )
+            : t,
+        ),
       );
       loadTickets(
         dateRangeActive ? dateFrom : undefined,
-        dateRangeActive ? dateTo : undefined
+        dateRangeActive ? dateTo : undefined,
       );
       setReply("");
     } catch (err) {
@@ -601,7 +638,12 @@ export default function TicketsPage() {
         >
           <Ionicons name="options-outline" size={20} color={C.accent} />
         </TouchableOpacity>
-        <TouchableOpacity accessibilityRole="button" accessibilityLabel="Refresh tickets" style={styles.refreshButton} onPress={onRefresh}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Refresh tickets"
+          style={styles.refreshButton}
+          onPress={onRefresh}
+        >
           <Ionicons name="refresh-outline" size={20} color={C.accent} />
         </TouchableOpacity>
       </View>
@@ -680,7 +722,13 @@ export default function TicketsPage() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.accent} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={C.accent}
+          />
+        }
         renderItem={({ item }) => {
           const cfg = getStatusCfg(item.status);
           return (
@@ -699,9 +747,7 @@ export default function TicketsPage() {
                   <View
                     style={[styles.statusPill, { backgroundColor: cfg.bg }]}
                   >
-                    <Text
-                      style={[styles.statusPillText, { color: cfg.color }]}
-                    >
+                    <Text style={[styles.statusPillText, { color: cfg.color }]}>
                       {cfg.label}
                     </Text>
                   </View>
@@ -723,8 +769,24 @@ export default function TicketsPage() {
                     <Text style={styles.userName}>
                       {item.full_name || "Unknown"}
                     </Text>
-                    <Text style={styles.userContact}>
-                      {item.contact_number || "No Contact"}
+                    {item.contact_number ? (
+                      <TouchableOpacity
+                        accessibilityRole="button"
+                        accessibilityLabel={`Call ${item.contact_number}`}
+                        onPress={(event) => {
+                          event.stopPropagation();
+                          void openPhoneNumber(item.contact_number);
+                        }}
+                      >
+                        <Text style={styles.userContactLink}>
+                          {item.contact_number}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <Text style={styles.userContact}>No Contact</Text>
+                    )}
+                    <Text style={styles.timestampText}>
+                      Created: {formatTimestamp(item.created_at)}
                     </Text>
                   </View>
                   <Ionicons
@@ -857,122 +919,159 @@ export default function TicketsPage() {
               <View style={{ width: 40 }} />
             </View>
 
-            {/* Title + Status */}
-            <View style={styles.detailTop}>
-              <Text style={styles.detailTitle}>
-                {selectedTicket?.issue_type}
-              </Text>
-              <TouchableOpacity
-                style={[
-                  styles.detailStatusBadge,
-                  {
-                    backgroundColor: getStatusCfg(selectedTicket?.status).bg,
-                  },
-                ]}
-                onPress={() => setStatusChangeVisible(true)}
-              >
-                <View
+            <ScrollView
+              style={styles.detailScroll}
+              contentContainerStyle={styles.detailScrollContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              {/* Title + Status */}
+              <View style={styles.detailTop}>
+                <Text style={styles.detailTitle}>
+                  {selectedTicket?.issue_type}
+                </Text>
+                <TouchableOpacity
                   style={[
-                    styles.statusDot,
+                    styles.detailStatusBadge,
                     {
-                      backgroundColor: getStatusCfg(selectedTicket?.status)
-                        .color,
+                      backgroundColor: getStatusCfg(selectedTicket?.status).bg,
                     },
                   ]}
-                />
-                <Text
-                  style={[
-                    styles.detailStatusText,
-                    { color: getStatusCfg(selectedTicket?.status).color },
-                  ]}
+                  onPress={() => setStatusChangeVisible(true)}
                 >
-                  {getStatusCfg(selectedTicket?.status).label}
-                </Text>
-                <Ionicons
-                  name="chevron-down"
-                  size={14}
-                  color={getStatusCfg(selectedTicket?.status).color}
-                />
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styles.detailBody}>{selectedTicket?.details}</Text>
-
-            {/* Screenshot */}
-            {selectedTicket?.screenshot && (
-              <>
-                <TouchableOpacity
-                  style={styles.imageWrapper}
-                  onPress={() => setImageVisible(true)}
-                  activeOpacity={0.9}
-                >
-                  <Image
-                    source={{
-                      uri: formatBase64Image(selectedTicket.screenshot),
-                    }}
-                    style={styles.screenshot}
-                    resizeMode="cover"
+                  <View
+                    style={[
+                      styles.statusDot,
+                      {
+                        backgroundColor: getStatusCfg(selectedTicket?.status)
+                          .color,
+                      },
+                    ]}
                   />
-                  <View style={styles.zoomHint}>
-                    <Ionicons
-                      name="expand-outline"
-                      size={14}
-                      color={C.white}
-                    />
-                    <Text style={styles.zoomText}>Tap to zoom</Text>
-                  </View>
-                </TouchableOpacity>
-                <ImageViewing
-                  images={[
-                    { uri: formatBase64Image(selectedTicket.screenshot) },
-                  ]}
-                  imageIndex={0}
-                  visible={imageVisible}
-                  onRequestClose={() => setImageVisible(false)}
-                />
-              </>
-            )}
-
-            {/* Conversation */}
-            <View style={styles.conversationHeader}>
-              <Ionicons
-                name="chatbubbles-outline"
-                size={16}
-                color={C.accent}
-              />
-              <Text style={styles.conversationTitle}>Conversation</Text>
-            </View>
-
-            {commentLoading ? (
-              <ActivityIndicator color={C.accent} style={{ marginTop: 16 }} />
-            ) : (
-              <FlatList
-                data={comments}
-                keyExtractor={(i) => String(i.id)}
-                contentContainerStyle={{ paddingVertical: 8 }}
-                renderItem={({ item }) => {
-                  const isAdmin = item.user_type === "admin";
-                  return (
-                    <View
-                      style={[
-                        styles.bubble,
-                        isAdmin ? styles.adminBubble : styles.userBubble,
-                      ]}
-                    >
-                      <Text style={styles.bubbleSender}>
-                        {isAdmin ? "Admin" : "User"}
-                      </Text>
-                      <Text style={styles.bubbleText}>{item.comment}</Text>
-                    </View>
-                  );
-                }}
-                ListEmptyComponent={
-                  <Text style={styles.noComments}>
-                    No messages yet. Start the conversation.
+                  <Text
+                    style={[
+                      styles.detailStatusText,
+                      { color: getStatusCfg(selectedTicket?.status).color },
+                    ]}
+                  >
+                    {getStatusCfg(selectedTicket?.status).label}
                   </Text>
-                }
-              />
-            )}
+                  <Ionicons
+                    name="chevron-down"
+                    size={14}
+                    color={getStatusCfg(selectedTicket?.status).color}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.detailBody}>{selectedTicket?.details}</Text>
+
+              <View style={styles.detailTimestamps}>
+                <Text style={styles.detailTimestampText}>
+                  Created: {formatTimestamp(selectedTicket?.created_at)}
+                </Text>
+                {selectedTicket?.updated_at ? (
+                  <Text style={styles.detailTimestampText}>
+                    Updated: {formatTimestamp(selectedTicket.updated_at)}
+                  </Text>
+                ) : null}
+                {selectedTicket?.resolved_at ? (
+                  <Text style={styles.detailTimestampText}>
+                    Resolved: {formatTimestamp(selectedTicket.resolved_at)}
+                  </Text>
+                ) : null}
+              </View>
+
+              {/* Screenshot */}
+              {selectedTicket?.screenshot && (
+                <>
+                  <TouchableOpacity
+                    style={styles.imageWrapper}
+                    onPress={() => setImageVisible(true)}
+                    activeOpacity={0.9}
+                  >
+                    <Image
+                      source={{
+                        uri: formatBase64Image(selectedTicket.screenshot),
+                      }}
+                      style={styles.screenshot}
+                      resizeMode="cover"
+                    />
+                    <View style={styles.zoomHint}>
+                      <Ionicons
+                        name="expand-outline"
+                        size={14}
+                        color={C.white}
+                      />
+                      <Text style={styles.zoomText}>Tap to zoom</Text>
+                    </View>
+                  </TouchableOpacity>
+                  <ImageViewing
+                    images={[
+                      { uri: formatBase64Image(selectedTicket.screenshot) },
+                    ]}
+                    imageIndex={0}
+                    visible={imageVisible}
+                    onRequestClose={() => setImageVisible(false)}
+                    HeaderComponent={() => (
+                      <View style={styles.imageViewerHeader}>
+                        <TouchableOpacity
+                          accessibilityRole="button"
+                          accessibilityLabel="Close image"
+                          style={styles.imageViewerCloseButton}
+                          onPress={() => setImageVisible(false)}
+                        >
+                          <Ionicons name="close" size={24} color={C.white} />
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  />
+                </>
+              )}
+
+              {/* Conversation */}
+              <View style={styles.conversationHeader}>
+                <Ionicons
+                  name="chatbubbles-outline"
+                  size={16}
+                  color={C.accent}
+                />
+                <Text style={styles.conversationTitle}>Conversation</Text>
+              </View>
+
+              {commentLoading ? (
+                <ActivityIndicator color={C.accent} style={{ marginTop: 16 }} />
+              ) : (
+                <View style={styles.commentsContent}>
+                  {comments.length > 0 ? (
+                    comments.map((item) => {
+                      const isAdmin = item.user_type === "admin";
+                      return (
+                        <View
+                          key={String(item.id)}
+                          style={[
+                            styles.bubble,
+                            isAdmin ? styles.adminBubble : styles.userBubble,
+                          ]}
+                        >
+                          <Text style={styles.bubbleSender}>
+                            {isAdmin ? "Admin" : "User"}
+                          </Text>
+                          <Text style={styles.bubbleText}>{item.comment}</Text>
+                          <Text style={styles.bubbleTimestamp}>
+                            {formatTimestamp(item.created_at)}
+                          </Text>
+                        </View>
+                      );
+                    })
+                  ) : (
+                    <Text style={styles.noComments}>
+                      No messages yet. Start the conversation.
+                    </Text>
+                  )}
+                </View>
+              )}
+            </ScrollView>
 
             {/* Reply Box */}
             <View style={styles.replyBox}>
@@ -1266,6 +1365,17 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   userContact: { color: C.textSecondary, fontSize: 12, marginTop: 2 },
+  userContactLink: {
+    color: C.accent,
+    fontSize: 12,
+    marginTop: 2,
+    textDecorationLine: "underline",
+  },
+  timestampText: {
+    color: C.textMuted,
+    fontSize: 10,
+    marginTop: 5,
+  },
 
   /* Empty */
   emptyState: { alignItems: "center", paddingTop: 80, gap: 8 },
@@ -1337,6 +1447,8 @@ const styles = StyleSheet.create({
 
   /* Detail Screen */
   detailContainer: { flex: 1, backgroundColor: C.bg },
+  detailScroll: { flex: 1 },
+  detailScrollContent: { paddingBottom: 12 },
   detailHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -1399,6 +1511,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: C.border,
   },
+  detailTimestamps: {
+    marginHorizontal: 18,
+    marginBottom: 16,
+    gap: 4,
+  },
+  detailTimestampText: {
+    color: C.textMuted,
+    fontSize: 11,
+  },
 
   /* Image */
   imageWrapper: {
@@ -1423,6 +1544,21 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   zoomText: { color: C.white, fontSize: 11, fontWeight: "600" },
+  imageViewerHeader: {
+    position: "absolute",
+    top: 18,
+    right: 16,
+    zIndex: 2,
+  },
+  imageViewerCloseButton: {
+    width: 42,
+    height: 42,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 21,
+    backgroundColor: "rgba(0, 0, 0, 0.65)",
+    top:50
+  },
 
   /* Conversation */
   conversationHeader: {
@@ -1437,6 +1573,9 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: C.textPrimary,
     letterSpacing: 0.2,
+  },
+  commentsContent: {
+    paddingVertical: 8,
   },
   bubble: {
     paddingHorizontal: 14,
@@ -1468,6 +1607,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
   bubbleText: { fontSize: 14, color: C.textPrimary, lineHeight: 20 },
+  bubbleTimestamp: {
+    alignSelf: "flex-end",
+    marginTop: 6,
+    color: C.textMuted,
+    fontSize: 10,
+  },
   noComments: {
     textAlign: "center",
     color: C.textMuted,

@@ -25,6 +25,8 @@ import createAgoraRtcEngine, {
   RtcSurfaceView,
   VideoSourceType,
 } from "react-native-agora";
+import KundaliFloatingButton from "../components/KundaliFloatingButton";
+
 import {
   clearActiveCallSession,
   getCallEngine,
@@ -106,6 +108,8 @@ export default function VideoCallScreen() {
   dateOfBirth,
   timeOfBirth,
   birthLocation,
+  longitude,
+  latitude,
 } = useLocalSearchParams<{
   fullName?: string;
   id?: string;
@@ -114,6 +118,8 @@ export default function VideoCallScreen() {
   dateOfBirth?: string;
   timeOfBirth?: string;
   birthLocation?: string;
+  longitude?: string;
+  latitude?: string;
 }>();
   useKeepAwake();
 
@@ -806,7 +812,17 @@ const [showCustomerInfo, setShowCustomerInfo] = useState(false);
           <Text style={styles.overlayRemaining}>Left {timeLeftLabel}</Text>
         )}
       </View>
-
+      {session?.status === "connected" && (
+<KundaliFloatingButton
+  userId={callUserId}
+  dateOfBirth={callDateOfBirth}
+  timeOfBirth={callTimeOfBirth}
+  birthLocation={callBirthLocation}
+  longitude={Number(longitude)}
+  latitude={Number(latitude)}
+  fullName={callFullName}
+/>  
+)}
       <View style={styles.controls}>
         <ControlBtn text={isMuted ? "Unmute" : "Mute"} onPress={toggleMute} />
         <ControlBtn
@@ -850,6 +866,7 @@ const styles = StyleSheet.create({
     top: 28,
     left: 20,
     right: 150,
+    backgroundColor: "rgba(8, 2, 53, 0.96)",
   },
   overlayName: {
     color: "#fff",
@@ -967,14 +984,14 @@ const styles = StyleSheet.create({
   },
    birthDetails: {
   fontSize: 13,
-  color: "#021934",
+  color: "#f8f9fb",
   marginTop: 2,
   textAlign: "center",
 },
 
 birthLocation: {
   fontSize: 13,
-  color: "#07122c",
+  color: "#ffffff",
   marginTop: 4,
   marginBottom: 8,
   textAlign: "center",

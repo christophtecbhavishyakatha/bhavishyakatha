@@ -1,17 +1,16 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  Platform,
-  RefreshControl,
-  
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import React, { useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 const API = "https://bhavishyakatha.in/express/api";
 
@@ -19,7 +18,9 @@ const RechargeLogsScreen = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<"today" | "7days" | "custom">("today");
+  const [activeFilter, setActiveFilter] = useState<
+    "today" | "7days" | "custom"
+  >("today");
 
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -64,7 +65,11 @@ const RechargeLogsScreen = () => {
 
   // 🔹 Helpers
   const formatDate = (date: Date) => {
-    return date.toISOString().split("T")[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
   };
 
   // 🔹 Filters
@@ -105,9 +110,18 @@ const RechargeLogsScreen = () => {
   };
 
   // 🔹 Summary Calculations
-  const totalRecharge = data.reduce((sum, item) => sum + (parseFloat(item.recharge_amount) || 0), 0);
-  const totalGST = data.reduce((sum, item) => sum + (parseFloat(item.gst_amount) || 0), 0);
-  const totalPaid = data.reduce((sum, item) => sum + (parseFloat(item.payable_amount) || 0), 0);
+  const totalRecharge = data.reduce(
+    (sum, item) => sum + (parseFloat(item.recharge_amount) || 0),
+    0,
+  );
+  const totalGST = data.reduce(
+    (sum, item) => sum + (parseFloat(item.gst_amount) || 0),
+    0,
+  );
+  const totalPaid = data.reduce(
+    (sum, item) => sum + (parseFloat(item.payable_amount) || 0),
+    0,
+  );
 
   const getStatusColor = (status: string) => {
     if (!status) return "#888";
@@ -118,14 +132,30 @@ const RechargeLogsScreen = () => {
   };
 
   return (
-    <SafeAreaView edges={['top','bottom']} style={styles.safeArea}>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#6C63FF" />}>
-
+    <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#6C63FF"
+          />
+        }
+      >
         {/* ── HEADER ── */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Recharge Logs</Text>
-          <Text style={styles.headerSub}>{data.length} transaction{data.length !== 1 ? "s" : ""}</Text>
-          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Refresh recharge logs" onPress={onRefresh} style={styles.refreshButton}>
+          <Text style={styles.headerSub}>
+            {data.length} transaction{data.length !== 1 ? "s" : ""}
+          </Text>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Refresh recharge logs"
+            onPress={onRefresh}
+            style={styles.refreshButton}
+          >
             <Ionicons name="refresh-outline" size={22} color="#6C63FF" />
           </TouchableOpacity>
         </View>
@@ -136,14 +166,28 @@ const RechargeLogsScreen = () => {
             style={[styles.pill, activeFilter === "today" && styles.pillActive]}
             onPress={filterToday}
           >
-            <Text style={[styles.pillText, activeFilter === "today" && styles.pillTextActive]}>Today</Text>
+            <Text
+              style={[
+                styles.pillText,
+                activeFilter === "today" && styles.pillTextActive,
+              ]}
+            >
+              Today
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.pill, activeFilter === "7days" && styles.pillActive]}
             onPress={filterLast7Days}
           >
-            <Text style={[styles.pillText, activeFilter === "7days" && styles.pillTextActive]}>Last 7 Days</Text>
+            <Text
+              style={[
+                styles.pillText,
+                activeFilter === "7days" && styles.pillTextActive,
+              ]}
+            >
+              Last 7 Days
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -172,7 +216,10 @@ const RechargeLogsScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.applyBtn, (!startDate || !endDate) && styles.applyBtnDisabled]}
+            style={[
+              styles.applyBtn,
+              (!startDate || !endDate) && styles.applyBtnDisabled,
+            ]}
             onPress={applyCustomFilter}
             disabled={!startDate || !endDate}
           >
@@ -219,17 +266,23 @@ const RechargeLogsScreen = () => {
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
                 <Text style={styles.summaryLabel}>Total Recharge</Text>
-                <Text style={styles.summaryAmount}>₹{totalRecharge.toFixed(2)}</Text>
+                <Text style={styles.summaryAmount}>
+                  ₹{totalRecharge.toFixed(2)}
+                </Text>
               </View>
               <View style={styles.summarySep} />
               <View style={styles.summaryItem}>
                 <Text style={styles.summaryLabel}>Total GST</Text>
-                <Text style={[styles.summaryAmount, { color: "#f59e0b" }]}>₹{totalGST.toFixed(2)}</Text>
+                <Text style={[styles.summaryAmount, { color: "#f59e0b" }]}>
+                  ₹{totalGST.toFixed(2)}
+                </Text>
               </View>
               <View style={styles.summarySep} />
               <View style={styles.summaryItem}>
                 <Text style={styles.summaryLabel}>Total Paid</Text>
-                <Text style={[styles.summaryAmount, { color: "#22c55e" }]}>₹{totalPaid.toFixed(2)}</Text>
+                <Text style={[styles.summaryAmount, { color: "#22c55e" }]}>
+                  ₹{totalPaid.toFixed(2)}
+                </Text>
               </View>
             </View>
           </View>
@@ -240,24 +293,44 @@ const RechargeLogsScreen = () => {
           <View style={styles.emptyBox}>
             <Text style={styles.emptyIcon}>📭</Text>
             <Text style={styles.emptyText}>No transactions found</Text>
-            <Text style={styles.emptySubText}>Try adjusting the date range</Text>
+            <Text style={styles.emptySubText}>
+              Try adjusting the date range
+            </Text>
           </View>
         )}
 
         {/* ── DATA CARDS ── */}
-        {!loading && Array.isArray(data) &&
+        {!loading &&
+          Array.isArray(data) &&
           data.map((item) => (
             <View key={item.id} style={styles.card}>
-
               {/* Card Header */}
               <View style={styles.cardHeader}>
                 <View>
                   <Text style={styles.cardName}>{item.user_name}</Text>
                   <Text style={styles.cardPhone}>📞 {item.phone_number}</Text>
                 </View>
-                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.payment_status) + "20" }]}>
-                  <View style={[styles.statusDot, { backgroundColor: getStatusColor(item.payment_status) }]} />
-                  <Text style={[styles.statusText, { color: getStatusColor(item.payment_status) }]}>
+                <View
+                  style={[
+                    styles.statusBadge,
+                    {
+                      backgroundColor:
+                        getStatusColor(item.payment_status) + "20",
+                    },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.statusDot,
+                      { backgroundColor: getStatusColor(item.payment_status) },
+                    ]}
+                  />
+                  <Text
+                    style={[
+                      styles.statusText,
+                      { color: getStatusColor(item.payment_status) },
+                    ]}
+                  >
                     {item.payment_status}
                   </Text>
                 </View>
@@ -269,15 +342,26 @@ const RechargeLogsScreen = () => {
               <View style={styles.amountRow}>
                 <View style={styles.amountItem}>
                   <Text style={styles.amountLabel}>Recharge</Text>
-                  <Text style={styles.amountValue}>₹{item.recharge_amount}</Text>
+                  <Text style={styles.amountValue}>
+                    ₹{item.recharge_amount}
+                  </Text>
                 </View>
                 <View style={styles.amountItem}>
                   <Text style={styles.amountLabel}>GST</Text>
-                  <Text style={[styles.amountValue, { color: "#f59e0b" }]}>₹{item.gst_amount}</Text>
+                  <Text style={[styles.amountValue, { color: "#f59e0b" }]}>
+                    ₹{item.gst_amount}
+                  </Text>
                 </View>
                 <View style={styles.amountItem}>
                   <Text style={styles.amountLabel}>Total Paid</Text>
-                  <Text style={[styles.amountValue, { color: "#22c55e", fontWeight: "700" }]}>₹{item.payable_amount}</Text>
+                  <Text
+                    style={[
+                      styles.amountValue,
+                      { color: "#22c55e", fontWeight: "700" },
+                    ]}
+                  >
+                    ₹{item.payable_amount}
+                  </Text>
                 </View>
               </View>
 
@@ -285,16 +369,29 @@ const RechargeLogsScreen = () => {
 
               {/* Balance Row */}
               <View style={styles.balanceRow}>
-                <Text style={styles.balanceText}>Prev: ₹{item.previous_balance}</Text>
+                <Text style={styles.balanceText}>
+                  Prev: ₹{item.previous_balance}
+                </Text>
                 <Text style={styles.balanceArrow}>→</Text>
-                <Text style={[styles.balanceText, { color: "#6366f1", fontWeight: "600" }]}>New: ₹{item.after_balance}</Text>
+                <Text
+                  style={[
+                    styles.balanceText,
+                    { color: "#6366f1", fontWeight: "600" },
+                  ]}
+                >
+                  New: ₹{item.after_balance}
+                </Text>
               </View>
 
               {/* Coupon Row */}
               {(item.coupon_code || item.coupon_bonus_amount > 0) && (
                 <View style={styles.couponRow}>
-                  <Text style={styles.couponText}>🎟 {item.coupon_code || "—"}</Text>
-                  <Text style={styles.couponBonus}>+₹{item.coupon_bonus_amount || 0} bonus</Text>
+                  <Text style={styles.couponText}>
+                    🎟 {item.coupon_code || "—"}
+                  </Text>
+                  <Text style={styles.couponBonus}>
+                    +₹{item.coupon_bonus_amount || 0} bonus
+                  </Text>
                 </View>
               )}
 

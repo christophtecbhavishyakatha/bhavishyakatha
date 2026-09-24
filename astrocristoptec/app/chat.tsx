@@ -384,6 +384,7 @@ const resolvedAstrologerDp = String(callerName || "");
   const [showRechargePopup, setShowRechargePopup] = useState(false);
 const [chatEnded, setChatEnded] = useState(false);
 const [showLowBalance, setShowLowBalance] = useState(false);
+    const [lowBalance, setLowBalance] = useState(0);
   const [showChatAgainModal, setShowChatAgainModal] = useState(false);
   const [chatAgainDraft, setChatAgainDraft] = useState<RequestDraft>(emptyRequestDraft());
   const [chatAgainLoading, setChatAgainLoading] = useState(false);
@@ -934,6 +935,39 @@ setChatAgainRequestSent(true);
     ]);
   };
 
+  const checkBalanceAfterServerRemoval = useCallback(async () => {
+    try {
+      const userId = await AsyncStorage.getItem("user_id");
+
+      if (!userId) {
+        console.log("No user ID found, skipping low balance check.");
+        return;
+      }
+
+      const response = await fetch(
+        `${CLIENT_AUTH_API_BASE_URL}/users/${userId}`,
+      );
+      const json = await response.json();
+
+      if (!response.ok || !json.success) {
+        console.error("Balance check failed:", json.message || response.status);
+        return;
+      }
+
+      const balance = Number(json.data?.wallet_balance ?? 0);
+
+      if (!Number.isFinite(balance)) {
+        console.error("Balance check returned an invalid balance:", json.data);
+        return;
+      }
+
+      setLowBalance(balance);
+      setShowLowBalance(balance < 30);
+    } catch (error) {
+      console.error("Balance check after server removal failed:", error);
+    }
+  }, []);
+
   useEffect(() => {
     initChat();
 
@@ -1017,11 +1051,10 @@ const handleEnded = (payload: { callId?: string }) => {
     return;
   }
 
-  // Server ended the chat.
-  // Do NOT navigate away.
+  // Server ended the chat. Check the current balance before showing recharge UI.
   setChatEnded(true);
   setShowRechargePopup(false);
-  setShowLowBalance(true);
+  void checkBalanceAfterServerRemoval();
   setInput("");
 
   // Stop call service, but keep this screen open.
@@ -1055,6 +1088,7 @@ const handleEnded = (payload: { callId?: string }) => {
     appendMessage,
     applyTimerWindow,
     beginExitFlow,
+    checkBalanceAfterServerRemoval,
     resolvedChannelName,
     resolvedCallId,
   ]);
@@ -1604,7 +1638,7 @@ const saveLastCall = async () => {
 )}
 <LowBalanceModal
   visible={showLowBalance}
-  balance={12.50}
+  balance={lowBalance}
   remainingMinutes={2}
   onClose={() => setShowLowBalance(false)}
   onRecharge={() => {
