@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const LANGUAGES = [
@@ -35,6 +35,7 @@ const LANGUAGES = [
 
 export default function LanguageScreen() {
   const router = useRouter();
+  const { change } = useLocalSearchParams<{ change?: string }>();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [checking, setChecking] = useState(true);
 
@@ -47,7 +48,7 @@ export default function LanguageScreen() {
       try {
         const savedLang = await AsyncStorage.getItem('user-language');
 
-        if (savedLang) {
+        if (savedLang && change !== "1") {
           // Language already selected → go to tabs
           router.replace('/(tabs)');
         }
@@ -59,7 +60,7 @@ export default function LanguageScreen() {
     };
 
     checkLanguage();
-  }, []);
+  }, [change, router]);
 
   /** 🔹 Save language and navigate */
   const confirmSelection = async () => {

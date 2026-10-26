@@ -429,6 +429,7 @@ export default function RootLayout(props: any) {
           <Stack.Screen name="audiocall" options={{ headerShown: false }} />
           <Stack.Screen name="videocall" options={{ headerShown: false }} />
           <Stack.Screen name="chat" options={{ headerShown: false }} />
+          <Stack.Screen name="report" options={{ headerShown: false }} />
           <Stack.Screen
             name="modal"
             options={{ presentation: "modal", title: "Modal" }}

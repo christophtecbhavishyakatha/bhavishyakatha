@@ -7,23 +7,36 @@
     "icon": "./assets/images/icon.png",
     "scheme": "astrocristoptec",
     "intentFilters": [
-        {
-          "action": "VIEW",
-          "data": [
-            {
-              "scheme": "astrocristoptec"
-            }
-          ],
-          "category": ["BROWSABLE", "DEFAULT"]
-        }
-      ],
+      {
+        "action": "VIEW",
+        "data": [
+          {
+            "scheme": "astrocristoptec"
+          }
+        ],
+        "category": ["BROWSABLE", "DEFAULT"]
+      },
+      {
+        "action": "VIEW",
+        "autoVerify": true,
+        "data": [
+          {
+            "scheme": "https",
+            "host": "bhavishyakatha.in",
+            "pathPrefix": "/"
+          }
+        ],
+        "category": ["BROWSABLE", "DEFAULT"]
+      }
+    ],
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-     "notification": {
+    "notification": {
       "icon": "./assets/images/icon.png"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "associatedDomains": ["applinks:bhavishyakatha.in"]
     },
     "android": {
       "adaptiveIcon": {
@@ -33,6 +46,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
+      "softwareKeyboardLayoutMode": "resize",
       "predictiveBackGestureEnabled": false,
       "package": "com.snsrk9.astrocristoptec",
       "googleServicesFile": "./google-services.json",
@@ -48,8 +62,8 @@
         "android.permission.USE_FULL_SCREEN_INTENT",
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.SYSTEM_ALERT_WINDOW",
-  "android.permission.VIBRATE",
-  "android.permission.DISABLE_KEYGUARD"
+        "android.permission.VIBRATE",
+        "android.permission.DISABLE_KEYGUARD"
       ]
     },
     "web": {
@@ -59,11 +73,11 @@
     "plugins": [
       "expo-router",
       "expo-notifications",
-    
+
       "@react-native-firebase/app",
       "@react-native-firebase/messaging"
     ],
-    
+
     "experiments": {
       "typedRoutes": true
     }

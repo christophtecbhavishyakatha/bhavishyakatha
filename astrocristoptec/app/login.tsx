@@ -14,6 +14,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Keyboard,
   KeyboardAvoidingView,
   Linking,
   Modal,
@@ -29,10 +30,13 @@ import {
 import { AppEventsLogger } from "react-native-fbsdk-next";
 
 interface LocationSuggestion {
+  place_id?: string;
   label?: string;
   display_name?: string;
-  lat: string | number;
-  lon: string | number;
+  main_text?: string;
+  secondary_text?: string;
+  lat?: string | number | null;
+  lon?: string | number | null;
 }
 
 // Translation helper
@@ -152,8 +156,13 @@ const getTranslations = (lang: string) => {
 
 export default function LoginScreen() {
   const router = useRouter();
+  const loginScrollRef = useRef<ScrollView>(null);
+  const mobileInputRef = useRef<TextInput>(null);
+  const otpInputRef = useRef<TextInput>(null);
+  const locationInputRef = useRef<TextInput>(null);
   const [language, setLanguage] = useState("en");
   const [step, setStep] = useState<"mobile" | "otp" | "signup">("mobile");
+  const [signupStep, setSignupStep] = useState<1 | 2 | 3>(1);
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
   const [name, setName] = useState("");
@@ -164,6 +173,7 @@ export default function LoginScreen() {
   const [locationSuggestions, setLocationSuggestions] = useState<
     LocationSuggestion[]
   >([]);
+  const [locationSearching, setLocationSearching] = useState(false);
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [timeOfBirth, setTimeOfBirth] = useState("");
   const [unknownTime, setUnknownTime] = useState(false);
@@ -176,15 +186,11 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const t = getTranslations(language);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showPolicyModal, setShowPolicyModal] = useState(false);
   const [policyType, setPolicyType] = useState("terms"); // 'terms' | 'privacy'
   const [policyContent, setPolicyContent] = useState("");
   const [loadingPolicy, setLoadingPolicy] = useState(false);
   const [fcmToken, setFcmToken] = useState("");
-  const locationSearchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
   const { mode } = useLocalSearchParams<{
     mode?: string;
   }>();
@@ -200,55 +206,7 @@ export default function LoginScreen() {
     loadLanguage();
     checkAuth();
 
-    return () => {
-      if (locationSearchTimeoutRef.current) {
-        clearTimeout(locationSearchTimeoutRef.current);
-      }
-    };
   }, []);
-
-  useEffect(() => {
-    const query = location.trim();
-
-    // In edit mode, do not search the already-saved location on initial load.
-    // Search only after the user changes the location field.
-    if (
-      query.length < 2 ||
-      latitude ||
-      longitude ||
-      (isEdit && !locationEdited)
-    ) {
-      setLocationSuggestions([]);
-      return;
-    }
-
-    if (locationSearchTimeoutRef.current) {
-      clearTimeout(locationSearchTimeoutRef.current);
-    }
-
-    locationSearchTimeoutRef.current = setTimeout(async () => {
-      try {
-        const response = await fetch(
-          `${LOCATION_API_URL}/location/search?q=${encodeURIComponent(
-            query,
-          )}&limit=5&language=${encodeURIComponent(language)}`,
-        );
-        const result = await response.json();
-        setLocationSuggestions(
-          Array.isArray(result?.data) ? result.data : [],
-        );
-      } catch (error) {
-        console.log("Location search error:", error);
-        setLocationSuggestions([]);
-      }
-    }, 450);
-
-    return () => {
-      if (locationSearchTimeoutRef.current) {
-        clearTimeout(locationSearchTimeoutRef.current);
-      }
-    };
-  }, [isEdit, language, latitude, longitude, location, locationEdited]);
 
   const checkAuth = async () => {
     const userId = await AsyncStorage.getItem("user_id");
@@ -256,6 +214,7 @@ export default function LoginScreen() {
     if (isEdit && userId?.trim()) {
       loadProfileData(userId);
       setStep("signup");
+      setSignupStep(1);
     } else if (userId?.trim()) {
       router.replace("/(tabs)");
     }
@@ -446,24 +405,75 @@ export default function LoginScreen() {
     const newErrors: any = {};
     if (!name.trim()) newErrors.name = t.requiredField;
     if (!location.trim()) {
-      newErrors.location = location.trim()
-        ? t.selectLocation
-        : t.requiredField;
+      newErrors.location = location.trim() ? t.selectLocation : t.requiredField;
     } else if ((!isEdit || locationEdited) && (!latitude || !longitude)) {
       newErrors.location = t.selectLocation;
     }
     if (!dateOfBirth) newErrors.dateOfBirth = t.requiredField;
     if (!unknownTime && !timeOfBirth) newErrors.timeOfBirth = t.requiredField;
     setErrors(newErrors);
-    if (!acceptedTerms) {
-      Alert.alert(
-        "Terms & Conditions",
-        "You must accept the Terms & Conditions and Privacy Policy to proceed.",
-      );
-      return false;
-    }
     return Object.keys(newErrors).length === 0;
   };
+
+const searchLocation = async () => {
+  const query = location.trim();
+
+  if (query.length < 2) {
+    setErrors({
+      ...errors,
+      location: t.requiredField,
+    });
+    return;
+  }
+
+  Keyboard.dismiss();
+
+  setLocationSuggestions([]);
+  setLocationSearching(true);
+  setLoading(true);
+
+  try {
+    const response = await fetch(
+      `${LOCATION_API_URL}/locationV1/searchV1?q=${encodeURIComponent(
+        query
+      )}&limit=5&language=${encodeURIComponent(language)}`
+    );
+
+    const result = await response.json();
+
+    console.log("Google Location Search:", result);
+
+    if (result.status && Array.isArray(result.data)) {
+      setLocationSuggestions(result.data);
+
+      if (result.data.length === 0) {
+        setErrors({
+          ...errors,
+          location: t.selectLocation,
+        });
+      }
+    } else {
+      setLocationSuggestions([]);
+
+      setErrors({
+        ...errors,
+        location: t.selectLocation,
+      });
+    }
+  } catch (error) {
+    console.log("Location search error:", error);
+
+    setLocationSuggestions([]);
+
+    setErrors({
+      ...errors,
+      location: t.selectLocation,
+    });
+  } finally {
+    setLocationSearching(false);
+    setLoading(false);
+  }
+};
 
   const formatDate = (date: Date) => {
     const day = date.getDate().toString().padStart(2, "0");
@@ -593,7 +603,7 @@ export default function LoginScreen() {
         date_of_birth: dateOfBirth,
         time_of_birth: unknownTime ? null : timeOfBirth,
         gender,
-        acceptedTerms,
+        acceptedTerms: true,
       };
       console.log("Signup Payload:", payload);
       const response = await fetch(`${API_URL}/complete-profile`, {
@@ -633,119 +643,142 @@ export default function LoginScreen() {
     }
   };
   const renderMobileStep = () => (
-    <View style={styles.formContainer}>
-      <View style={styles.iconContainer}>
-        <Feather name="smartphone" size={48} color="#4B7BEC" />
-      </View>
-      <TouchableOpacity
-        style={styles.skipButton}
-        onPress={() => router.replace("/(tabs)")}
-      >
-        <Text style={styles.skipTitle}>Skip</Text>
-      </TouchableOpacity>
-      <Text style={styles.title}>{t.welcome}</Text>
-      <Text style={styles.subtitle}>{t.subtitle}</Text>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>{t.mobileNumber}</Text>
-        <View style={[styles.inputWrapper, errors.mobile && styles.inputError]}>
-          <Text style={styles.prefix}>+91</Text>
-          <TextInput
-            style={styles.input}
-            placeholder={t.enterMobile}
-            value={mobile}
-            onChangeText={(text) => {
-              setMobile(text.replace(/[^0-9]/g, ""));
-              setErrors({});
-            }}
-            keyboardType="phone-pad"
-            maxLength={10}
-            placeholderTextColor={"#94A3B8"}
-          />
+    <ScrollView
+      ref={loginScrollRef}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      // automaticallyAdjustKeyboardInsets
+      contentContainerStyle={styles.authScrollContent}
+    >
+      <View style={styles.formContainer}>
+        <View style={styles.iconContainer}>
+          <Feather name="smartphone" size={48} color="#4B7BEC" />
         </View>
-        {errors.mobile && <Text style={styles.errorText}>{errors.mobile}</Text>}
+        <TouchableOpacity
+          style={styles.skipButton}
+          onPress={() => router.replace("/(tabs)")}
+        >
+          <Text style={styles.skipTitle}>Skip</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>{t.welcome}</Text>
+        <Text style={styles.subtitle}>{t.subtitle}</Text>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>{t.mobileNumber}</Text>
+          <View
+            style={[styles.inputWrapper, errors.mobile && styles.inputError]}
+          >
+            <Text style={styles.prefix}>+91</Text>
+            <TextInput
+              style={styles.input}
+              ref={mobileInputRef}
+              showSoftInputOnFocus
+              onPressIn={() => mobileInputRef.current?.focus()}
+              //   onFocus={() => scrollInputIntoView(mobileInputRef)}
+              placeholder={t.enterMobile}
+              value={mobile}
+              onChangeText={(text) => {
+                setMobile(text.replace(/[^0-9]/g, ""));
+                setErrors({});
+              }}
+              keyboardType="phone-pad"
+              maxLength={10}
+              placeholderTextColor={"#94A3B8"}
+            />
+          </View>
+          {errors.mobile && (
+            <Text style={styles.errorText}>{errors.mobile}</Text>
+          )}
+        </View>
+
+        <TouchableOpacity style={styles.primaryButton} onPress={handleSendOTP}>
+          <Text style={styles.primaryButtonText}>{t.sendOTP}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.textButton}
+          onPress={() => setStep("signup")}
+        >
+          <Text style={styles.textButtonText}>{t.newUser}</Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity style={styles.primaryButton} onPress={handleSendOTP}>
-        <Text style={styles.primaryButtonText}>{t.sendOTP}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.textButton}
-        onPress={() => setStep("signup")}
-      >
-        <Text style={styles.textButtonText}>{t.newUser}</Text>
-      </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 
   const renderOTPStep = () => (
-    <View style={styles.formContainer}>
-      <View style={styles.iconContainer}>
-        <Feather name="lock" size={48} color="#4B7BEC" />
-      </View>
-
-      <Text style={styles.title}>{t.verifyOTP}</Text>
-      <Text style={styles.subtitle}>OTP sent to +91 {mobile}</Text>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>{t.enterOTP}</Text>
-        <View style={[styles.inputWrapper, errors.otp && styles.inputError]}>
-          <TextInput
-            style={[styles.input, styles.otpInput]}
-            placeholder="000000"
-            value={otp}
-            onChangeText={(text) => {
-              setOtp(text.replace(/[^0-9]/g, ""));
-              setErrors({});
-            }}
-            keyboardType="number-pad"
-            maxLength={6}
-            placeholderTextColor={"#94A3B8"}
-          />
+    <ScrollView
+      ref={loginScrollRef}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      contentContainerStyle={styles.authScrollContent}
+    >
+      <View style={styles.formContainer}>
+        <View style={styles.iconContainer}>
+          <Feather name="lock" size={48} color="#4B7BEC" />
         </View>
-        {errors.otp && <Text style={styles.errorText}>{errors.otp}</Text>}
+
+        <Text style={styles.title}>{t.verifyOTP}</Text>
+        <Text style={styles.subtitle}>OTP sent to +91 {mobile}</Text>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>{t.enterOTP}</Text>
+          <View style={[styles.inputWrapper, errors.otp && styles.inputError]}>
+            <TextInput
+              style={[styles.input, styles.otpInput]}
+              ref={otpInputRef}
+              showSoftInputOnFocus
+              onPressIn={() => otpInputRef.current?.focus()}
+              //   onFocus={() => scrollInputIntoView(otpInputRef)}
+              placeholder="000000"
+              value={otp}
+              onChangeText={(text) => {
+                setOtp(text.replace(/[^0-9]/g, ""));
+                setErrors({});
+              }}
+              keyboardType="number-pad"
+              maxLength={6}
+              placeholderTextColor={"#94A3B8"}
+            />
+          </View>
+          {errors.otp && <Text style={styles.errorText}>{errors.otp}</Text>}
+        </View>
+
+        <TouchableOpacity
+          style={styles.primaryButton}
+          onPress={handleVerifyOTP}
+        >
+          <Text style={styles.primaryButtonText}>{t.verify}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.textButton} onPress={handleSendOTP}>
+          <Text style={styles.textButtonText}>{t.resendOTP}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.textButton}
+          onPress={() => setStep("mobile")}
+        >
+          <Feather name="arrow-left" size={16} color="#4B7BEC" />
+          <Text style={styles.textButtonText}>{t.changeNumber}</Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity style={styles.primaryButton} onPress={handleVerifyOTP}>
-        <Text style={styles.primaryButtonText}>{t.verify}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.textButton} onPress={handleSendOTP}>
-        <Text style={styles.textButtonText}>{t.resendOTP}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.textButton}
-        onPress={() => setStep("mobile")}
-      >
-        <Feather name="arrow-left" size={16} color="#4B7BEC" />
-        <Text style={styles.textButtonText}>{t.changeNumber}</Text>
-      </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 
-  {
-    loading && (
-      <View
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(255,255,255,0.6)",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: 999,
-        }}
-      >
-        <ActivityIndicator size="large" color="#4B7BEC" />
-      </View>
-    );
-  }
   const renderSignupStep = () => (
-    <ScrollView showsVerticalScrollIndicator={false}>
+    <ScrollView
+      ref={loginScrollRef}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      contentContainerStyle={[
+        styles.signupScrollContent,
+        locationSuggestions.length > 0 &&
+          styles.signupScrollContentWithDropdown,
+      ]}
+    >
       <View style={styles.formContainer}>
         <View style={styles.iconContainer}>
           <Feather name="user-plus" size={48} color="#4B7BEC" />
@@ -758,6 +791,14 @@ export default function LoginScreen() {
           {isEdit ? t.editProfile : t.completeProfile}
         </Text>
 
+        <View style={styles.stepIndicator}>
+          {[1, 2, 3].map((item) => (
+            <View key={item} style={[styles.stepDot, signupStep >= item && styles.stepDotActive]} />
+          ))}
+        </View>
+        <Text style={styles.stepLabel}>Step {signupStep} of 3</Text>
+
+        {signupStep === 1 && <>
         {/* Full Name */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>{t.fullName} *</Text>
@@ -791,6 +832,7 @@ export default function LoginScreen() {
                   errors.gender && styles.inputError,
                 ]}
                 onPress={() => {
+                  Keyboard.dismiss();
                   setGender(item);
                   setErrors({ ...errors, gender: null });
                 }}
@@ -811,65 +853,176 @@ export default function LoginScreen() {
             <Text style={styles.errorText}>{errors.gender}</Text>
           )}
         </View>
+        </>}
 
         {/* Location */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>{t.location} *</Text>
-          <View
-            style={[styles.inputWrapper, errors.location && styles.inputError]}
-          >
-            <Feather name="map-pin" size={20} color="#94A3B8" />
-            <TextInput
-              style={styles.input}
-              placeholder={t.enterLocation}
-              value={location}
-              onChangeText={(text) => {
-                setLocation(text);
-                setLocationEdited(true);
-                setLatitude("");
-                setLongitude("");
-                setLocationSuggestions([]);
-                setErrors({ ...errors, location: null });
-              }}
-              placeholderTextColor={"#94A3B8"}
-            />
-          </View>
-          {locationSuggestions.length > 0 && (
-            <View style={styles.locationDropdown}>
-              {locationSuggestions.map((suggestion, index) => (
-                <TouchableOpacity
-                  key={`${suggestion.display_name || suggestion.label}-${index}`}
-                  style={styles.locationOption}
-                  onPress={() => {
-                    setLocation(
-                      suggestion.label || suggestion.display_name || "",
-                    );
-                    setLocationEdited(true);
-                    setLatitude(String(suggestion.lat));
-                    setLongitude(String(suggestion.lon));
-                    setLocationSuggestions([]);
-                    setErrors({ ...errors, location: null });
-                  }}
-                >
-                  <Text style={styles.locationOptionText} numberOfLines={2}>
-                    {suggestion.display_name || suggestion.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+        {signupStep === 3 && <KeyboardAvoidingView
+          enabled={locationSuggestions.length > 0}
+          behavior={Platform.OS === "ios" ? "position" : "padding"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 8 : 0}
+          style={styles.inputGroup}
+        >
+          {/* Location */}
+          <View style={[styles.inputGroup, styles.locationField]}>
+            <Text style={styles.label}>{t.location} *</Text>
+
+            {locationSuggestions.length > 0 && (
+              <View style={styles.locationDropdown}>
+                {locationSuggestions.map((suggestion, index) => (
+                  <TouchableOpacity
+                    key={`${suggestion.display_name || suggestion.label}-${index}`}
+                    style={styles.locationOption}
+                   onPress={async () => {
+  if (!suggestion.place_id) {
+    return;
+  }
+
+  try {
+    setLocationSearching(true);
+    setLocationSuggestions([]);
+
+    const response = await fetch(
+      `${LOCATION_API_URL}/locationV1/detailsV1?place_id=${encodeURIComponent(
+        suggestion.place_id
+      )}`
+    );
+
+    const result = await response.json();
+
+    console.log("Google Location Details:", result);
+
+    if (
+      !result.status ||
+      !result.data
+    ) {
+      setErrors({
+        ...errors,
+        location: "Unable to get location details",
+      });
+
+      return;
+    }
+
+    const data = result.data;
+
+    // Location name
+    setLocation(
+      data.label ||
+        data.display_name ||
+        suggestion.label ||
+        ""
+    );
+
+    // Latitude
+    setLatitude(
+      data.latitude !== null &&
+        data.latitude !== undefined
+        ? String(data.latitude)
+        : ""
+    );
+
+    // Longitude
+    setLongitude(
+      data.longitude !== null &&
+        data.longitude !== undefined
+        ? String(data.longitude)
+        : ""
+    );
+
+    setLocationEdited(true);
+
+    setErrors({
+      ...errors,
+      location: null,
+    });
+
+  } catch (error) {
+    console.log(
+      "Location details error:",
+      error
+    );
+
+    setErrors({
+      ...errors,
+      location: "Unable to get location details",
+    });
+  } finally {
+    setLocationSearching(false);
+  }
+}}
+                  >
+                   <Text
+  style={styles.locationOptionText}
+  numberOfLines={2}
+>
+  {suggestion.main_text ||
+    suggestion.label ||
+    suggestion.display_name}
+</Text>
+
+{suggestion.secondary_text ? (
+  <Text
+    style={{
+      fontSize: 12,
+      color: "#64748B",
+      marginTop: 3,
+  }}
+    numberOfLines={1}
+  >
+    {suggestion.secondary_text}
+  </Text>
+) : null}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            <View
+              style={[
+                styles.inputWrapper,
+                errors.location && styles.inputError,
+              ]}
+            >
+              <Feather name="map-pin" size={20} color="#94A3B8" />
+
+              <TextInput
+                style={styles.input}
+                ref={locationInputRef}
+                showSoftInputOnFocus={true}
+                placeholder={t.enterLocation}
+                returnKeyType="search"
+                onSubmitEditing={searchLocation}
+                value={location}
+                onChangeText={(text) => {
+                  setLocation(text);
+                  setLocationEdited(true);
+                  setLatitude("");
+                  setLongitude("");
+                  setLocationSuggestions([]);
+                  setErrors({ ...errors, location: null });
+                }}
+                placeholderTextColor="#94A3B8"
+              />
+              <TouchableOpacity style={styles.locationSearchButton} onPress={searchLocation} disabled={locationSearching}>
+                {locationSearching ? <ActivityIndicator size="small" color="#FFFFFF" /> : <Feather name="search" size={18} color="#FFFFFF" />}
+              </TouchableOpacity>
             </View>
-          )}
-          {location.trim().length >= 2 &&
-            !latitude &&
-            !longitude &&
-            (!isEdit || locationEdited) && (
-            <Text style={styles.locationHint}>{t.selectLocation}</Text>
-          )}
-          {errors.location && (
-            <Text style={styles.errorText}>{errors.location}</Text>
-          )}
-        </View>
+
+            {location.trim().length >= 2 &&
+              !latitude &&
+              !longitude &&
+              (!isEdit || locationEdited) && (
+                <Text style={styles.locationHint}>{t.selectLocation}</Text>
+              )}
+
+            {errors.location && (
+              <Text style={styles.errorText}>{errors.location}</Text>
+            )}
+          </View>
+        </KeyboardAvoidingView>}
 
         {/* Date of Birth */}
+        {signupStep === 2 && <>
         <View style={styles.inputGroup}>
           <Text style={styles.label}>{t.dateOfBirth} *</Text>
           <TouchableOpacity
@@ -963,21 +1116,12 @@ export default function LoginScreen() {
             <Text style={styles.checkboxLabel}>{t.dontKnowTime}</Text>
           </TouchableOpacity>
         </View>
+        </>}
 
         {/* Terms & Privacy */}
-        <View style={styles.termsContainer}>
-          <TouchableOpacity
-            style={styles.checkboxContainer}
-            onPress={() => setAcceptedTerms(!acceptedTerms)}
-          >
-            <View
-              style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}
-            >
-              {acceptedTerms && <Feather name="check" size={14} color="#FFF" />}
-            </View>
-
+        {signupStep === 3 && <><View style={styles.termsContainer}>
             <Text style={styles.termsText}>
-              I agree to the{" "}
+              By clicking the button below, you accept the{" "}
               <Text
                 style={styles.linkText}
                 onPress={() => {
@@ -999,8 +1143,8 @@ export default function LoginScreen() {
               >
                 Privacy Policy
               </Text>
+              .
             </Text>
-          </TouchableOpacity>
         </View>
         <Modal visible={showPolicyModal} animationType="slide" transparent>
           <View style={styles.modalOverlay}>
@@ -1026,19 +1170,37 @@ export default function LoginScreen() {
               </ScrollView>
             </View>
           </View>
-        </Modal>
+        </Modal></>}
 
-        <TouchableOpacity style={styles.primaryButton} onPress={handleSignup}>
+        <TouchableOpacity style={styles.primaryButton} onPress={() => {
+          if (signupStep === 1) {
+            if (!name.trim()) { setErrors({ ...errors, name: t.requiredField }); return; }
+            Keyboard.dismiss();
+            setSignupStep(2);
+          } else if (signupStep === 2) {
+            const nextErrors: any = {};
+            if (!dateOfBirth) nextErrors.dateOfBirth = t.requiredField;
+            if (!unknownTime && !timeOfBirth) nextErrors.timeOfBirth = t.requiredField;
+            setErrors(nextErrors);
+            if (Object.keys(nextErrors).length === 0) {
+              Keyboard.dismiss();
+              setSignupStep(3);
+            }
+          } else {
+            handleSignup();
+          }
+        }}>
           <Text style={styles.primaryButtonText}>
-            {isEdit ? t.saveChanges : t.signup}
+            {signupStep === 3 ? (isEdit ? t.saveChanges : t.signup) : "Continue"}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.textButton}
-          onPress={() => setStep("mobile")}
+          onPress={() => signupStep === 1 ? setStep("mobile") : setSignupStep((signupStep - 1) as 1 | 2 | 3)}
         >
-          <Text style={styles.textButtonText}>{t.alreadyHaveAccount}</Text>
+          <Feather name="arrow-left" size={16} color="#4B7BEC" />
+          <Text style={styles.textButtonText}>{signupStep === 1 ? t.alreadyHaveAccount : "Back"}</Text>
         </TouchableOpacity>
 
         <View style={{ height: 40 }} />
@@ -1074,15 +1236,22 @@ export default function LoginScreen() {
         </View>
       </Modal>
 
-      <LinearGradient colors={["#4B7BEC", "#667eea"]} style={styles.header} />
-
       <KeyboardAvoidingView
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.content}
       >
-        {step === "mobile" && renderMobileStep()}
-        {step === "otp" && renderOTPStep()}
-        {step === "signup" && renderSignupStep()}
+        <LinearGradient colors={["#4B7BEC", "#667eea"]} style={styles.header} />
+        <View style={styles.content}>
+          {step === "mobile" && renderMobileStep()}
+          {step === "otp" && renderOTPStep()}
+          {step === "signup" && renderSignupStep()}
+        </View>
+
+        {loading && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator size="large" color="#4B7BEC" />
+          </View>
+        )}
       </KeyboardAvoidingView>
     </View>
   );
@@ -1099,10 +1268,29 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
   },
+  keyboardContainer: {
+    flex: 1,
+  },
 
   content: {
     flex: 1,
     marginTop: -120,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255,255,255,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
+  },
+  signupScrollContent: {
+    paddingBottom: 150,
+  },
+  authScrollContent: {
+    paddingBottom: 24,
+  },
+  signupScrollContentWithDropdown: {
+    paddingBottom: 180,
   },
   formContainer: {
     backgroundColor: "#FFF",
@@ -1138,8 +1326,31 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 32,
   },
+  stepIndicator: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+    marginBottom: 6,
+  },
+  stepDot: {
+    width: 28,
+    height: 4,
+    borderRadius: 4,
+    backgroundColor: "#E2E8F0",
+  },
+  stepDotActive: {
+    backgroundColor: "#4B7BEC",
+  },
+  stepLabel: {
+    textAlign: "center",
+    color: "#64748B",
+    fontSize: 12,
+    marginBottom: 24,
+  },
   inputGroup: {
     marginBottom: 20,
+    position: "relative",
+    zIndex: 100,
   },
   label: {
     fontSize: 14,
@@ -1157,23 +1368,48 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "#E2E8F0",
     gap: 12,
+    zIndex: 101,
   },
   inputError: {
     borderColor: "#EF4444",
   },
+  locationSearchButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: "#4B7BEC",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  locationField: {
+    position: "relative",
+    zIndex: 20,
+  },
   locationDropdown: {
-    marginTop: 4,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 58,
+
     backgroundColor: "#FFF",
     borderWidth: 1,
     borderColor: "#E2E8F0",
     borderRadius: 10,
-    overflow: "hidden",
-    elevation: 3,
+
+    elevation: 10,
+    zIndex: 9999,
+
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+
+    overflow: "hidden",
   },
+
   locationOption: {
     paddingHorizontal: 14,
     paddingVertical: 12,

@@ -1,6 +1,8 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import NetInfo from "@react-native-community/netinfo";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   BackHandler,
   Linking,
@@ -8,18 +10,14 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import NetInfo from "@react-native-community/netinfo";
-import { router } from "expo-router";
 
-const APP_VERSION = "21";
+const APP_VERSION = "25";
 
 const API_BASE = "https://bhavishyakatha.in/express";
 
-const USER_API =
-  "https://bhavishyakatha.in/express/api/client/auth";
+const USER_API = "https://bhavishyakatha.in/express/api/client/auth";
 
 export default function ForceUpdateChecker() {
   const [loading, setLoading] = useState(false);
@@ -36,7 +34,7 @@ export default function ForceUpdateChecker() {
     if (visible || noInternet) {
       const backHandler = BackHandler.addEventListener(
         "hardwareBackPress",
-        () => true
+        () => true,
       );
 
       return () => backHandler.remove();
@@ -56,7 +54,7 @@ export default function ForceUpdateChecker() {
 
       // 1. Internet
       const internetOK = await checkInternet();
-console.log("Internet check:", internetOK);
+      console.log("Internet check:", internetOK);
       if (!internetOK) {
         setNoInternet(true);
         return;
@@ -107,25 +105,19 @@ console.log("Internet check:", internetOK);
    */
   const checkVersion = async (): Promise<boolean> => {
     try {
-      const response = await fetch(
-        `${API_BASE}/check-version/user`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            version: APP_VERSION,
-            platform: "android",
-          }),
-        }
-      );
+      const response = await fetch(`${API_BASE}/check-version/user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          version: APP_VERSION,
+          platform: "android",
+        }),
+      });
 
       if (!response.ok) {
-        console.log(
-          "Version API HTTP error:",
-          response.status
-        );
+        console.log("Version API HTTP error:", response.status);
 
         return false;
       }
@@ -172,25 +164,19 @@ console.log("Internet check:", internetOK);
         return true;
       }
 
-      const response = await fetch(
-        `${USER_API}/user-verify-fcm-token`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            fcmToken,
-            user_id: userId,
-          }),
-        }
-      );
+      const response = await fetch(`${USER_API}/user-verify-fcm-token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fcmToken,
+          user_id: userId,
+        }),
+      });
 
       if (!response.ok) {
-        console.log(
-          "FCM verification HTTP error:",
-          response.status
-        );
+        console.log("FCM verification HTTP error:", response.status);
 
         // Don't logout because of temporary API error
         return true;
@@ -198,10 +184,7 @@ console.log("Internet check:", internetOK);
 
       const data = await response.json();
 
-      console.log(
-        "FCM Token verification response:",
-        data
-      );
+      console.log("FCM Token verification response:", data);
 
       if (!data.success) {
         await logout();
@@ -210,10 +193,7 @@ console.log("Internet check:", internetOK);
 
       return true;
     } catch (error) {
-      console.log(
-        "FCM verification error:",
-        error
-      );
+      console.log("FCM verification error:", error);
 
       // Don't logout on temporary network/API error
       return true;
@@ -232,10 +212,7 @@ console.log("Internet check:", internetOK);
           text: "OK",
           onPress: async () => {
             try {
-              await AsyncStorage.multiRemove([
-                "user_id",
-                "fcmToken",
-              ]);
+              await AsyncStorage.multiRemove(["user_id", "fcmToken"]);
 
               router.replace("/login");
             } catch (error) {
@@ -247,7 +224,7 @@ console.log("Internet check:", internetOK);
       ],
       {
         cancelable: false,
-      }
+      },
     );
   };
 
@@ -274,19 +251,20 @@ console.log("Internet check:", internetOK);
   /**
    * EXIT APP
    */
-const handleExit = () => {
-  setNoInternet(false);
-  setVisible(false);
+  const handleExit = () => {
+    setNoInternet(false);
+    setVisible(false);
 
-  setTimeout(() => {
-    BackHandler.exitApp();
-  }, 200);
-};
+    setTimeout(() => {
+      BackHandler.exitApp();
+    }, 200);
+  };
 
   // ==========================================
   // LOADING SCREEN
   // ==========================================
-{/**   if (loading) {
+  {
+    /**   if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator
@@ -300,7 +278,8 @@ const handleExit = () => {
       </View>
     );
   }
-*/}
+*/
+  }
   return (
     <>
       {/* FORCE UPDATE */}
@@ -312,13 +291,10 @@ const handleExit = () => {
       >
         <View style={styles.overlay}>
           <View style={styles.modalBox}>
-            <Text style={styles.title}>
-              Update Required
-            </Text>
+            <Text style={styles.title}>Update Required</Text>
 
             <Text style={styles.message}>
-              A new version of the app is available.
-              Please update to continue.
+              A new version of the app is available. Please update to continue.
             </Text>
 
             <TouchableOpacity
@@ -326,9 +302,7 @@ const handleExit = () => {
               onPress={handleUpdate}
               activeOpacity={0.8}
             >
-              <Text style={styles.buttonText}>
-                Update Now
-              </Text>
+              <Text style={styles.buttonText}>Update Now</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -343,14 +317,11 @@ const handleExit = () => {
       >
         <View style={styles.overlay}>
           <View style={styles.modalBox}>
-            <Text style={styles.title}>
-              No Internet Connection
-            </Text>
+            <Text style={styles.title}>No Internet Connection</Text>
 
             <Text style={styles.message}>
-              Internet connection is required to use
-              this app. Please connect to the internet
-              and try again.
+              Internet connection is required to use this app. Please connect to
+              the internet and try again.
             </Text>
 
             <TouchableOpacity
@@ -358,9 +329,7 @@ const handleExit = () => {
               onPress={handleExit}
               activeOpacity={0.8}
             >
-              <Text style={styles.buttonText}>
-                Exit App
-              </Text>
+              <Text style={styles.buttonText}>Exit App</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -92,8 +92,8 @@ android {
         applicationId 'com.snsrk9.astrocristoptec'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 21
-        versionName "21.0.0"
+        versionCode 25
+        versionName "22.3.0"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }

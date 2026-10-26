@@ -46,65 +46,64 @@ const getTranslations = (lang: string) => {
       helpCenter: "Help Center",
       cancel: "Cancel",
       yes: "Yes",
-languages: {
-  Hindi: "हिंदी",
-  English: "English",
-  Bengali: "বাংলা",
-}
+      languages: {
+        Hindi: "हिंदी",
+        English: "English",
+        Bengali: "বাংলা",
+      },
     },
- hi: {
-  profile: "प्रोफाइल",
-  personalDetails: "व्यक्तिगत विवरण",
-  name: "नाम",
-  phone: "फ़ोन",
-  walletBalance: "वॉलेट बैलेंस",
-  addMoney: "पैसे जोड़ें",
-  transactionHistory: "रिचार्ज इतिहास",
-  callHistory: "कॉल इतिहास",
-  chatHistory: "चैट इतिहास",
-  logout: "लॉगआउट",
-  languageSettings: "भाषा सेटिंग",
-  viewAll: "सभी देखें",
-  noTransactions: "अभी तक कोई लेनदेन नहीं",
-  noCallHistory: "अभी तक कोई कॉल इतिहास नहीं",
-  logoutConfirm: "क्या आप वाकई लॉगआउट करना चाहते हैं?",
-  editProfile: "प्रोफाइल संपादित करें",
-  helpCenter: "सहायता केंद्र",
-  cancel: "रद्द करें",
-  yes: "हाँ",
-  languages: {
-    Hindi: "हिंदी",
-    English: "English",
-    Bengali: "বাংলা",
-  },
-},
-   bn: {
-  profile: "প্রোফাইল",
-  personalDetails: "ব্যক্তিগত বিবরণ",
-  name: "নাম",
-  phone: "ফোন",
-  walletBalance: "ওয়ালেট ব্যালেন্স",
-  addMoney: "টাকা যোগ করুন",
-  transactionHistory: "রিচার্জের ইতিহাস",
-  callHistory: "কল ইতিহাস",
-  chatHistory: "চ্যাট ইতিহাস",
-  logout: "লগআউট",
-  languageSettings: "ভাষা সেটিংস",
-  viewAll: "সব দেখুন",
-  noTransactions: "এখনও কোনো লেনদেন নেই",
-  noCallHistory: "এখনও কোনো কল ইতিহাস নেই",
-  logoutConfirm: "আপনি কি নিশ্চিত লগআউট করতে চান?",
-  editProfile: "প্রোফাইল সম্পাদনা করুন",
-  helpCenter: "সহায়তা কেন্দ্র",
-  cancel: "বাতিল",
-  yes: "হ্যাঁ",
-   languages: {
-  Hindi: "हिंदी",
-  English: "English",
-  Bengali: "বাংলা",
-}
-},
-
+    hi: {
+      profile: "प्रोफाइल",
+      personalDetails: "व्यक्तिगत विवरण",
+      name: "नाम",
+      phone: "फ़ोन",
+      walletBalance: "वॉलेट बैलेंस",
+      addMoney: "पैसे जोड़ें",
+      transactionHistory: "रिचार्ज इतिहास",
+      callHistory: "कॉल इतिहास",
+      chatHistory: "चैट इतिहास",
+      logout: "लॉगआउट",
+      languageSettings: "भाषा सेटिंग",
+      viewAll: "सभी देखें",
+      noTransactions: "अभी तक कोई लेनदेन नहीं",
+      noCallHistory: "अभी तक कोई कॉल इतिहास नहीं",
+      logoutConfirm: "क्या आप वाकई लॉगआउट करना चाहते हैं?",
+      editProfile: "प्रोफाइल संपादित करें",
+      helpCenter: "सहायता केंद्र",
+      cancel: "रद्द करें",
+      yes: "हाँ",
+      languages: {
+        Hindi: "हिंदी",
+        English: "English",
+        Bengali: "বাংলা",
+      },
+    },
+    bn: {
+      profile: "প্রোফাইল",
+      personalDetails: "ব্যক্তিগত বিবরণ",
+      name: "নাম",
+      phone: "ফোন",
+      walletBalance: "ওয়ালেট ব্যালেন্স",
+      addMoney: "টাকা যোগ করুন",
+      transactionHistory: "রিচার্জের ইতিহাস",
+      callHistory: "কল ইতিহাস",
+      chatHistory: "চ্যাট ইতিহাস",
+      logout: "লগআউট",
+      languageSettings: "ভাষা সেটিংস",
+      viewAll: "সব দেখুন",
+      noTransactions: "এখনও কোনো লেনদেন নেই",
+      noCallHistory: "এখনও কোনো কল ইতিহাস নেই",
+      logoutConfirm: "আপনি কি নিশ্চিত লগআউট করতে চান?",
+      editProfile: "প্রোফাইল সম্পাদনা করুন",
+      helpCenter: "সহায়তা কেন্দ্র",
+      cancel: "বাতিল",
+      yes: "হ্যাঁ",
+      languages: {
+        Hindi: "हिंदी",
+        English: "English",
+        Bengali: "বাংলা",
+      },
+    },
   };
 
   return translations[lang] || translations.en;
@@ -151,7 +150,7 @@ export default function ProfileScreen() {
 
       const response = await fetch(`${CLIENT_AUTH_API_BASE_URL}/users/${userId}`);
       const result = await response.json();
-console.log('Profile load response:', result);
+      console.log('Profile load response:', result);
       if (!result.success) {
         await AsyncStorage.removeItem('user_id');
         router.replace('/login');
@@ -241,7 +240,7 @@ console.log('Profile load response:', result);
           colors={['#2A0B4F', '#4A148C']}
           style={styles.loadingBadge}
         >
-          <Feather name="moon" size={22} color="#FFD700" />
+          <Feather name="moon" size={24} color="#FFD700" />
         </LinearGradient>
         <Text style={styles.loadingText}>Loading...</Text>
       </View>
@@ -249,133 +248,156 @@ console.log('Profile load response:', result);
   }
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={styles.container}>
+    <SafeAreaView edges={['top']} style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#2A0B4F" />
 
-      <LinearGradient
-        colors={['#2A0B4F', '#4A148C', '#7B2CBF']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
-        <View style={styles.headerOrb} />
+      {/* Top bar */}
+      <View style={styles.topBar}>
         <TouchableOpacity
           onPress={() => router.replace('/(tabs)')}
           style={styles.backBtn}
           activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Feather name="arrow-left" size={12} color="#fff" />
+          <Feather name="arrow-left" size={20} color="#fff" />
         </TouchableOpacity>
-
-        <View style={styles.headerTitleWrap}>
-          <Text style={styles.headerTitle}>{t.profile}</Text>
-          <Text style={styles.headerSubtitle}>Your spiritual account hub</Text>
+        <View style={styles.topBarTitleWrap}>
+          <Text style={styles.topBarTitle}>{t.profile}</Text>
+          <Text style={styles.topBarSubtitle}>Your spiritual account hub</Text>
         </View>
-      </LinearGradient>
+      </View>
 
       <ScrollView
+        style={styles.scroll}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <View style={styles.profileCard}>
-          <View style={styles.profileCardGlow} />
-          <LinearGradient
-            colors={['#FFD700', '#FF9933', '#4A148C']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.avatarFrame}
-          >
-            <Image source={getGenderAvatar()} style={styles.avatar} />
-          </LinearGradient>
-          <Text style={styles.userName}>{userData.name}</Text>
-          <View style={styles.profilePhonePill}>
-            <Feather name="phone" size={13} color="#B66A00" />
-            <Text style={styles.profilePhoneText}>{userData.phone}</Text>
-          </View>
-
-          <TouchableOpacity
-            style={styles.editProfileBtn}
-            onPress={() =>
-              router.push({
-                pathname: '/login',
-                params: { mode: 'edit' },
-              })
-            }
-          >
-            <Feather name="edit-2" size={16} color="#4A148C" />
-            <Text style={styles.editProfileText}>{t.editProfile}</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t.personalDetails}</Text>
-          <View style={styles.detailCard}>
-            <View style={styles.detailRow}>
-              <View style={styles.detailIcon}>
-                <Feather name="user" size={18} color="#4A148C" />
+        {/* Hero */}
+        <LinearGradient
+          colors={['#2A0B4F', '#4A148C']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.hero}
+        >
+          <View style={styles.heroOrb} />
+          <View style={styles.heroRow}>
+            <LinearGradient
+              colors={['#FFD700', '#FF9933']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.avatarFrame}
+            >
+              <Image source={getGenderAvatar()} style={styles.avatar} />
+            </LinearGradient>
+            <View style={styles.heroInfo}>
+              <Text style={styles.userName} numberOfLines={1}>{userData.name}</Text>
+              <View style={styles.phoneRow}>
+                <Feather name="phone" size={13} color="rgba(255,255,255,0.75)" />
+                <Text style={styles.phoneText} numberOfLines={1}>{userData.phone}</Text>
               </View>
-              <View style={styles.detailContent}>
-                <Text style={styles.detailLabel}>{t.name}</Text>
-                <Text style={styles.detailValue}>{userData.name}</Text>
-              </View>
-            </View>
-            <View style={styles.detailRow}>
-              <View style={styles.detailIcon}>
-                <Feather name="phone" size={18} color="#4A148C" />
-              </View>
-              <View style={styles.detailContent}>
-                <Text style={styles.detailLabel}>{t.phone}</Text>
-                <Text style={styles.detailValue}>{userData.phone}</Text>
-              </View>
+              <TouchableOpacity
+                style={styles.editProfileBtn}
+                activeOpacity={0.8}
+                onPress={() =>
+                  router.push({
+                    pathname: '/login',
+                    params: { mode: 'edit' },
+                  })
+                }
+              >
+                <Feather name="edit-2" size={14} color="#2A0B4F" />
+                <Text style={styles.editProfileText}>{t.editProfile}</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </LinearGradient>
 
-  <TouchableOpacity style={styles.helpBtn} onPress={() => router.push('/chat-history')}>
-          <Feather name="message-circle" size={20} color="#4A148C" />
-          <Text style={styles.helpText}>{t.chatHistory}</Text>
-        </TouchableOpacity>
-
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t.walletBalance}</Text>
-          <LinearGradient
-            colors={['#2A0B4F', '#4A148C', '#FF9933']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.walletCard}
-          >
-            <View style={styles.walletOrb} />
-            <View style={styles.walletContent}>
+        {/* Wallet (overlaps hero) */}
+        <View style={styles.walletWrap}>
+          <View style={styles.walletCard}>
+            <View style={styles.walletLeft}>
               <View style={styles.walletIcon}>
-                <Feather name="credit-card" size={28} color="#FFD700" />
+                <Feather name="credit-card" size={22} color="#B66A00" />
               </View>
-              <View>
+              <View style={styles.walletTextWrap}>
                 <Text style={styles.walletLabel}>{t.walletBalance}</Text>
                 <Text style={styles.walletAmount}>{"\u20B9"}{walletBalance}</Text>
               </View>
             </View>
-            <TouchableOpacity style={styles.addMoneyBtn} onPress={() => router.push('/wallet')}>
-              <Text style={styles.addMoneyText}>{t.addMoney}</Text>
+            <TouchableOpacity
+              style={styles.addMoneyBtn}
+              activeOpacity={0.85}
+              onPress={() => router.push('/wallet')}
+            >
               <Feather name="plus" size={16} color="#FFF" />
+              <Text style={styles.addMoneyText}>{t.addMoney}</Text>
             </TouchableOpacity>
-          </LinearGradient>
+          </View>
         </View>
 
+        {/* Personal details */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t.personalDetails}</Text>
+          <View style={styles.group}>
+            <View style={[styles.row, styles.rowDivider]}>
+              <View style={styles.rowIcon}>
+                <Feather name="user" size={18} color="#4A148C" />
+              </View>
+              <View style={styles.rowContent}>
+                <Text style={styles.rowLabel}>{t.name}</Text>
+                <Text style={styles.rowValue}>{userData.name}</Text>
+              </View>
+            </View>
+            <View style={styles.row}>
+              <View style={styles.rowIcon}>
+                <Feather name="phone" size={18} color="#4A148C" />
+              </View>
+              <View style={styles.rowContent}>
+                <Text style={styles.rowLabel}>{t.phone}</Text>
+                <Text style={styles.rowValue}>{userData.phone}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Chat history */}
+        <View style={styles.section}>
+          <View style={styles.group}>
+            <TouchableOpacity
+              style={styles.row}
+              activeOpacity={0.7}
+              onPress={() => router.push('/chat-history')}
+            >
+              <View style={styles.rowIcon}>
+                <Feather name="message-circle" size={18} color="#4A148C" />
+              </View>
+              <Text style={styles.menuText}>{t.chatHistory}</Text>
+              <Feather name="chevron-right" size={20} color="#B8AFC7" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Recharge history */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t.transactionHistory}</Text>
-            <TouchableOpacity onPress={() => router.push('/transaction-history')}>
+            <Text style={styles.sectionTitleInline}>{t.transactionHistory}</Text>
+            <TouchableOpacity
+              onPress={() => router.push('/transaction-history')}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
               <Text style={styles.viewAllText}>{t.viewAll}</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.listCard}>
+          <View style={styles.group}>
             {transactions.length ? (
-              transactions.map((transaction) => (
+              transactions.map((transaction, index) => (
                 <TouchableOpacity
                   key={transaction.id}
-                  style={styles.listItem}
-                  activeOpacity={0.82}
+                  style={[
+                    styles.row,
+                    index < transactions.length - 1 && styles.rowDivider,
+                  ]}
+                  activeOpacity={0.7}
                   onPress={() => openTransactionDetail(transaction)}
                 >
                   <View
@@ -387,15 +409,15 @@ console.log('Profile load response:', result);
                     <Feather
                       name={transaction.type === 'credit' ? 'arrow-down-left' : 'arrow-up-right'}
                       size={18}
-                      color={transaction.type === 'credit' ? '#10B981' : '#EF4444'}
+                      color={transaction.type === 'credit' ? '#059669' : '#DC2626'}
                     />
                   </View>
-                  <View style={styles.listContent}>
-<Text style={styles.listTitle}>
-  {transaction.description
-    .replaceAll("_", " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase())}
-</Text>
+                  <View style={styles.rowContent}>
+                    <Text style={styles.listTitle} numberOfLines={1}>
+                      {transaction.description
+                        .replaceAll("_", " ")
+                        .replace(/\b\w/g, (c) => c.toUpperCase())}
+                    </Text>
                     <Text style={styles.listDate}>{transaction.date}</Text>
                   </View>
                   <Text
@@ -406,37 +428,47 @@ console.log('Profile load response:', result);
                   >
                     {transaction.type === 'credit' ? '+' : '-'}{"\u20B9"}{transaction.amount}
                   </Text>
-                  <Feather name="chevron-right" size={18} color="#94A3B8" />
+                  <Feather name="chevron-right" size={18} color="#B8AFC7" />
                 </TouchableOpacity>
               ))
             ) : (
-              <Text style={styles.emptyText}>{t.noTransactions}</Text>
+              <View style={styles.emptyWrap}>
+                <Feather name="inbox" size={22} color="#B8AFC7" />
+                <Text style={styles.emptyText}>{t.noTransactions}</Text>
+              </View>
             )}
           </View>
         </View>
 
+        {/* Call history */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t.callHistory}</Text>
-            <TouchableOpacity onPress={() => router.push('/call-history')}>
+            <Text style={styles.sectionTitleInline}>{t.callHistory}</Text>
+            <TouchableOpacity
+              onPress={() => router.push('/call-history')}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
               <Text style={styles.viewAllText}>{t.viewAll}</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.listCard}>
+          <View style={styles.group}>
             {callHistory.length ? (
-              callHistory.map((call) => (
-        <TouchableOpacity
-          key={call.id}
-          style={styles.listItem}
-          activeOpacity={0.82}
-          onPress={() =>
-   router.push({
-      pathname: "/(tabs)/astrologer-details",
-      params:  { id: call.astrologerId },
-    })
-  }
-        >
-                            <View style={styles.iconCircle}>
+              callHistory.map((call, index) => (
+                <TouchableOpacity
+                  key={call.id}
+                  style={[
+                    styles.row,
+                    index < callHistory.length - 1 && styles.rowDivider,
+                  ]}
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(tabs)/astrologer-details",
+                      params: { id: call.astrologerId },
+                    })
+                  }
+                >
+                  <View style={styles.iconCircle}>
                     <Feather
                       name={
                         call.type === 'video'
@@ -449,179 +481,281 @@ console.log('Profile load response:', result);
                       color="#4A148C"
                     />
                   </View>
-                  <View style={styles.listContent}>
-                    <Text style={styles.listTitle}>{call.astrologerName}</Text>
+                  <View style={styles.rowContent}>
+                    <Text style={styles.listTitle} numberOfLines={1}>{call.astrologerName}</Text>
                     <Text style={styles.listDate}>{call.duration} on {call.date}</Text>
                   </View>
                   <Text style={styles.callAmount}>{"\u20B9"}{call.amount}</Text>
                 </TouchableOpacity>
               ))
             ) : (
-              <Text style={styles.emptyText}>{t.noCallHistory}</Text>
+              <View style={styles.emptyWrap}>
+                <Feather name="phone-off" size={22} color="#B8AFC7" />
+                <Text style={styles.emptyText}>{t.noCallHistory}</Text>
+              </View>
             )}
           </View>
         </View>
 
+        {/* Language */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t.languageSettings}</Text>
-          <View style={styles.languageCard}>
+          <View style={styles.segment}>
             {['en', 'hi', 'bn'].map((lang) => (
               <TouchableOpacity
                 key={lang}
-                style={[styles.languageOption, language === lang && styles.languageOptionActive]}
+                style={[styles.segmentOption, language === lang && styles.segmentOptionActive]}
+                activeOpacity={0.8}
                 onPress={() => changeLanguage(lang)}
               >
-                <Text style={[styles.languageText, language === lang && styles.languageTextActive]}>
+                <Text style={[styles.segmentText, language === lang && styles.segmentTextActive]}>
                   {t.languages[lang === 'en' ? 'English' : lang === 'hi' ? 'Hindi' : 'Bengali']}
                 </Text>
-                {language === lang && <Feather name="check" size={20} color="#4A148C" />}
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-      
+        {/* Help + Logout */}
+        <View style={styles.section}>
+          <View style={styles.group}>
+            <TouchableOpacity
+              style={styles.row}
+              activeOpacity={0.7}
+              onPress={() => router.push('/help')}
+            >
+              <View style={styles.rowIcon}>
+                <Feather name="help-circle" size={18} color="#4A148C" />
+              </View>
+              <Text style={styles.menuText}>{t.helpCenter}</Text>
+              <Feather name="chevron-right" size={20} color="#B8AFC7" />
+            </TouchableOpacity>
+          </View>
+        </View>
 
-        <TouchableOpacity style={styles.helpBtn} onPress={() => router.push('/help')}>
-          <Feather name="help-circle" size={20} color="#4A148C" />
-          <Text style={styles.helpText}>{t.helpCenter}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <Feather name="log-out" size={20} color="#EF4444" />
+        <TouchableOpacity style={styles.logoutBtn} activeOpacity={0.8} onPress={handleLogout}>
+          <Feather name="log-out" size={18} color="#DC2626" />
           <Text style={styles.logoutText}>{t.logout}</Text>
         </TouchableOpacity>
 
-        <View style={{ height: 40 }} />
+        <View style={{ height: 32 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
+const INK = '#1F1235';
+const MUTED = '#7C6F8F';
+const PURPLE = '#4A148C';
+const PLUM = '#2A0B4F';
+const SAFFRON = '#FF9933';
+const BG = '#F7F5FB';
+const BORDER = '#EFEAF5';
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF7EA',
+    backgroundColor: PLUM,
+  },
+  scroll: {
+    flex: 1,
+    backgroundColor: BG,
+  },
+  scrollContent: {
+    paddingBottom: 24,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFF7EA',
+    backgroundColor: BG,
   },
   loadingBadge: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   loadingText: {
     fontSize: 15,
-    fontWeight: '800',
-    color: '#4A148C',
+    fontWeight: '700',
+    color: PURPLE,
   },
-  header: {
-    paddingTop: 8,
-    paddingBottom: 8,
-    paddingHorizontal: 20,
+
+  /* Top bar */
+  topBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    overflow: 'hidden',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: PLUM,
   },
-  headerOrb: {
-    position: 'absolute',
-    right: -42,
-    top: -62,
-    width: 170,
-    height: 170,
-    borderRadius: 85,
-    backgroundColor: 'rgba(255, 215, 0, 0.16)',
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
   },
-  headerTitleWrap: {
+  topBarTitleWrap: {
     flex: 1,
     marginLeft: 12,
     minWidth: 0,
   },
-  headerTitle: {
-    fontSize: 18,
+  topBarTitle: {
+    fontSize: 20,
     fontWeight: '800',
     color: '#FFF',
   },
-  headerSubtitle: {
-    marginTop: 2,
-    fontSize: 8,
-    fontWeight: '700',
-    color: 'rgba(255, 244, 211, 0.82)',
+  topBarSubtitle: {
+    marginTop: 1,
+    fontSize: 12,
+    fontWeight: '500',
+    color: 'rgba(255, 244, 211, 0.75)',
   },
-  scrollContent: {
-    paddingBottom: 34,
-  },
-  profileCard: {
-    backgroundColor: '#FFF',
-    marginTop: -18,
-    marginHorizontal: 20,
-    borderRadius: 28,
-    padding: 24,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(74, 20, 140, 0.08)',
-    shadowColor: '#4A148C',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.13,
-    shadowRadius: 22,
-    elevation: 7,
+
+  /* Hero */
+  hero: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 56,
     overflow: 'hidden',
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
-  profileCardGlow: {
+  heroOrb: {
     position: 'absolute',
-    top: -62,
-    right: -56,
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: 'rgba(255, 153, 51, 0.12)',
+    right: -50,
+    top: -70,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255, 215, 0, 0.12)',
+  },
+  heroRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
   },
   avatarFrame: {
-    width: 112,
-    height: 112,
-    borderRadius: 56,
-    padding: 4,
-    marginBottom: 16,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    padding: 3,
   },
   avatar: {
     width: '100%',
     height: '100%',
-    borderRadius: 50,
-    borderWidth: 3,
+    borderRadius: 41,
+    borderWidth: 2,
     borderColor: '#FFFFFF',
   },
+  heroInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
   userName: {
-    fontSize: 23,
-    fontWeight: '900',
-    color: '#2B164C',
-    marginBottom: 8,
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#FFF',
     letterSpacing: 0.2,
   },
-  profilePhonePill: {
+  phoneRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 999,
-    backgroundColor: '#FFF7EA',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 153, 51, 0.16)',
-    maxWidth: '100%',
+    marginTop: 4,
   },
-  profilePhoneText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#8B6B45',
+  phoneText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: 'rgba(255,255,255,0.8)',
     flexShrink: 1,
   },
+  editProfileBtn: {
+    alignSelf: 'flex-start',
+    marginTop: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    backgroundColor: '#FFD700',
+  },
+  editProfileText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: PLUM,
+  },
+
+  /* Wallet */
+  walletWrap: {
+    paddingHorizontal: 20,
+    marginTop: -36,
+  },
+  walletCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 20,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    shadowColor: PLUM,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.14,
+    shadowRadius: 20,
+    elevation: 6,
+  },
+  walletLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+    minWidth: 0,
+  },
+  walletIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFF3DF',
+  },
+  walletTextWrap: {
+    flexShrink: 1,
+  },
+  walletLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: MUTED,
+  },
+  walletAmount: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: INK,
+    marginTop: 1,
+  },
+  addMoneyBtn: {
+    backgroundColor: PURPLE,
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  addMoneyText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFF',
+  },
+
+  /* Sections */
   section: {
     paddingHorizontal: 20,
     marginTop: 24,
@@ -630,156 +764,84 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
     gap: 12,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#2B164C',
-    marginBottom: 12,
+    fontSize: 17,
+    fontWeight: '800',
+    color: INK,
+    marginBottom: 10,
+  },
+  sectionTitleInline: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: INK,
     flexShrink: 1,
   },
   viewAllText: {
     fontSize: 14,
-    color: '#B66A00',
-    fontWeight: '800',
+    color: PURPLE,
+    fontWeight: '700',
     flexShrink: 0,
   },
-  detailCard: {
+
+  /* Grouped list */
+  group: {
     backgroundColor: '#FFF',
-    borderRadius: 22,
-    padding: 16,
-    gap: 16,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'rgba(74, 20, 140, 0.08)',
-    shadowColor: '#4A148C',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 3,
+    borderColor: BORDER,
+    overflow: 'hidden',
   },
-  detailRow: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    minHeight: 60,
   },
-  detailIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+  rowDivider: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E4DDEE',
+  },
+  rowIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F8F1FF',
-    borderWidth: 1,
-    borderColor: 'rgba(74, 20, 140, 0.08)',
+    backgroundColor: '#F3ECFB',
   },
-  detailContent: {
+  rowContent: {
     flex: 1,
     minWidth: 0,
   },
-  detailLabel: {
+  rowLabel: {
     fontSize: 12,
-    color: '#8E6CA8',
-    marginBottom: 4,
-    fontWeight: '700',
+    color: MUTED,
+    fontWeight: '600',
+    marginBottom: 2,
   },
-  detailValue: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#2B164C',
-  },
-  walletCard: {
-    borderRadius: 24,
-    padding: 20,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 215, 0, 0.22)',
-    shadowColor: '#4A148C',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.16,
-    shadowRadius: 20,
-    elevation: 6,
-  },
-  walletOrb: {
-    position: 'absolute',
-    right: -38,
-    top: -48,
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: 'rgba(255, 215, 0, 0.16)',
-  },
-  walletContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    marginBottom: 16,
-    minWidth: 0,
-  },
-  walletIcon: {
-    width: 58,
-    height: 58,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.13)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 215, 0, 0.24)',
-  },
-  walletLabel: {
-    fontSize: 14,
-    color: '#FFF',
-    opacity: 0.9,
-  },
-  walletAmount: {
-    fontSize: 32,
-    fontWeight: '900',
-    color: '#FFF',
-  },
-  addMoneyBtn: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.18)',
-  },
-  addMoneyText: {
+  rowValue: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#FFF',
+    color: INK,
   },
-  listCard: {
-    backgroundColor: '#FFF',
-    borderRadius: 22,
-    padding: 10,
-    gap: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(74, 20, 140, 0.08)',
-    shadowColor: '#4A148C',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 3,
+  menuText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '700',
+    color: INK,
   },
-  listItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 10,
-    borderRadius: 18,
-    backgroundColor: '#FFFDF8',
-  },
+
+  /* History items */
   iconCircle: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F8F1FF',
+    backgroundColor: '#F3ECFB',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -789,141 +851,95 @@ const styles = StyleSheet.create({
   debitBg: {
     backgroundColor: '#FEE2E2',
   },
-  listContent: {
-    flex: 1,
-    minWidth: 0,
-  },
   listTitle: {
     fontSize: 14,
-    fontWeight: '800',
-    color: '#2B164C',
+    fontWeight: '700',
+    color: INK,
     marginBottom: 2,
-    flexShrink: 1,
   },
   listDate: {
     fontSize: 12,
-    color: '#8E6CA8',
-    fontWeight: '600',
+    color: MUTED,
+    fontWeight: '500',
   },
   listAmount: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
     flexShrink: 0,
   },
   creditText: {
-    color: '#10B981',
+    color: '#059669',
   },
   debitText: {
-    color: '#EF4444',
+    color: '#DC2626',
   },
   callAmount: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#2B164C',
+    color: INK,
     flexShrink: 0,
+  },
+  emptyWrap: {
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 26,
   },
   emptyText: {
     fontSize: 14,
-    color: '#8E6CA8',
+    color: MUTED,
     textAlign: 'center',
-    paddingVertical: 18,
-    fontWeight: '700',
-  },
-  languageCard: {
-    backgroundColor: '#FFF',
-    borderRadius: 22,
-    padding: 8,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(74, 20, 140, 0.08)',
-  },
-  languageOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 16,
-    backgroundColor: '#FFF7EA',
-  },
-  languageOptionActive: {
-    backgroundColor: '#F8F1FF',
-    borderWidth: 2,
-    borderColor: '#4A148C',
-  },
-  languageText: {
-    fontSize: 16,
     fontWeight: '600',
-    color: '#7A637D',
   },
-  languageTextActive: {
-    color: '#4A148C',
+
+  /* Language segmented control */
+  segment: {
+    flexDirection: 'row',
+    backgroundColor: '#EBE4F4',
+    borderRadius: 16,
+    padding: 4,
   },
+  segmentOption: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  segmentOptionActive: {
+    backgroundColor: '#FFF',
+    shadowColor: PLUM,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  segmentText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: MUTED,
+  },
+  segmentTextActive: {
+    color: PURPLE,
+    fontWeight: '800',
+  },
+
+  /* Logout */
   logoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#FFF',
-    marginHorizontal: 20,
-    marginTop: 24,
-    padding: 16,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#FEE2E2',
-  },
-  logoutText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#EF4444',
-  },
-  editProfileBtn: {
-    marginTop: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 999,
-    borderWidth: 1.5,
-    borderColor: 'rgba(74, 20, 140, 0.14)',
-    backgroundColor: '#F8F1FF',
-  },
-  editProfileText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#4A148C',
-  },
-  backBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 21,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.13)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.16)',
-  },
-  helpBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: '#FFF',
     marginHorizontal: 20,
     marginTop: 16,
-    padding: 16,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: 'rgba(74, 20, 140, 0.08)',
-    shadowColor: '#4A148C',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 2,
+    paddingVertical: 15,
+    borderRadius: 16,
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
   },
-  helpText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#4A148C',
+  logoutText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#DC2626',
   },
 });

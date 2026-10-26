@@ -14,16 +14,19 @@ const getTranslations = (lang: string) => {
       home: "Home",
       astrologers: "Astrologers",
       horoscope: "Horoscope",
+      reports: "Reports",
     },
     hi: {
       home: "होम",
       astrologers: "ज्योतिषी",
       horoscope: "राशिफल",
+      reports: "रिपोर्ट",
     },
     bn: {
       home: "হোম",
       astrologers: "জ্যোতিষী",
       horoscope: "রাশিফল",
+      reports: "রিপোর্ট",
     },
   };
   return translations[lang] || translations.en;
@@ -95,8 +98,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="reports"
         options={{
-          title: "",
-          href: null,
+          title: t.reports,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="doc.text.fill" color={color} />,
         }}
       />
   

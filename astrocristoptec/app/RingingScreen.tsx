@@ -1,7 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Animated,
+  Easing,
   NativeModules,
   StatusBar,
   StyleSheet,
@@ -9,6 +11,8 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  Image,
+  useWindowDimensions,
 } from "react-native";
 
 const { CallManager } = NativeModules;
@@ -32,6 +36,12 @@ export default function RingingScreen() {
   }>();
 
   const [loading, setLoading] = useState(false);
+  const { width, height } = useWindowDimensions();
+  const outerRingPulse = useRef(new Animated.Value(0)).current;
+  const middleRingPulse = useRef(new Animated.Value(0)).current;
+
+  const scale = Math.min(Math.max(Math.min(width / 375, height / 812), 0.78), 1.12);
+  const styles = useMemo(() => createStyles(scale, width), [scale, width]);
 
   const name = callerName || "Incoming Call";
   const type = callType || "audio";
@@ -48,6 +58,37 @@ export default function RingingScreen() {
       channelName: resolvedChannelName,
     });
   }, []);
+
+  useEffect(() => {
+    const createPulse = (value: Animated.Value, delay = 0) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(value, {
+            toValue: 1,
+            duration: 1500,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(value, {
+            toValue: 0,
+            duration: 1500,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ])
+      );
+
+    const outerAnimation = createPulse(outerRingPulse);
+    const middleAnimation = createPulse(middleRingPulse, 450);
+    outerAnimation.start();
+    middleAnimation.start();
+
+    return () => {
+      outerAnimation.stop();
+      middleAnimation.stop();
+    };
+  }, [middleRingPulse, outerRingPulse]);
 
   const stopNativeCall = () => {
     if (CallManager?.clearPendingIncomingCall) {
@@ -216,102 +257,228 @@ export default function RingingScreen() {
 
   return (
     <View style={styles.container}>
-    <Text style={styles.appName}>Bhavishya Katha</Text>
+      <View style={styles.content}>
+        <View style={styles.logoFrame}>
+          <Image
+            source={require("../assets/icon.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
+        <Text style={styles.appName}>Bhavishya Katha</Text>
 
-      <Text style={styles.incomingText}>
-        {type === "chat"
-          ? "Incoming Chat Request"
-          : `Incoming ${type} call`}
-      </Text>
+        <Text style={styles.incomingText}>
+          {type === "chat"
+            ? "Incoming Chat Request"
+            : `Incoming ${type} call`}
+        </Text>
 
-      <Ionicons
-        name={getIcon()}
-        size={80}
-        color="#fff"
-        style={{ marginVertical: 20 }}
-      />
+        <TouchableOpacity
+          disabled={loading}
+          activeOpacity={0.85}
+          onPress={handleAnswer}
+          hitSlop={12 * scale}
+          accessibilityRole="button"
+          accessibilityLabel={type === "chat" ? "Accept chat" : "Accept call"}
+          style={styles.requestIcon}
+        >
+          <Animated.View
+            style={[
+              styles.requestIconRingOuter,
+              {
+                opacity: outerRingPulse.interpolate({ inputRange: [0, 1], outputRange: [0.5, 0.12] }),
+                transform: [{ scale: outerRingPulse.interpolate({ inputRange: [0, 1], outputRange: [0.82, 1.08] }) }],
+              },
+            ]}
+          />
+          <Animated.View
+            style={[
+              styles.requestIconRingMiddle,
+              {
+                opacity: middleRingPulse.interpolate({ inputRange: [0, 1], outputRange: [0.75, 0.2] }),
+                transform: [{ scale: middleRingPulse.interpolate({ inputRange: [0, 1], outputRange: [0.86, 1.08] }) }],
+              },
+            ]}
+          />
+          <View style={styles.requestIconCircle}>
+            <Ionicons name={getIcon()} size={styles.requestIconGlyph.fontSize} color="#351047" />
+          </View>
+        </TouchableOpacity>
 
-      <Text style={styles.name}>{name}</Text>
+        <Text style={styles.name}>{name}</Text>
+        <Text style={styles.requestDescription}>
+          has accepted your consultation request
+        </Text>
+      </View>
 
       {loading && (
-        <View style={{ marginTop: 20 }}>
-          <ActivityIndicator size="large" color="#fff" />
-          <Text style={{ color: "#aaa", marginTop: 10 }}>
-            Processing...
-          </Text>
+        <View style={styles.loading}>
+          <ActivityIndicator size={32 * scale} color="#fff" />
+          <Text style={styles.loadingText}>Processing...</Text>
         </View>
       )}
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          disabled={loading}
-          style={[
-            styles.button,
-            styles.reject,
-            loading && { opacity: 0.5 },
-          ]}
-          onPress={handleReject}
-        >
-          <Ionicons name="call" size={28} color="#fff" />
-        </TouchableOpacity>
+        <View style={styles.action}>
+          <TouchableOpacity
+            disabled={loading}
+            style={[styles.button, styles.reject, loading && styles.disabled]}
+            onPress={handleReject}
+          >
+            <Ionicons name="call" size={styles.buttonIcon.fontSize} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.actionLabel}>Decline</Text>
+        </View>
 
-        <TouchableOpacity
-          disabled={loading}
-          style={[
-            styles.button,
-            styles.answer,
-            loading && { opacity: 0.5 },
-          ]}
-          onPress={handleAnswer}
-        >
-          <Ionicons name="call" size={28} color="#fff" />
-        </TouchableOpacity>
+        <View style={styles.action}>
+          <TouchableOpacity
+            disabled={loading}
+            style={[styles.button, styles.answer, loading && styles.disabled]}
+            onPress={handleAnswer}
+          >
+            <Ionicons name={type === "chat" ? "chatbubble" : getIcon()} size={styles.buttonIcon.fontSize} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.actionLabel}>
+            {type === "chat" ? "Accept Chat" : "Accept Call"}
+          </Text>
+        </View>
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (scale: number, width: number) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#121212",
+    backgroundColor: "#1d032d",
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 24 * scale,
+  },
+  content: {
+    alignItems: "center",
+    width: "100%",
+    marginTop: 8 * scale,
+  },
+  logoFrame: {
+    width: 0 * scale,
+    height: 0 * scale,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#21052f",
+    borderRadius: 12 * scale,
+    shadowColor: "#000",
+    shadowOpacity: 0.32,
+    shadowRadius: 12 * scale,
+    shadowOffset: { width: 0, height: 7 * scale },
+    elevation: 8 * scale,
+    marginBottom: 26 * scale,
+  },
+  logo: {
+    width: 112 * scale,
+    height: 112 * scale,
   },
   incomingText: {
-    color: "#aaa",
-    fontSize: 18,
+    color: "#dd98f8",
+    fontSize: 20 * scale,
+    fontWeight: "500",
+    marginTop: 26 * scale,
   },
   name: {
     color: "#fff",
-    fontSize: 28,
+    fontSize: 30 * scale,
     fontWeight: "bold",
+    textAlign: "center",
+    marginTop: 18 * scale,
+  },
+  requestDescription: {
+    color: "#dd98f8",
+    fontSize: 15 * scale,
+    textAlign: "center",
+    marginTop: 10 * scale,
+  },
+  requestIcon: {
+    width: 210 * scale,
+    height: 190 * scale,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 26 * scale,
+  },
+  requestIconRingOuter: {
+    position: "absolute",
+    width: 210 * scale,
+    height: 210 * scale,
+    borderRadius: 105 * scale,
+    backgroundColor: "rgba(104, 45, 139, 0.16)",
+  },
+  requestIconRingMiddle: {
+    position: "absolute",
+    width: 170 * scale,
+    height: 170 * scale,
+    borderRadius: 85 * scale,
+    backgroundColor: "rgba(122, 54, 160, 0.28)",
+  },
+  requestIconCircle: {
+    width: 112 * scale,
+    height: 112 * scale,
+    borderRadius: 56 * scale,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
   },
   buttonContainer: {
     flexDirection: "row",
-    marginTop: 60,
-    width: "60%",
-    justifyContent: "space-between",
+    marginTop: 42 * scale,
+    width: Math.min(width * 0.86, 360 * scale),
+    justifyContent: "space-around",
+    alignItems: "flex-start",
+  },
+  action: {
+    alignItems: "center",
+    minWidth: 115 * scale,
   },
   button: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 108 * scale,
+    height: 108 * scale,
+    borderRadius: 54 * scale,
     justifyContent: "center",
     alignItems: "center",
   },
   reject: {
-    backgroundColor: "#e53935",
+    backgroundColor: "#f22f36",
     transform: [{ rotate: "135deg" }],
   },
   answer: {
-    backgroundColor: "#43a047",
+    backgroundColor: "#18b930",
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+  actionLabel: {
+    color: "#fff",
+    fontSize: 19 * scale,
+    marginTop: 22 * scale,
+    textAlign: "center",
   },
   appName: {
-  color: "#FFFFFF",
-  fontSize: 32,
-  fontWeight: "bold",
-  marginBottom: 16,
-  letterSpacing: 0.5,
-},
+    color: "#FFFFFF",
+    fontSize: 32 * scale,
+    fontWeight: "bold",
+    letterSpacing: 0.5 * scale,
+  },
+  loading: {
+    position: "absolute",
+    bottom: 28 * scale,
+    alignItems: "center",
+  },
+  loadingText: {
+    color: "#aaa",
+    marginTop: 10 * scale,
+  },
+  buttonIcon: {
+    fontSize: 34 * scale,
+  },
+  requestIconGlyph: {
+    fontSize: 54 * scale,
+  },
 });

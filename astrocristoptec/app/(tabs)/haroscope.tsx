@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
@@ -11,6 +11,7 @@ import {
   Image,
   ImageSourcePropType,
   ScrollView,
+  Share,
   StatusBar,
   StyleSheet,
   Text,
@@ -369,7 +370,11 @@ const HERO_STAT_ICONS: Record<
 // =====================================================
 
 const HoroscopeScreen = () => {
-  const [selectedSign, setSelectedSign] = useState<string | null>('Aries');
+  const { sign: linkedSign } = useLocalSearchParams<{ sign?: string }>();
+  const validLinkedSign = ZODIAC_SIGNS.find(
+    (item) => item.key.toLowerCase() === String(linkedSign ?? "").toLowerCase(),
+  )?.key;
+  const [selectedSign, setSelectedSign] = useState<string | null>(validLinkedSign ?? "Aries");
 
   const [horoscope, setHoroscope] = useState<HoroscopeData | null>(null);
 
@@ -387,7 +392,7 @@ const HoroscopeScreen = () => {
     (async () => {
       try {
         const storedLanguage = await AsyncStorage.getItem(
-          LANGUAGE_STORAGE_KEY
+          "user-language"
         );
 
         if (
@@ -409,7 +414,7 @@ const HoroscopeScreen = () => {
     setLanguage(next);
 
     try {
-      await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, next);
+   //   await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, next);
     } catch (err) {
       console.error("Failed to persist language:", err);
     }
@@ -420,9 +425,23 @@ const HoroscopeScreen = () => {
   // ===================================================
 useEffect(() => {
   if (languageLoaded) {
-    fetchHoroscope("Aries");
+    fetchHoroscope(selectedSign ?? "Aries");
   }
 }, [languageLoaded]);
+
+  const handleShareHoroscope = async () => {
+    const signToShare = selectedSign ?? "Aries";
+    const url = `https://bhavishyakatha.in/haroscope?sign=${encodeURIComponent(signToShare)}`;
+    try {
+      await Share.share({
+        title: `${signToShare} Horoscope`,
+        message: `Check out the ${signToShare} horoscope on Bhavishya Katha:\n${url}`,
+        url,
+      });
+    } catch (shareError) {
+      console.error("Failed to share horoscope:", shareError);
+    }
+  };
   const fetchHoroscope = async (sign: string) => {
     try {
       setSelectedSign(sign);
@@ -668,9 +687,15 @@ useEffect(() => {
         <Text style={styles.headerTitle} numberOfLines={1}>
           {t.title}
         </Text>
-        <View style={styles.headerIconBadge}>
-          <Feather name="moon" size={16} color="#FFD700" />
-        </View>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Share horoscope"
+          activeOpacity={0.75}
+          onPress={handleShareHoroscope}
+          style={styles.headerIconBadge}
+        >
+          <Feather name="share-2" size={16} color="#FFD700" />
+        </TouchableOpacity>
       </LinearGradient>
         {/* =========================================
             LANGUAGE SWITCH

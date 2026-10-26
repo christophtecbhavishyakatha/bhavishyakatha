@@ -24,6 +24,7 @@ const MAPPING = {
   "star.fill": "star",
   "bubble.left.and.bubble.right.fill": "chat", // Chat tab (you need this!)
   "person.3.fill": "group", // Astrologers tab (you need this!)
+  "doc.text.fill": "description",
 } as IconMapping;
 
 /**

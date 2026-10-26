@@ -13,6 +13,7 @@ import {
   Modal,
   Pressable,
   ScrollView,
+  Share,
   StatusBar,
   StyleSheet,
   Text,
@@ -237,10 +238,13 @@ type AstrologerPhoto = {
 };
 
 type RequestLocationSuggestion = {
+  place_id?: string;
   label?: string;
+  main_text?: string;
+  secondary_text?: string;
   display_name?: string;
-  lat: string;
-  lon: string;
+  lat?: string | number | null;
+  lon?: string | number | null;
 };
 
 type RequestDraft = {
@@ -393,6 +397,8 @@ export default function AstrologerDetails() {
   const [requestProfileLoading, setRequestProfileLoading] = useState(false);
   const [requestProfileError, setRequestProfileError] = useState("");
   const [requestLocationSuggestions, setRequestLocationSuggestions] = useState<RequestLocationSuggestion[]>([]);
+  const [showLocationSearchModal, setShowLocationSearchModal] = useState(false);
+  const [locationSearchQuery, setLocationSearchQuery] = useState("");
   const [showRequestDatePicker, setShowRequestDatePicker] = useState(false);
   const [showRequestTimePicker, setShowRequestTimePicker] = useState(false);
   const [unknownBirthTime, setUnknownBirthTime] = useState(false);
@@ -401,6 +407,20 @@ export default function AstrologerDetails() {
 
   // Get current translations
   const t = { ...translations.en, ...translations[language] };
+
+  const handleShareAstrologer = async () => {
+    if (!astrologer?.id) return;
+    const url = `https://bhavishyakatha.in/astrologer-details?id=${encodeURIComponent(String(astrologer.id))}`;
+    try {
+      await Share.share({
+        title: `Astrologer ${astrologer.displayName}`,
+        message: `Check out ${astrologer.displayName} on Bhavishya Katha:\n${url}`,
+        url,
+      });
+    } catch (shareError) {
+      console.error("Failed to share astrologer:", shareError);
+    }
+  };
 
   /* 🌍 Load language preference */
   useFocusEffect(
@@ -625,7 +645,7 @@ export default function AstrologerDetails() {
     locationSearchTimeout.current = setTimeout(async () => {
       try {
         const res = await fetch(
-          `${API_BASE_URL}/location/search?q=${encodeURIComponent(query)}&limit=5&language=${language}`,
+          `${API_BASE_URL}/locationV1/searchV1?q=${encodeURIComponent(query)}&limit=5&language=${language}`,
         );
         const json = await res.json();
         setRequestLocationSuggestions(json?.data || []);
@@ -684,6 +704,42 @@ export default function AstrologerDetails() {
     setRequestLocationSuggestions([]);
     setShowRequestDatePicker(false);
     setShowRequestTimePicker(false);
+  };
+
+  const openLocationSearch = () => {
+    setLocationSearchQuery(requestDraft.location);
+    setRequestLocationSuggestions([]);
+    setShowLocationSearchModal(true);
+  };
+
+  const searchLocationFromModal = async () => {
+    const query = locationSearchQuery.trim();
+    if (query.length < 2) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/locationV1/searchV1?q=${encodeURIComponent(query)}&limit=5&language=${language}`);
+      const result = await response.json();
+      setRequestLocationSuggestions(result.status && Array.isArray(result.data) ? result.data : []);
+    } catch {
+      setRequestLocationSuggestions([]);
+    }
+  };
+
+  const selectLocationFromModal = async (suggestion: RequestLocationSuggestion) => {
+    let latitude = suggestion.lat;
+    let longitude = suggestion.lon;
+    let label = suggestion.label || suggestion.display_name || suggestion.main_text || "";
+    if ((!latitude || !longitude) && suggestion.place_id) {
+      const response = await fetch(`${API_BASE_URL}/locationV1/detailsV1?place_id=${encodeURIComponent(suggestion.place_id)}`);
+      const result = await response.json();
+      if (result.status && result.data) {
+        latitude = result.data.latitude;
+        longitude = result.data.longitude;
+        label = result.data.label || result.data.display_name || label;
+      }
+    }
+    setRequestDraft((prev) => ({ ...prev, location: label, latitude: latitude == null ? "" : String(latitude), longitude: longitude == null ? "" : String(longitude) }));
+    setRequestLocationSuggestions([]);
+    setShowLocationSearchModal(false);
   };
 
   const sendRequestWithBirthDetails = async () => {
@@ -1002,6 +1058,16 @@ export default function AstrologerDetails() {
           >
             <View style={styles.profileGlowOne} />
             <View style={styles.profileGlowTwo} />
+
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel={`Share ${astrologer.displayName}`}
+              activeOpacity={0.75}
+              onPress={handleShareAstrologer}
+              style={styles.shareButton}
+            >
+              <Feather name="share-2" size={18} color="#FFD700" />
+            </TouchableOpacity>
 
             <LinearGradient
               colors={["#FFD700", "#FF9933", "#FFFFFF"]}
@@ -1454,17 +1520,13 @@ export default function AstrologerDetails() {
                   </View>
                   <Text style={styles.updateProfileText}>{t.unknownBirthTime}</Text>
                 </TouchableOpacity>
+                <View style={styles.locationField}>
                 <Text style={styles.requestLabel}>{t.birthLocation}</Text>
-                <TextInput
-                  style={styles.requestInput}
-                  value={requestDraft.location}
-                  onChangeText={(location) => {
-                    setRequestProfileError("");
-                    setRequestDraft((prev) => ({ ...prev, location, latitude: "", longitude: "" }));
-                  }}
-                  placeholder={t.searchLocation}
-                  placeholderTextColor="#94A3B8"
-                />
+                <TouchableOpacity style={styles.requestInput} onPress={openLocationSearch} activeOpacity={0.8}>
+                  <Text style={requestDraft.location ? styles.requestValue : styles.requestPlaceholder}>
+                    {requestDraft.location || t.searchLocation}
+                  </Text>
+                </TouchableOpacity>
                 {!requestDraft.latitude && requestDraft.location.trim().length >= 2 ? <Text style={styles.locationHint}>{t.selectLocation}</Text> : null}
                 {requestLocationSuggestions.length > 0 && (
                   <View style={styles.locationDropdown}>
@@ -1472,16 +1534,42 @@ export default function AstrologerDetails() {
                       <TouchableOpacity
                         key={`${suggestion.display_name}-${index}`}
                         style={styles.locationOption}
-                        onPress={() => {
-                          setRequestDraft((prev) => ({ ...prev, location: suggestion.label || suggestion.display_name || "", latitude: String(suggestion.lat), longitude: String(suggestion.lon) }));
+                        onPress={async () => {
                           setRequestLocationSuggestions([]);
+                          let latitude = suggestion.lat;
+                          let longitude = suggestion.lon;
+                          let label = suggestion.label || suggestion.display_name || suggestion.main_text || "";
+
+                          if ((!latitude || !longitude) && suggestion.place_id) {
+                            try {
+                              const response = await fetch(
+                                `${API_BASE_URL}/locationV1/detailsV1?place_id=${encodeURIComponent(suggestion.place_id)}`,
+                              );
+                              const result = await response.json();
+                              if (result.status && result.data) {
+                                latitude = result.data.latitude;
+                                longitude = result.data.longitude;
+                                label = result.data.label || result.data.display_name || label;
+                              }
+                            } catch (error) {
+                              console.log("Location details error:", error);
+                            }
+                          }
+
+                          setRequestDraft((prev) => ({
+                            ...prev,
+                            location: label,
+                            latitude: latitude == null ? "" : String(latitude),
+                            longitude: longitude == null ? "" : String(longitude),
+                          }));
                         }}
                       >
-                        <Text style={styles.locationOptionText} numberOfLines={2}>{suggestion.display_name || suggestion.label}</Text>
+                        <Text style={styles.locationOptionText} numberOfLines={2}>{suggestion.main_text || suggestion.label || suggestion.display_name}</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
                 )}
+                </View>
                 <TouchableOpacity
                   style={styles.updateProfileRow}
                   onPress={() => setUpdateProfile((prev) => !prev)}
@@ -1529,6 +1617,31 @@ export default function AstrologerDetails() {
           }}
         />
       )}
+      <Modal visible={showLocationSearchModal} transparent animationType="slide" onRequestClose={() => setShowLocationSearchModal(false)}>
+        <KeyboardAvoidingView style={styles.locationSearchOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+          <View style={styles.locationSearchCard}>
+            <View style={styles.locationModalHeader}>
+              <Text style={styles.audioModalTitle}>{t.birthLocation}</Text>
+              <TouchableOpacity onPress={() => setShowLocationSearchModal(false)} hitSlop={10}>
+                <Feather name="x" size={24} color="#475569" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.locationSearchRow}>
+              <TextInput autoFocus style={styles.locationSearchInput} value={locationSearchQuery} onChangeText={setLocationSearchQuery} placeholder={t.searchLocation} placeholderTextColor="#94A3B8" returnKeyType="search" onSubmitEditing={() => void searchLocationFromModal()} />
+              <TouchableOpacity style={styles.locationSearchAction} onPress={() => void searchLocationFromModal()}><Text style={styles.audioOkText}>Search</Text></TouchableOpacity>
+            </View>
+            <ScrollView keyboardShouldPersistTaps="handled" style={styles.locationSearchResults}>
+              {requestLocationSuggestions.map((suggestion, index) => (
+                <TouchableOpacity key={`${suggestion.place_id || suggestion.display_name || index}`} style={styles.locationOption} onPress={() => void selectLocationFromModal(suggestion)}>
+                  <Text style={styles.locationOptionText}>{suggestion.main_text || suggestion.label || suggestion.display_name}</Text>
+                  {suggestion.secondary_text ? <Text style={styles.locationSecondaryText}>{suggestion.secondary_text}</Text> : null}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity style={styles.audioCancelBtn} onPress={() => setShowLocationSearchModal(false)}><Text style={styles.audioCancelText}>{t.cancel}</Text></TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
       <Modal visible={false} transparent animationType="fade">
         <View style={styles.audioModalOverlay}>
           <View style={styles.audioModalCard}>
@@ -1631,6 +1744,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.18,
     shadowRadius: 24,
     elevation: 8,
+  },
+  shareButton: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    zIndex: 2,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255,215,0,0.35)",
   },
   profileGlowOne: {
     position: "absolute",
@@ -2002,7 +2129,16 @@ modalContent: {
   requestValue: { fontSize: 14, color: "#1E293B", fontWeight: "600" },
   requestPlaceholder: { fontSize: 14, color: "#94A3B8" },
   locationHint: { marginTop: 7, fontSize: 12, color: "#B45309", fontWeight: "600" },
-  locationDropdown: { marginTop: 9, borderWidth: 1, borderColor: "rgba(74,20,140,0.12)", borderRadius: 14, overflow: "hidden", backgroundColor: "#FFFFFF" },
+  locationField: { position: "relative", zIndex: 20 },
+  locationSearchOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(15,23,42,0.55)" },
+  locationSearchCard: { backgroundColor: "#FFFFFF", borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: "80%" },
+  locationModalHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  locationSearchRow: { flexDirection: "row", gap: 8, marginTop: 14 },
+  locationSearchInput: { flex: 1, minHeight: 48, borderWidth: 1, borderColor: "#CBD5E1", borderRadius: 12, paddingHorizontal: 14, color: "#1E293B" },
+  locationSearchAction: { minHeight: 48, paddingHorizontal: 16, borderRadius: 12, backgroundColor: "#4A148C", justifyContent: "center", alignItems: "center" },
+  locationSearchResults: { marginTop: 12, maxHeight: 300 },
+  locationSecondaryText: { fontSize: 12, color: "#64748B", marginTop: 3 },
+  locationDropdown: { position: "absolute", left: 0, right: 0, bottom: 58, borderWidth: 1, borderColor: "rgba(74,20,140,0.12)", borderRadius: 14, overflow: "hidden", backgroundColor: "#FFFFFF", elevation: 10, zIndex: 30 },
   locationOption: { paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "rgba(148,163,184,0.16)" },
   locationOptionText: { fontSize: 13, color: "#334155", lineHeight: 18 },
   updateProfileRow: { flexDirection: "row", alignItems: "center", marginTop: 14, marginBottom: 6 },

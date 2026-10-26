@@ -1,264 +1,637 @@
-import { Feather } from "@expo/vector-icons";
+
 import React from "react";
+import { Feather } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import {
+  Image,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
+
 import {
   getReportCatalog,
   getReportScreenTranslations,
+  ReportCategory,
   SupportedLanguage,
 } from "../../lib/reportCatalog";
 
-type ReportsContentProps = {
+type Props = {
   language: SupportedLanguage;
-  footerMode?: "back" | "astrologers" | "none";
 };
+
+type FilterCategory = "all" | ReportCategory;
 
 export default function ReportsContent({
   language,
-  footerMode = "none",
-}: ReportsContentProps) {
+}: Props) {
   const router = useRouter();
+
   const t = getReportScreenTranslations(language);
-  const reportCatalog = getReportCatalog(language);
-  const yourReports = [
+  const reports = getReportCatalog(language);
+
+  const [selectedCategory, setSelectedCategory] =
+    React.useState<FilterCategory>("all");
+
+  const openFreeKundali = () => {
+    router.push("/report/free-kundali" as any);
+  };
+
+  const openReport = (reportSlug: string) => {
+    router.push(`/report/${reportSlug}` as any);
+  };
+
+  const filters: Array<{
+    key: FilterCategory;
+    label: string;
+  }> = [
     {
-      id: "1",
-      title: reportCatalog[0]?.title ?? "",
-      status: t.yourReportStatusProcessing,
-      icon: "clock",
-      color: "#FFA500",
+      key: "all",
+      label: t.allReports,
     },
     {
-      id: "2",
-      title: reportCatalog[1]?.title ?? "",
-      status: t.yourReportStatusCompleted,
-      icon: "check-circle",
-      color: "#28A745",
+      key: "basic",
+      label: t.categories.basic.replace(" Reports", ""),
+    },
+    {
+      key: "life",
+      label: t.categories.life.replace(" Reports", ""),
+    },
+    {
+      key: "family",
+      label: t.categories.family.replace(" Reports", ""),
+    },
+    {
+      key: "special",
+      label: t.categories.special.replace(" Reports", ""),
     },
   ];
 
-  const footer =
-    footerMode === "back"
-      ? {
-          title: t.continueExploring,
-          subtitle: t.continueExploringSubtitle,
-          icon: "arrow-left" as const,
-          onPress: () => router.back(),
-        }
-      : footerMode === "astrologers"
-        ? {
-            title: t.continueExploring,
-            subtitle: t.continueExploringSubtitle,
-            icon: "arrow-right" as const,
-            onPress: () => router.push("/(tabs)" as any),
-          }
-        : null;
+  const categories: ReportCategory[] = [
+    "basic",
+    "life",
+    "family",
+    "special",
+  ];
+
+  const visibleCategories =
+    selectedCategory === "all"
+      ? categories
+      : [selectedCategory];
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.content}
-    >
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t.premiumReports}</Text>
-        <Text style={styles.sectionSubtitle}>{t.premiumReportsSubtitle}</Text>
+    <View style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
+       
 
-        <View style={styles.grid}>
-          {reportCatalog.map((service) => (
-            <TouchableOpacity
-              key={service.slug}
-              style={styles.reportCard}
-              activeOpacity={0.85}
-              onPress={() => router.push(`/service/${service.slug}` as any)}
-            >
-              <View
-                style={[
-                  styles.reportIcon,
-                  { backgroundColor: service.color + "20" },
-                ]}
-              >
-                <Feather
-                  name={service.icon as any}
-                  size={24}
-                  color={service.color}
-                />
-              </View>
-              <Text style={styles.reportTitle}>{service.title}</Text>
-              <Text style={styles.price}>{"\u20B9"}{service.price}</Text>
-              <Text style={styles.tag}>{service.delivery}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
+        {/* =========================
+            FILTER
+        ========================== */}
 
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t.yourReports}</Text>
-          <TouchableOpacity activeOpacity={0.8}>
-            <Text style={styles.sectionAction}>{t.viewAll}</Text>
-          </TouchableOpacity>
-        </View>
-
-        {yourReports.map((report) => (
-          <TouchableOpacity
-            key={report.id}
-            style={styles.orderCard}
-            activeOpacity={0.85}
+        <View style={styles.filterContainer}>
+  {/*       <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterContent}
           >
-            <View>
-              <Text style={styles.orderTitle}>{report.title}</Text>
-              <Text style={[styles.orderStatus, { color: report.color }]}>
-                {report.status}
-              </Text>
-            </View>
-            <Feather name={report.icon as any} size={20} color={report.color} />
-          </TouchableOpacity>
-        ))}
-      </View>
+            {filters.map((filter) => {
+              const selected =
+                selectedCategory === filter.key;
 
-      {footer ? (
-        <TouchableOpacity style={styles.ctaCard} onPress={footer.onPress}>
-          <View style={styles.ctaContent}>
-            <Text style={styles.ctaTitle}>{footer.title}</Text>
-            <Text style={styles.ctaSubtitle}>{footer.subtitle}</Text>
-          </View>
-          <Feather name={footer.icon} size={22} color="#fff" />
-        </TouchableOpacity>
-      ) : null}
-    </ScrollView>
+              return (
+                <TouchableOpacity
+                  key={filter.key}
+                  activeOpacity={0.8}
+                  onPress={() =>
+                    setSelectedCategory(filter.key)
+                  }
+                  style={[
+                    styles.filterButton,
+                    selected &&
+                      styles.filterButtonSelected,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.filterText,
+                      selected &&
+                        styles.filterTextSelected,
+                    ]}
+                  >
+                    {filter.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+          */}  
+        </View>
+
+        {/* =========================
+            REPORT SECTIONS
+        ========================== */}
+
+        {visibleCategories.map((category) => {
+          const categoryReports = reports.filter(
+            (report) =>
+              report.category === category
+          );
+
+          if (!categoryReports.length) {
+            return null;
+          }
+
+          return (
+            <View
+              key={category}
+              style={styles.section}
+            >
+              <Text style={styles.sectionTitle}>
+                {t.categories[category]}
+              </Text>
+
+              <View style={styles.grid}>
+                {categoryReports.map((report) => {
+                  const isFree =
+                    report.finalPrice === 0;
+
+                  return (
+                    <TouchableOpacity
+                      key={report.slug}
+                      activeOpacity={0.9}
+                      style={styles.card}
+                      onPress={
+                        report.slug === "free-kundali"
+                          ? openFreeKundali
+                          : () =>
+                              openReport(report.slug)
+                      }
+                    >
+                      {/* =========================
+                          IMAGE
+                      ========================== */}
+
+                      <View
+                        style={styles.imageContainer}
+                      >
+                        <Image
+                          source={report.image}
+                          style={styles.reportImage}
+                          resizeMode="cover"
+                        />
+
+                        {/* DISCOUNT BADGE */}
+
+                        {isFree ? (
+                          <View style={[styles.discountBadge, styles.freeBadge]}>
+                            <Feather name="award" size={17} color="#FFFFFF" />
+                            <Text style={styles.discountText}>FREE</Text>
+                          </View>
+                        ) : (
+                          <View
+                            style={styles.discountBadge}
+                          >
+                            <Text
+                              style={
+                                styles.discountText
+                              }
+                            >
+                              {report.discountPercentage}%
+                              OFF
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+
+                      {/* =========================
+                          CARD CONTENT
+                      ========================== */}
+
+                      <View
+                        style={styles.cardContent}
+                      >
+                        <Text
+                          style={styles.cardTitle}
+                          numberOfLines={2}
+                        >
+                          {report.title}
+                        </Text>
+
+                        <Text
+                          style={styles.cardDescription}
+                          numberOfLines={3}
+                        >
+                          {report.description}
+                        </Text>
+
+                        <View style={styles.featureRow}>
+                          <View style={styles.featureItem}>
+                            <View style={styles.featureIcon}><Feather name="calendar" size={19} color="#6D28D9" /></View>
+                            <Text style={styles.featureText}>Detailed{"\n"}Birth Chart</Text>
+                          </View>
+                          <View style={styles.featureDivider} />
+                          <View style={styles.featureItem}>
+                            <View style={styles.featureIcon}><Feather name="bar-chart-2" size={19} color="#6D28D9" /></View>
+                            <Text style={styles.featureText}>Key Planet{"\n"}Insights</Text>
+                          </View>
+                          <View style={styles.featureDivider} />
+                      {/*     <View style={styles.featureItem}>
+                            <View style={styles.featureIcon}><Feather name="file-text" size={19} color="#6D28D9" /></View>
+                            <Text style={styles.featureText}>Personalized{"\n"}Summary</Text>
+                          </View>
+                          */}
+                        </View>
+
+                        {/* =========================
+                            PRICE
+                        ========================== */}
+
+                        <View
+                          style={styles.priceRow}
+                        >
+                          {isFree ? (
+                            <View style={styles.freeNotice}>
+                              <Feather name="gift" size={24} color="#16A34A" />
+                              <View style={styles.freeNoticeText}>
+                                <Text style={styles.freeNoticeTitle}>Completely Free for All Users</Text>
+                                <Text style={styles.freeNoticeSubtitle}>No charges, no hidden costs</Text>
+                              </View>
+                            </View>
+                          ) : (
+                            <>
+                              <Text
+                                style={
+                                  styles.finalPrice
+                                }
+                              >
+                                ₹{report.finalPrice}
+                              </Text>
+
+                              <Text
+                                style={
+                                  styles.originalPrice
+                                }
+                              >
+                                ₹
+                                {
+                                  report.originalPrice
+                                }
+                              </Text>
+                            </>
+                          )}
+                        </View>
+
+                        {/* =========================
+                            CTA
+                        ========================== */}
+
+                        <View
+                          style={styles.cta}
+                        >
+                          <Text
+                            style={styles.ctaText}
+                          >
+                            {isFree
+                              ? t.getFreeKundali
+                              : t.getReport}
+                          </Text>
+                          <Feather name="arrow-right" size={21} color="#FFFFFF" />
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+          );
+        })}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F8FAFC",
+  },
+
   content: {
     paddingHorizontal: 16,
-    paddingBottom: 40,
+    paddingBottom: 110,
   },
+
+  /* =========================
+     HEADER
+  ========================== */
+
+  header: {
+    paddingTop: 8,
+    paddingBottom: 18,
+  },
+
+  title: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#1E293B",
+  },
+
+  subtitle: {
+    marginTop: 7,
+    fontSize: 14,
+    lineHeight: 21,
+    color: "#64748B",
+  },
+
+  /* =========================
+     FILTER
+  ========================== */
+
+  filterContainer: {
+    marginBottom: 22,
+  },
+
+  filterContent: {
+    paddingRight: 8,
+    gap: 8,
+  },
+
+  filterButton: {
+    minHeight: 38,
+    paddingHorizontal: 17,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+
+  filterButtonSelected: {
+    backgroundColor: "#7C3AED",
+    borderColor: "#7C3AED",
+  },
+
+  filterText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#64748B",
+  },
+
+  filterTextSelected: {
+    color: "#FFFFFF",
+  },
+
+  /* =========================
+     SECTION
+  ========================== */
+
   section: {
     marginBottom: 24,
   },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-    gap: 10,
-  },
+
   sectionTitle: {
-    fontSize: 22,
+    marginBottom: 12,
+    fontSize: 20,
     fontWeight: "700",
     color: "#1E293B",
-    marginBottom: 8,
-    flexShrink: 1,
   },
-  sectionSubtitle: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: "#64748B",
-    marginBottom: 14,
-  },
-  sectionAction: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#4B7BEC",
-    flexShrink: 0,
-  },
+
+  /* =========================
+     GRID
+  ========================== */
+
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
     gap: 12,
   },
-  reportCard: {
-    flexBasis: "47%",
-    flexGrow: 1,
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 18,
-    alignItems: "center",
+
+  /* =========================
+     CARD
+  ========================== */
+
+  card: {
+    width: "100%",
+    borderRadius: 22,
+    backgroundColor: "#FFFFFF",
+    overflow: "hidden",
+
     elevation: 2,
-    minWidth: 0,
+
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.07,
+    shadowRadius: 6,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
   },
-  reportIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+
+  /* =========================
+     IMAGE
+  ========================== */
+
+  imageContainer: {
+    width: "100%",
+    height: 235,
+    position: "relative",
+    backgroundColor: "#E2E8F0",
+  },
+
+  reportImage: {
+    width: "100%",
+    height: "100%",
+  },
+
+  discountBadge: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+
+    borderRadius: 24,
+
+    backgroundColor: "#EF4444",
+  },
+
+  freeBadge: {
+    backgroundColor: "#16A34A",
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 12,
+    gap: 5,
+    borderWidth: 2,
+    borderColor: "#86EFAC",
   },
-  reportTitle: {
-    fontSize: 15,
-    fontWeight: "600",
+
+  discountText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "800",
+  },
+
+  /* =========================
+     CARD CONTENT
+  ========================== */
+
+  cardContent: {
+    padding: 18,
+  },
+
+  cardTitle: {
+    fontSize: 22,
+    lineHeight: 28,
+    fontWeight: "800",
     color: "#1E293B",
-    textAlign: "center",
-    alignSelf: "stretch",
   },
-  price: {
+
+  cardDescription: {
+    marginTop: 7,
+    minHeight: 42,
+
+    fontSize: 15,
+    lineHeight: 22,
+    color: "#64748B",
+  },
+
+  /* =========================
+     PRICE
+  ========================== */
+
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 16,
+    gap: 7,
+    width: "100%",
+  },
+
+  finalPrice: {
     fontSize: 18,
     fontWeight: "800",
     color: "#1E293B",
-    marginTop: 8,
   },
-  tag: {
-    fontSize: 10,
-    marginTop: 8,
-    backgroundColor: "#FFE066",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    color: "#5F4B00",
-    fontWeight: "600",
+
+  originalPrice: {
+    fontSize: 12,
+    color: "#94A3B8",
+    textDecorationLine: "line-through",
   },
-  orderCard: {
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    padding: 16,
+
+  freePrice: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#16A34A",
+  },
+
+  freePriceGroup: {
+    gap: 2,
+  },
+
+  featureRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
-    elevation: 2,
+    justifyContent: "space-between",
+    marginTop: 18,
+    paddingVertical: 4,
+  },
+
+  featureItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+
+  featureIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "#F3E8FF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 6,
+  },
+
+  featureText: {
+    color: "#334155",
+    fontSize: 11,
+    lineHeight: 15,
+    textAlign: "center",
+  },
+
+  featureDivider: {
+    width: 1,
+    height: 55,
+    backgroundColor: "#E2E8F0",
+  },
+
+  freeNotice: {
+    flex: 1,
+    minHeight: 72,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: "#ECFDF3",
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
-  orderTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1E293B",
-    flexShrink: 1,
+
+  freeNoticeText: {
+    flex: 1,
   },
-  orderStatus: {
-    fontSize: 13,
-    marginTop: 4,
-    fontWeight: "600",
+
+  freeNoticeTitle: {
+    color: "#15803D",
+    fontSize: 14,
+    fontWeight: "800",
   },
-  ctaCard: {
-    backgroundColor: "#4B7BEC",
-    borderRadius: 16,
-    padding: 20,
+
+  freeNoticeSubtitle: {
+    marginTop: 3,
+    color: "#64748B",
+    fontSize: 12,
+  },
+
+  noChargeRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: 4,
   },
-  ctaContent: {
-    flex: 1,
-    paddingRight: 12,
+
+  noChargeText: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#16A34A",
   },
-  ctaTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#fff",
+
+  /* =========================
+     CTA
+  ========================== */
+
+  cta: {
+    marginTop: 14,
+    height: 54,
+    borderRadius: 27,
+
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 12,
+
+    backgroundColor: "#7C3AED",
   },
-  ctaSubtitle: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.9)",
-    marginTop: 4,
-    lineHeight: 20,
+
+  ctaText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "800",
   },
 });

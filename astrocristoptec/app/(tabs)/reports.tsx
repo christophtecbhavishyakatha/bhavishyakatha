@@ -27,11 +27,11 @@ export default function ReportsScreen() {
   );
 
   return (
-    <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
+    <SafeAreaView edges={["top"]} style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
 
       <AppHeader onProfilePress={() => router.push("/profile")} />
-      <ReportsContent language={language} footerMode="back" />
+      <ReportsContent language={language} />
     </SafeAreaView>
   );
 }

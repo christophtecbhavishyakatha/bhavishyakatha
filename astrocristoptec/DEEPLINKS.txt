@@ -1,0 +1,82 @@
+BHAVISHYA KATHA DEEP LINKS
+=========================
+
+DOMAIN
+https://bhavishyakatha.in
+
+SHAREABLE LINKS
+
+Daily horoscope (replace Aries with Aries, Taurus, Gemini, Cancer, Leo,
+Virgo, Libra, Scorpio, Sagittarius, Capricorn, Aquarius, or Pisces):
+https://bhavishyakatha.in/haroscope?sign=Aries
+
+Astrologer details (replace ASTROLOGER_ID with the astrologer's actual ID):
+https://bhavishyakatha.in/astrologer-details?id=ASTROLOGER_ID
+
+Free Kundali:
+https://bhavishyakatha.in/report/free-kundali
+
+The app's current route name is spelled "haroscope". Keep that spelling in
+the URL unless the app route is renamed too. The astrologer details screen
+expects the "id" query parameter. Free Kundali is the /report/free-kundali
+route.
+
+APP CONFIGURATION ALREADY IN app.json
+
+- Android HTTPS intent filter for bhavishyakatha.in with autoVerify enabled.
+- iOS associated domain applinks:bhavishyakatha.in.
+- Android application ID: com.snsrk9.astrocristoptec.
+
+REQUIRED DOMAIN FILES
+
+For Android App Links, host this file at:
+https://bhavishyakatha.in/.well-known/assetlinks.json
+
+Example (replace the fingerprint with the SHA-256 certificate fingerprint
+for the Play App Signing certificate used by the published app):
+
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.snsrk9.astrocristoptec",
+      "sha256_cert_fingerprints": ["REPLACE_WITH_PLAY_APP_SIGNING_SHA256_FINGERPRINT"]
+    }
+  }
+]
+
+For iOS Universal Links, host an apple-app-site-association file (no file
+extension) at either:
+https://bhavishyakatha.in/.well-known/apple-app-site-association
+https://bhavishyakatha.in/apple-app-site-association
+
+Its appID must be the Apple Developer Team ID followed by the app's iOS
+Bundle Identifier. Configure the component paths to cover the shared routes,
+for example /haroscope, /astrologer-details (including its query string), and
+/report/free-kundali.
+Serve both association files over HTTPS with valid JSON and without redirects.
+
+WHEN THE APP IS NOT INSTALLED
+
+An HTTPS App Link by itself does not send users to Google Play. The website
+must serve a useful fallback page for these paths and offer/redirect to the
+Play Store listing:
+https://play.google.com/store/apps/details?id=com.snsrk9.astrocristoptec
+
+Check the site's hosting/CDN routing so the association files are served
+directly and the shared page URLs do not return a 404. If a specific route
+needs to send users straight to Play Store, configure that redirect on the
+website; preserve the requested content/parameters if deferred routing is
+needed after installation.
+
+TESTING CHECKLIST
+
+1. Install a release-signed build, then open each HTTPS link on Android and
+   confirm it opens the matching screen, horoscope sign, or astrologer profile.
+2. Test with the app uninstalled and confirm the website fallback leads to
+   the Play Store listing.
+3. Test the same links on iOS after the AASA file is live and the app has been
+   built with the associated domain entitlement.
+4. Re-test after changing signing certificates, package/bundle identifiers,
+   domain, or app routes.

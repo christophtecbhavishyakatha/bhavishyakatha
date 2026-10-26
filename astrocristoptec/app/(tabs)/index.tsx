@@ -75,9 +75,12 @@ const uniqueById = <T extends { id: unknown }>(items: T[]): T[] => {
 type RequestModalMode = "online" | "busy";
 
 interface RequestLocationSuggestion {
-  label: string;
-  lat: string;
-  lon: string;
+  place_id?: string;
+  label?: string;
+  main_text?: string;
+  secondary_text?: string;
+  lat?: string | number | null;
+  lon?: string | number | null;
   display_name?: string;
   address?: NominatimAddress;
 }
@@ -572,6 +575,8 @@ export default function ChatScreen() {
   const [requestLocationSuggestions, setRequestLocationSuggestions] = useState<
     RequestLocationSuggestion[]
   >([]);
+  const [showLocationSearchModal, setShowLocationSearchModal] = useState(false);
+  const [locationSearchQuery, setLocationSearchQuery] = useState("");
   const [showRequestDatePicker, setShowRequestDatePicker] = useState(false);
   const [showRequestTimePicker, setShowRequestTimePicker] = useState(false);
   const [unknownBirthTime, setUnknownBirthTime] = useState(false);
@@ -719,7 +724,7 @@ const skeletonData = Array.from({ length: 6 }, (_, index) => ({
 }));
   // Initial load
   useEffect(() => {
-    fetchAstrologers();
+  //  fetchAstrologers();
     fetchNotice();
     loadBestCouponOffer();
   }, []);
@@ -727,7 +732,7 @@ const skeletonData = Array.from({ length: 6 }, (_, index) => ({
   // Refresh on screen focus
   useFocusEffect(
     useCallback(() => {
-     // fetchAstrologers();
+      fetchAstrologers();
     //  fetchNotice();
 
       onWalletUpdated();
@@ -1058,27 +1063,51 @@ filtered.sort((a, b) => {
     setShowRequestTimePicker(false);
   };
 
-  const resolveLocationCoordinates = async (query: string) => {
+  const resolveLocationCoordinates = async (
+    query: string,
+  ): Promise<RequestLocationSuggestion | null> => {
     if (query.trim().length < 2) {
       return null;
     }
 
     try {
       const res = await fetch(
-        `${API_BASE_URL}/location/search?q=${encodeURIComponent(
+        `${API_BASE_URL}/locationV1/searchV1?q=${encodeURIComponent(
           query.trim(),
         )}&limit=1&language=${encodeURIComponent(language)}`,
       );
 
       const json = await res.json();
 
-      if (json.success && Array.isArray(json.data) && json.data[0]) {
+      if (json.status && Array.isArray(json.data) && json.data[0]) {
         const first = json.data[0];
 
+        if (first.lat != null && first.lon != null) {
+          return {
+            label: first.label || first.display_name || first.main_text,
+            lat: String(first.lat),
+            lon: String(first.lon),
+          };
+        }
+
+        if (first.place_id) {
+          const detailsResponse = await fetch(
+            `${API_BASE_URL}/locationV1/detailsV1?place_id=${encodeURIComponent(first.place_id)}`,
+          );
+          const details = await detailsResponse.json();
+          if (details.status && details.data) {
+            return {
+              label: details.data.label || details.data.display_name || first.main_text,
+              lat: String(details.data.latitude),
+              lon: String(details.data.longitude),
+            };
+          }
+        }
+
         return {
-          label: formatCompactLocation(first.address, first.display_name),
-          lat: String(first.lat),
-          lon: String(first.lon),
+          label: first.label || first.display_name || first.main_text || query,
+          lat: "",
+          lon: "",
           display_name: first.display_name,
           address: first.address,
         } as RequestLocationSuggestion;
@@ -1098,7 +1127,7 @@ filtered.sort((a, b) => {
 
   try {
     const url =
-      `${API_BASE_URL}/location/search?q=${encodeURIComponent(
+      `${API_BASE_URL}/locationV1/searchV1?q=${encodeURIComponent(
         query.trim()
       )}&limit=5&language=${encodeURIComponent(language)}`;
 
@@ -1240,17 +1269,45 @@ filtered.sort((a, b) => {
     }));
   };
 
-  const handleRequestLocationSelect = (
+  const openLocationSearch = () => {
+    setLocationSearchQuery(requestDraft.location);
+    setRequestLocationSuggestions([]);
+    setShowLocationSearchModal(true);
+  };
+
+  const handleRequestLocationSelect = async (
     suggestion: RequestLocationSuggestion,
   ) => {
     setRequestProfileError("");
+    setRequestLocationSuggestions([]);
+    setShowLocationSearchModal(false);
+
+    let latitude = suggestion.lat;
+    let longitude = suggestion.lon;
+    let label = suggestion.label || suggestion.display_name || suggestion.main_text || "";
+
+    if ((!latitude || !longitude) && suggestion.place_id) {
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/locationV1/detailsV1?place_id=${encodeURIComponent(suggestion.place_id)}`,
+        );
+        const result = await response.json();
+        if (result.status && result.data) {
+          latitude = result.data.latitude;
+          longitude = result.data.longitude;
+          label = result.data.label || result.data.display_name || label;
+        }
+      } catch (error) {
+        console.error("Location details lookup failed:", error);
+      }
+    }
+
     setRequestDraft((prev) => ({
       ...prev,
-      location: suggestion.label || suggestion.display_name || "",
-      latitude: String(suggestion.lat),
-      longitude: String(suggestion.lon),
+      location: label,
+      latitude: latitude == null ? "" : String(latitude),
+      longitude: longitude == null ? "" : String(longitude),
     }));
-    setRequestLocationSuggestions([]);
   };
 
   const sendCallRequest = async (
@@ -2138,7 +2195,7 @@ const renderHeader = () => (
                   ) : null}
 
                   {/* NAME */}
-                  <View style={styles.requestField}>
+                  <View style={[styles.requestField, styles.locationField]}>
                     <Text style={styles.requestLabel}>{t.fullName}</Text>
 
                     <TextInput
@@ -2217,13 +2274,11 @@ const renderHeader = () => (
                   <View style={styles.requestField}>
                     <Text style={styles.requestLabel}>{t.birthLocation}</Text>
 
-                    <TextInput
-                      style={styles.requestInput}
-                      value={requestDraft.location}
-                      onChangeText={handleRequestLocationChange}
-                      placeholder={t.searchLocation}
-                      placeholderTextColor="#94A3B8"
-                    />
+                    <TouchableOpacity style={styles.requestInput} onPress={openLocationSearch} activeOpacity={0.8}>
+                      <Text style={requestDraft.location ? styles.requestInputText : styles.requestInputPlaceholder}>
+                        {requestDraft.location || t.searchLocation}
+                      </Text>
+                    </TouchableOpacity>
 
                     {requestDraft.location.trim().length >= 2 &&
                     (!requestDraft.latitude || !requestDraft.longitude) ? (
@@ -2246,7 +2301,7 @@ const renderHeader = () => (
                               style={styles.locationOptionText}
                               numberOfLines={2}
                             >
-                              {suggestion.display_name}
+                              {suggestion.main_text || suggestion.label || suggestion.display_name}
                             </Text>
                           </TouchableOpacity>
                         ))}
@@ -2355,6 +2410,31 @@ const renderHeader = () => (
           onChange={handleRequestTimeChange}
         />
       )}
+      <Modal visible={showLocationSearchModal} transparent animationType="slide" onRequestClose={() => setShowLocationSearchModal(false)}>
+        <KeyboardAvoidingView style={styles.locationSearchOverlay} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+          <View style={styles.locationSearchCard}>
+            <View style={styles.locationModalHeader}>
+              <Text style={styles.audioModalTitle}>{t.birthLocation}</Text>
+              <TouchableOpacity onPress={() => setShowLocationSearchModal(false)} hitSlop={10}>
+                <Feather name="x" size={24} color="#475569" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.locationSearchRow}>
+              <TextInput autoFocus style={styles.locationSearchInput} value={locationSearchQuery} onChangeText={setLocationSearchQuery} placeholder={t.searchLocation} placeholderTextColor="#94A3B8" returnKeyType="search" onSubmitEditing={() => void searchLocationSuggestions(locationSearchQuery)} />
+              <TouchableOpacity style={styles.locationSearchAction} onPress={() => void searchLocationSuggestions(locationSearchQuery)}><Text style={styles.audioOkText}>Search</Text></TouchableOpacity>
+            </View>
+            <ScrollView keyboardShouldPersistTaps="handled" style={styles.locationSearchResults}>
+              {requestLocationSuggestions.map((suggestion, index) => (
+                <TouchableOpacity key={`${suggestion.place_id || suggestion.display_name || index}`} style={styles.locationOption} onPress={() => void handleRequestLocationSelect(suggestion)}>
+                  <Text style={styles.locationOptionText}>{suggestion.main_text || suggestion.label || suggestion.display_name}</Text>
+                  {suggestion.secondary_text ? <Text style={styles.locationSecondaryText}>{suggestion.secondary_text}</Text> : null}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity style={styles.audioCancelBtn} onPress={() => setShowLocationSearchModal(false)}><Text style={styles.audioCancelText}>{t.cancel}</Text></TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -2967,6 +3047,28 @@ couponChevronWrap: {
   requestField: {
     marginBottom: 14,
   },
+  locationField: {
+    position: "relative",
+    zIndex: 20,
+  },
+  locationSearchOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(15,23,42,0.55)",
+  },
+  locationSearchCard: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    maxHeight: "80%",
+  },
+  locationModalHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  locationSearchRow: { flexDirection: "row", gap: 8, marginTop: 14 },
+  locationSearchInput: { flex: 1, minHeight: 48, borderWidth: 1, borderColor: "#CBD5E1", borderRadius: 12, paddingHorizontal: 14, color: "#1E293B" },
+  locationSearchAction: { minHeight: 48, paddingHorizontal: 16, borderRadius: 12, backgroundColor: "#4A148C", justifyContent: "center", alignItems: "center" },
+  locationSearchResults: { marginTop: 12, maxHeight: 300 },
+  locationSecondaryText: { fontSize: 12, color: "#64748B", marginTop: 3 },
   requestLabel: {
     fontSize: 12,
     fontWeight: "800",
@@ -2985,6 +3087,8 @@ couponChevronWrap: {
     fontSize: 14,
     color: "#1E293B",
   },
+  requestInputText: { fontSize: 14, color: "#1E293B" },
+  requestInputPlaceholder: { fontSize: 14, color: "#94A3B8" },
   requestPickerButton: {
     borderWidth: 1,
     borderColor: "rgba(74, 20, 140, 0.16)",
@@ -3005,7 +3109,10 @@ couponChevronWrap: {
     fontWeight: "600",
   },
   locationDropdown: {
-    marginTop: 10,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 58,
     borderWidth: 1,
     borderColor: "rgba(74, 20, 140, 0.12)",
     borderRadius: 14,

@@ -10,7 +10,6 @@ import React, {
   useState,
 } from "react";
 import {
-  Alert,
   Dimensions,
   StyleSheet,
   Text,
@@ -115,17 +114,7 @@ setCoins(Math.trunc(Number(json.data.wallet_balance ?? 0)));      }
   }));
 
   const changeLanguage = () => {
-    Alert.alert(t.changeLanguageTitle, t.changeLanguageMessage, [
-      { text: t.cancel, style: "cancel" },
-      {
-        text: t.change,
-        style: "destructive",
-        onPress: async () => {
-          await AsyncStorage.removeItem("user-language");
-          router.replace("/language");
-        },
-      },
-    ]);
+    router.push({ pathname: "/language", params: { change: "1" } });
   };
 
   const handleWalletPress = async () => {

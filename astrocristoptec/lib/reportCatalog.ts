@@ -1,475 +1,937 @@
+
 export type SupportedLanguage = "en" | "hi" | "bn";
-export type ReportSlug = "marriage" | "career" | "baby-name" | "vastu";
+
+export type ReportCategory = "basic" | "life" | "family" | "special";
+
+export type ReportSlug = string;
 
 export type ReportConfig = {
   slug: ReportSlug;
+  category: ReportCategory;
   title: string;
-  shortTitle: string;
-  icon: string;
-  color: string;
-  delivery: string;
-  price: number;
   description: string;
-  idealFor: string;
-  highlights: string[];
-  includes: string[];
+
+  // Report image
+  image: any;
+
+  // Pricing
+  originalPrice: number;
+  discountPercentage: number;
+  finalPrice: number;
 };
 
-type ReportStaticConfig = {
+type ReportTranslation = {
+  title: string;
+  description: string;
+};
+
+type Definition = {
   slug: ReportSlug;
-  icon: string;
-  color: string;
-  price: number;
+  category: ReportCategory;
+  translationKey: string;
+
+  image: any;
+
+  originalPrice: number;
+  discountPercentage: number;
 };
 
-type ReportLocalizedConfig = Omit<
-  ReportConfig,
-  "slug" | "icon" | "color" | "price"
->;
+/*
+|--------------------------------------------------------------------------
+| Report Definitions
+|--------------------------------------------------------------------------
+|
+| Put your report images inside:
+|
+| assets/reports/
+|
+| Example:
+|
+| assets/reports/free-kundali.png
+| assets/reports/marriage-report.png
+|
+*/
 
-type ReportScreenTranslations = {
-  premiumReports: string;
-  premiumReportsSubtitle: string;
-  yourReports: string;
-  viewAll: string;
-  continueExploring: string;
-  continueExploringSubtitle: string;
-  reportNotFound: string;
-  reportNotFoundMessage: string;
-  backToReports: string;
-  price: string;
-  delivery: string;
-  bestFor: string;
-  whatYouGet: string;
-  keyHighlights: string;
-  howItWorks: string;
-  requestButton: (reportShortTitle: string) => string;
-  requestAlertTitle: (reportShortTitle: string) => string;
-  requestAlertMessage: string;
-  yourReportStatusProcessing: string;
-  yourReportStatusCompleted: string;
-  steps: string[];
-};
+const definitions: Definition[] = [
+  // =========================
+  // BASIC REPORTS
+  // =========================
 
-const staticReportCatalog: ReportStaticConfig[] = [
   {
-    slug: "marriage",
-    icon: "heart",
-    color: "#FF6B81",
-    price: 699,
+    slug: "free-kundali",
+    category: "basic",
+    translationKey: "freeKundali",
+    image: require("../assets/reports/free-kundali.png"),
+    originalPrice: 0,
+    discountPercentage: 100,
   },
+/* 
   {
-    slug: "career",
-    icon: "briefcase",
-    color: "#4B7BEC",
-    price: 799,
+    slug: "kundali-summary",
+    category: "basic",
+    translationKey: "kundaliSummary",
+    image: require("../assets/reports/kundali-summary.png"),
+    originalPrice: 99,
+    discountPercentage: 79,
   },
+
+
+
+
+
+  // =========================
+  // LIFE REPORTS
+  // =========================
+
   {
-    slug: "baby-name",
-    icon: "user",
-    color: "#20C997",
-    price: 299,
+    slug: "marriage-report",
+    category: "life",
+    translationKey: "marriageReport",
+    image: require("../assets/reports/marriage-report.png"),
+    originalPrice: 499,
+    discountPercentage: 40,
   },
+
   {
-    slug: "vastu",
-    icon: "home",
-    color: "#F59F00",
-    price: 999,
+    slug: "love-relationship",
+    category: "life",
+    translationKey: "loveRelationship",
+    image: require("../assets/reports/love-relationship.png"),
+    originalPrice: 399,
+    discountPercentage: 25,
   },
+
+  {
+    slug: "career-report",
+    category: "life",
+    translationKey: "careerReport",
+    image: require("../assets/reports/career-report.png"),
+    originalPrice: 499,
+    discountPercentage: 40,
+  },
+
+  {
+    slug: "finance-report",
+    category: "life",
+    translationKey: "financeReport",
+    image: require("../assets/reports/finance-report.png"),
+    originalPrice: 499,
+    discountPercentage: 40,
+  },
+
+  {
+    slug: "education-report",
+    category: "life",
+    translationKey: "educationReport",
+    image: require("../assets/reports/education-report.png"),
+    originalPrice: 399,
+    discountPercentage: 25,
+  },
+
+  {
+    slug: "business-report",
+    category: "life",
+    translationKey: "businessReport",
+    image: require("../assets/reports/business-report.png"),
+    originalPrice: 499,
+    discountPercentage: 40,
+  },
+
+
+
+  // =========================
+  // FAMILY REPORTS
+  // =========================
+
+  {
+    slug: "baby-name-suggestions",
+    category: "family",
+    translationKey: "babyNameSuggestions",
+    image: require("../assets/reports/baby-name-suggestions.png"),
+    originalPrice: 299,
+    discountPercentage: 33,
+  },
+
+  {
+    slug: "child-future",
+    category: "family",
+    translationKey: "childFuture",
+    image: require("../assets/reports/child-future.png"),
+    originalPrice: 499,
+    discountPercentage: 40,
+  },
+
+  {
+    slug: "marriage-compatibility",
+    category: "family",
+    translationKey: "marriageCompatibility",
+    image: require("../assets/reports/marriage-compatibility.png"),
+    originalPrice: 599,
+    discountPercentage: 50,
+  },
+
+
+
+  // =========================
+  // SPECIAL REPORTS
+  // =========================
+
+  {
+    slug: "dosha-report",
+    category: "special",
+    translationKey: "doshaReport",
+    image: require("../assets/reports/dosha-report.png"),
+    originalPrice: 399,
+    discountPercentage: 25,
+  },
+
+  {
+    slug: "manglik-report",
+    category: "special",
+    translationKey: "manglikReport",
+    image: require("../assets/reports/manglik-report.png"),
+    originalPrice: 399,
+    discountPercentage: 25,
+  },
+
+  {
+    slug: "yoga-report",
+    category: "special",
+    translationKey: "yogaReport",
+    image: require("../assets/reports/yoga-report.png"),
+    originalPrice: 499,
+    discountPercentage: 40,
+  },
+
+  {
+    slug: "marriage-timing",
+    category: "special",
+    translationKey: "marriageTiming",
+    image: require("../assets/reports/marriage-timing.png"),
+    originalPrice: 499,
+    discountPercentage: 40,
+  },
+
+  {
+    slug: "career-change",
+    category: "special",
+    translationKey: "careerChange",
+    image: require("../assets/reports/career-change.png"),
+    originalPrice: 399,
+    discountPercentage: 25,
+  },
+
+  {
+    slug: "personal-year-report",
+    category: "special",
+    translationKey: "personalYearReport",
+    image: require("../assets/reports/personal-year-report.png"),
+    originalPrice: 499,
+    discountPercentage: 40,
+  },
+   */
 ];
 
-const localizedReportCatalog: Record<
+export type ReportTranslationKey =
+  (typeof definitions)[number]["translationKey"];
+
+export type ReportScreenTranslations = {
+  title: string;
+  subtitle: string;
+
+  allReports: string;
+
+  categories: Record<ReportCategory, string>;
+
+  reports: Record<ReportTranslationKey, ReportTranslation>;
+
+  comingSoon: string;
+  comingSoonMessage: string;
+
+  freeKundaliTitle: string;
+  freeKundaliIntro: string;
+
+  whatIsKundali: string;
+  whatIsKundaliBody: string;
+
+  whyKundali: string;
+  whyKundaliBody: string;
+
+  kundaliBenefits: string[];
+
+  getFreeKundali: string;
+  kundaliForm: { fullName: string; dateOfBirth: string; timeOfBirth: string; birthLocation: string; dontKnowTime: string; namePlaceholder: string; locationPlaceholder: string; selectDate: string; selectTime: string; cancel: string; continue: string; validation: string };
+
+  reportDetailsTitle: string;
+  reportDetailsBody: string;
+  getReport: string;
+
+  reportIntro: (title: string) => string;
+  whatReport: (title: string) => string;
+  whyReport: (title: string) => string;
+  reportBenefits: (title: string) => string[];
+};
+
+const translations: Record<
   SupportedLanguage,
-  Record<ReportSlug, ReportLocalizedConfig>
+  ReportScreenTranslations
 > = {
+  // ============================================================
+  // ENGLISH
+  // ============================================================
+
   en: {
-    marriage: {
-      title: "Marriage Report",
-      shortTitle: "Marriage",
-      delivery: "6-12 hrs",
-      description:
-        "A compatibility-focused report covering relationship timing, emotional alignment, and marriage prospects.",
-      idealFor:
-        "Users planning marriage, evaluating compatibility, or seeking guidance on relationship timing.",
-      highlights: [
-        "Marriage timing and major relationship windows",
-        "Compatibility perspective based on birth details",
-        "Guidance on emotional harmony and long-term stability",
-      ],
-      includes: [
-        "Marriage timing analysis",
-        "Compatibility observations",
-        "Strength and challenge areas",
-        "Practical remedies and recommendations",
-      ],
+    title: "Reports",
+    subtitle:
+      "Explore astrology reports based on your birth details",
+
+    allReports: "All",
+
+    categories: {
+      basic: "Basic Reports",
+      life: "Life Reports",
+      family: "Family Reports",
+      special: "Special Reports",
     },
-    career: {
-      title: "Career Report",
-      shortTitle: "Career",
-      delivery: "6-12 hrs",
-      description:
-        "A professional roadmap report focused on career growth, opportunities, financial trends, and job-change timing.",
-      idealFor:
-        "Users planning a job switch, career upgrade, business direction, or long-term professional growth.",
-      highlights: [
-        "Career growth phases and opportunity windows",
-        "Role and industry suitability signals",
-        "Financial direction and work stability outlook",
-      ],
-      includes: [
-        "Career path guidance",
-        "Job switch timing",
-        "Professional strengths review",
-        "Growth and caution periods",
-      ],
+
+    reports: {
+      freeKundali: {
+        title: "Kundali",
+        description:
+          "Create your birth chart and explore its key insights.",
+      },
+
+      kundaliSummary: {
+        title: "Kundali Summary",
+        description:
+          "Get a simple overview of your birth chart and major influences.",
+      },
+
+      planetaryReport: {
+        title: "Planetary Report",
+        description:
+          "Explore the positions and influences of the planets in your chart.",
+      },
+
+      dashaReport: {
+        title: "Dasha Report",
+        description:
+          "Understand your planetary periods and their influence on life.",
+      },
+
+      nakshatraReport: {
+        title: "Nakshatra Report",
+        description:
+          "Explore your birth star and its traditional astrological meaning.",
+      },
+
+      marriageReport: {
+        title: "Marriage Report",
+        description:
+          "Explore marriage, partnership, and married-life patterns.",
+      },
+
+      loveRelationship: {
+        title: "Love & Relationship",
+        description:
+          "Explore relationship patterns, emotional connections, and compatibility.",
+      },
+
+      careerReport: {
+        title: "Career Report",
+        description:
+          "Explore career strengths, opportunities, and professional direction.",
+      },
+
+      financeReport: {
+        title: "Finance Report",
+        description:
+          "Explore your financial outlook, opportunities, and money patterns.",
+      },
+
+      educationReport: {
+        title: "Education Report",
+        description:
+          "Explore learning strengths, education patterns, and opportunities.",
+      },
+
+      businessReport: {
+        title: "Business Report",
+        description:
+          "Explore business potential, opportunities, and professional patterns.",
+      },
+
+      yearlyPrediction: {
+        title: "Yearly Prediction",
+        description:
+          "Explore the major themes and opportunities for the coming year.",
+      },
+
+      babyNameSuggestions: {
+        title: "Baby Name Suggestions",
+        description:
+          "Find meaningful baby names based on birth details and astrology.",
+      },
+
+      childFuture: {
+        title: "Child Future",
+        description:
+          "Explore traditional astrological insights about your child's future.",
+      },
+
+      marriageCompatibility: {
+        title: "Marriage Compatibility",
+        description:
+          "Compare two birth charts to explore traditional compatibility factors.",
+      },
+
+      parentChildCompatibility: {
+        title: "Parent–Child Compatibility",
+        description:
+          "Explore traditional astrological compatibility between parent and child.",
+      },
+
+      doshaReport: {
+        title: "Dosha Report",
+        description:
+          "Explore important dosha-related factors identified in your birth chart.",
+      },
+
+      manglikReport: {
+        title: "Manglik Report",
+        description:
+          "Explore traditional Manglik considerations in your birth chart.",
+      },
+
+      yogaReport: {
+        title: "Yoga Report",
+        description:
+          "Explore important planetary combinations and traditional yogas.",
+      },
+
+      marriageTiming: {
+        title: "Marriage Timing",
+        description:
+          "Explore traditional astrological indicators related to marriage timing.",
+      },
+
+      careerChange: {
+        title: "Career Change",
+        description:
+          "Explore traditional astrological indicators related to career changes.",
+      },
+
+      personalYearReport: {
+        title: "Personal Year Report",
+        description:
+          "Explore the major themes and opportunities of your personal year.",
+      },
     },
-    "baby-name": {
-      title: "Baby Name",
-      shortTitle: "Baby Name",
-      delivery: "1-3 hrs",
-      description:
-        "A quick-turnaround naming report with astrologically aligned suggestions based on birth or family preferences.",
-      idealFor:
-        "Parents and families looking for meaningful, auspicious baby names with an astrology-based approach.",
-      highlights: [
-        "Curated name suggestions aligned with astrology",
-        "Balanced focus on sound, meaning, and positive vibration",
-        "Fastest delivery among all report types",
-      ],
-      includes: [
-        "Multiple baby name suggestions",
-        "Initial-letter guidance",
-        "Meaning-based shortlist",
-        "Naming recommendation summary",
-      ],
-    },
-    vastu: {
-      title: "Vastu Report",
-      shortTitle: "Vastu",
-      delivery: "24 hrs",
-      description:
-        "A home and space harmony report focused on energy flow, room placement, directional balance, and remedies.",
-      idealFor:
-        "Users reviewing a house, office, room setup, or property energy balance before major decisions.",
-      highlights: [
-        "Direction and placement review",
-        "Home-energy balance recommendations",
-        "Actionable vastu corrections and remedy ideas",
-      ],
-      includes: [
-        "Directional assessment",
-        "Room and entrance observations",
-        "Improvement recommendations",
-        "Basic remedy guidance",
-      ],
-    },
+
+    comingSoon: "Coming Soon",
+
+    comingSoonMessage:
+      "This report will be available soon.",
+
+    freeKundaliTitle: "Kundali",
+
+    freeKundaliIntro:
+      "Discover what your birth chart says about your personality, strengths, life path, and important opportunities.",
+
+    whatIsKundali: "What is a Kundali?",
+
+    whatIsKundaliBody:
+      "A Kundali is a snapshot of the sky at the exact time and place of your birth. It maps the planets and zodiac signs to help understand different areas of life.",
+
+    whyKundali: "Why do you need a Kundali?",
+
+    whyKundaliBody:
+      "Your birth chart can help you reflect on your nature, relationships, career direction, and personal growth with guidance from astrology.",
+
+    kundaliBenefits: [
+      "Understand your personality and natural strengths",
+      "Explore career and relationship patterns",
+      "Learn about planetary influences in your life",
+    ],
+
+    getFreeKundali: "Get Free Kundali",
+    kundaliForm: { fullName: "Full Name", dateOfBirth: "Date of Birth", timeOfBirth: "Time of Birth", birthLocation: "Birth Location", dontKnowTime: "I don't know my birth time", namePlaceholder: "Enter your full name", locationPlaceholder: "Enter your birth location", selectDate: "Select date of birth", selectTime: "Select time of birth", cancel: "Cancel", continue: "Continue", validation: "Please verify your name, date of birth, time of birth, and birth location." },
+
+    reportDetailsTitle: "What is this report?",
+
+    reportDetailsBody:
+      "This report explores one area of life through an astrology reading based on your birth details.",
+
+    getReport: "Get This Report",
+
+    reportIntro: (title) =>
+      `Discover what your ${title.toLowerCase()} can reveal about your life and future.`,
+
+    whatReport: (title) => `What is a ${title}?`,
+
+    whyReport: (title) => `Why do you need a ${title}?`,
+
+    reportBenefits: () => [
+      "Understand important patterns in this area of life",
+      "Explore strengths, opportunities, and challenges",
+      "Receive guidance based on your birth details",
+    ],
   },
+
+  // ============================================================
+  // HINDI
+  // ============================================================
+
   hi: {
-    marriage: {
-      title: "\u0935\u093f\u0935\u093e\u0939 \u0930\u093f\u092a\u094b\u0930\u094d\u091f",
-      shortTitle: "\u0935\u093f\u0935\u093e\u0939",
-      delivery: "6-12 \u0918\u0902\u091f\u0947",
-      description:
-        "\u090f\u0915 \u0905\u0928\u0941\u0915\u0942\u0932\u0924\u093e-\u0915\u0947\u0902\u0926\u094d\u0930\u093f\u0924 \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u091c\u094b \u0930\u093f\u0936\u094d\u0924\u0947 \u0915\u0940 \u091f\u093e\u0907\u092e\u093f\u0902\u0917, \u092d\u093e\u0935\u0928\u093e\u0924\u094d\u092e\u0915 \u0938\u0902\u0924\u0941\u0932\u0928 \u0914\u0930 \u0935\u093f\u0935\u093e\u0939 \u0915\u0940 \u0938\u0902\u092d\u093e\u0935\u0928\u093e\u0913\u0902 \u0915\u094b \u0915\u0935\u0930 \u0915\u0930\u0924\u0940 \u0939\u0948.",
-      idealFor:
-        "\u0909\u0928 \u0909\u092a\u092f\u094b\u0917\u0915\u0930\u094d\u0924\u093e\u0913\u0902 \u0915\u0947 \u0932\u093f\u090f \u091c\u094b \u0935\u093f\u0935\u093e\u0939 \u0915\u0940 \u092f\u094b\u091c\u0928\u093e \u092c\u0928\u093e \u0930\u0939\u0947 \u0939\u0948\u0902, \u0905\u0928\u0941\u0915\u0942\u0932\u0924\u093e \u0915\u093e \u092e\u0942\u0932\u094d\u092f\u093e\u0902\u0915\u0928 \u0915\u0930 \u0930\u0939\u0947 \u0939\u0948\u0902 \u092f\u093e \u0930\u093f\u0936\u094d\u0924\u0947 \u0915\u0940 \u091f\u093e\u0907\u092e\u093f\u0902\u0917 \u092a\u0930 \u092e\u093e\u0930\u094d\u0917\u0926\u0930\u094d\u0936\u0928 \u091a\u093e\u0939\u0924\u0947 \u0939\u0948\u0902.",
-      highlights: [
-        "\u0935\u093f\u0935\u093e\u0939 \u0915\u0940 \u091f\u093e\u0907\u092e\u093f\u0902\u0917 \u0914\u0930 \u092e\u0939\u0924\u094d\u0935\u092a\u0942\u0930\u094d\u0923 \u0930\u093f\u0936\u094d\u0924\u0947 \u0915\u0940 \u0905\u0935\u0927\u093f\u092f\u093e\u0902",
-        "\u091c\u0928\u094d\u092e \u0935\u093f\u0935\u0930\u0923 \u0915\u0947 \u0906\u0927\u093e\u0930 \u092a\u0930 \u0905\u0928\u0941\u0915\u0942\u0932\u0924\u093e \u0926\u0943\u0937\u094d\u091f\u093f\u0915\u094b\u0923",
-        "\u092d\u093e\u0935\u0928\u093e\u0924\u094d\u092e\u0915 \u0938\u093e\u092e\u0902\u091c\u0938\u094d\u092f \u0914\u0930 \u0926\u0940\u0930\u094d\u0918\u0915\u093e\u0932\u093f\u0915 \u0938\u094d\u0925\u093f\u0930\u0924\u093e \u092a\u0930 \u092e\u093e\u0930\u094d\u0917\u0926\u0930\u094d\u0936\u0928",
-      ],
-      includes: [
-        "\u0935\u093f\u0935\u093e\u0939 \u091f\u093e\u0907\u092e\u093f\u0902\u0917 \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923",
-        "\u0905\u0928\u0941\u0915\u0942\u0932\u0924\u093e \u0905\u0935\u0932\u094b\u0915\u0928",
-        "\u092e\u091c\u092c\u0942\u0924\u093f\u092f\u094b\u0902 \u0914\u0930 \u091a\u0941\u0928\u094c\u0924\u0940 \u0915\u0947 \u0915\u094d\u0937\u0947\u0924\u094d\u0930",
-        "\u0935\u094d\u092f\u093e\u0935\u0939\u093e\u0930\u093f\u0915 \u0909\u092a\u093e\u092f \u0914\u0930 \u0938\u093f\u092b\u093c\u093e\u0930\u093f\u0936\u0947\u0902",
-      ],
+    title: "रिपोर्ट",
+    subtitle:
+      "अपनी जन्म जानकारी के आधार पर ज्योतिष रिपोर्ट देखें",
+
+    allReports: "सभी",
+
+    categories: {
+      basic: "बेसिक रिपोर्ट",
+      life: "जीवन रिपोर्ट",
+      family: "परिवार रिपोर्ट",
+      special: "विशेष रिपोर्ट",
     },
-    career: {
-      title: "\u0915\u0930\u093f\u092f\u0930 \u0930\u093f\u092a\u094b\u0930\u094d\u091f",
-      shortTitle: "\u0915\u0930\u093f\u092f\u0930",
-      delivery: "6-12 \u0918\u0902\u091f\u0947",
-      description:
-        "\u090f\u0915 \u092a\u0947\u0936\u0947\u0935\u0930 \u0930\u094b\u0921\u092e\u0948\u092a \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u091c\u094b \u0915\u0930\u093f\u092f\u0930 \u0917\u094d\u0930\u094b\u0925, \u0905\u0935\u0938\u0930\u094b\u0902, \u0935\u093f\u0924\u094d\u0924\u0940\u092f \u0930\u0941\u091d\u093e\u0928 \u0914\u0930 \u091c\u0949\u092c-\u091a\u0947\u0902\u091c \u091f\u093e\u0907\u092e\u093f\u0902\u0917 \u092a\u0930 \u0915\u0947\u0902\u0926\u094d\u0930\u093f\u0924 \u0939\u0948.",
-      idealFor:
-        "\u0909\u0928 \u0909\u092a\u092f\u094b\u0917\u0915\u0930\u094d\u0924\u093e\u0913\u0902 \u0915\u0947 \u0932\u093f\u090f \u091c\u094b \u091c\u0949\u092c \u0938\u094d\u0935\u093f\u091a, \u0915\u0930\u093f\u092f\u0930 \u0905\u092a\u0917\u094d\u0930\u0947\u0921, \u092c\u093f\u091c\u0928\u0947\u0938 \u0926\u093f\u0936\u093e \u092f\u093e \u0932\u0902\u092c\u0947 \u0938\u092e\u092f \u0915\u0947 \u092a\u0947\u0936\u0947\u0935\u0930 \u0935\u093f\u0915\u093e\u0938 \u0915\u0940 \u092f\u094b\u091c\u0928\u093e \u092c\u0928\u093e \u0930\u0939\u0947 \u0939\u0948\u0902.",
-      highlights: [
-        "\u0915\u0930\u093f\u092f\u0930 \u0917\u094d\u0930\u094b\u0925 \u092b\u0947\u091c\u093c \u0914\u0930 \u0905\u0935\u0938\u0930\u094b\u0902 \u0915\u0940 \u0938\u092e\u092f \u0905\u0935\u0927\u093f",
-        "\u0930\u094b\u0932 \u0914\u0930 \u0907\u0902\u0921\u0938\u094d\u091f\u094d\u0930\u0940 \u0938\u0942\u091f\u0947\u092c\u093f\u0932\u093f\u091f\u0940 \u0938\u0902\u0915\u0947\u0924",
-        "\u0935\u093f\u0924\u094d\u0924\u0940\u092f \u0926\u093f\u0936\u093e \u0914\u0930 \u0915\u093e\u0930\u094d\u092f \u0938\u094d\u0925\u093f\u0930\u0924\u093e \u0915\u093e \u0926\u0943\u0937\u094d\u091f\u093f\u0915\u094b\u0923",
-      ],
-      includes: [
-        "\u0915\u0930\u093f\u092f\u0930 \u092a\u093e\u0925 \u0917\u093e\u0907\u0921\u0947\u0902\u0938",
-        "\u091c\u0949\u092c \u0938\u094d\u0935\u093f\u091a \u091f\u093e\u0907\u092e\u093f\u0902\u0917",
-        "\u092a\u0947\u0936\u0947\u0935\u0930 \u092e\u091c\u092c\u0942\u0924\u093f\u092f\u094b\u0902 \u0915\u093e \u0930\u093f\u0935\u094d\u092f\u0942",
-        "\u0917\u094d\u0930\u094b\u0925 \u0914\u0930 \u0938\u093e\u0935\u0927\u093e\u0928\u0940 \u0915\u0940 \u0905\u0935\u0927\u093f\u092f\u093e\u0902",
-      ],
+
+    reports: {
+      freeKundali: {
+        title: "कुंडली",
+        description:
+          "अपनी जन्म कुंडली बनाएं और उसके प्रमुख संकेतों को समझें।",
+      },
+
+      kundaliSummary: {
+        title: "कुंडली सारांश",
+        description:
+          "अपनी जन्म कुंडली और प्रमुख ग्रह प्रभावों का सरल सारांश पाएं।",
+      },
+
+      planetaryReport: {
+        title: "ग्रह स्थिति रिपोर्ट",
+        description:
+          "अपनी कुंडली में ग्रहों की स्थिति और उनके प्रभावों को समझें।",
+      },
+
+      dashaReport: {
+        title: "दशा रिपोर्ट",
+        description:
+          "अपनी ग्रह दशाओं और जीवन पर उनके प्रभाव को समझें।",
+      },
+
+      nakshatraReport: {
+        title: "नक्षत्र रिपोर्ट",
+        description:
+          "अपने जन्म नक्षत्र और उसके पारंपरिक ज्योतिषीय अर्थ को जानें।",
+      },
+
+      marriageReport: {
+        title: "विवाह रिपोर्ट",
+        description:
+          "विवाह, जीवनसाथी और वैवाहिक जीवन से जुड़े संकेतों को समझें।",
+      },
+
+      loveRelationship: {
+        title: "प्रेम और संबंध",
+        description:
+          "रिश्तों, भावनात्मक जुड़ाव और अनुकूलता से जुड़े संकेतों को समझें।",
+      },
+
+      careerReport: {
+        title: "करियर रिपोर्ट",
+        description:
+          "करियर की खूबियों, अवसरों और पेशेवर दिशा को समझें।",
+      },
+
+      financeReport: {
+        title: "वित्त रिपोर्ट",
+        description:
+          "आर्थिक स्थिति, अवसरों और धन से जुड़े संकेतों को समझें।",
+      },
+
+      educationReport: {
+        title: "शिक्षा रिपोर्ट",
+        description:
+          "सीखने की क्षमता, शिक्षा से जुड़े पैटर्न और अवसरों को समझें।",
+      },
+
+      businessReport: {
+        title: "व्यापार रिपोर्ट",
+        description:
+          "व्यापार की संभावनाओं, अवसरों और पेशेवर संकेतों को समझें।",
+      },
+
+      yearlyPrediction: {
+        title: "वार्षिक भविष्यफल",
+        description:
+          "आने वाले वर्ष के प्रमुख विषयों और अवसरों को जानें।",
+      },
+
+      babyNameSuggestions: {
+        title: "बच्चे के नाम सुझाव",
+        description:
+          "जन्म जानकारी और ज्योतिष के आधार पर बच्चे के लिए नाम खोजें।",
+      },
+
+      childFuture: {
+        title: "बच्चे का भविष्य",
+        description:
+          "बच्चे के भविष्य से जुड़े पारंपरिक ज्योतिषीय संकेतों को समझें।",
+      },
+
+      marriageCompatibility: {
+        title: "विवाह मिलान",
+        description:
+          "दो जन्म कुंडलियों के आधार पर पारंपरिक अनुकूलता को समझें।",
+      },
+
+      parentChildCompatibility: {
+        title: "माता-पिता और बच्चे की अनुकूलता",
+        description:
+          "माता-पिता और बच्चे के बीच पारंपरिक ज्योतिषीय अनुकूलता को समझें।",
+      },
+
+      doshaReport: {
+        title: "दोष रिपोर्ट",
+        description:
+          "अपनी जन्म कुंडली में मौजूद महत्वपूर्ण दोष संबंधी संकेतों को समझें।",
+      },
+
+      manglikReport: {
+        title: "मांगलिक रिपोर्ट",
+        description:
+          "अपनी जन्म कुंडली में मांगलिक स्थिति से जुड़े पारंपरिक संकेतों को समझें।",
+      },
+
+      yogaReport: {
+        title: "योग रिपोर्ट",
+        description:
+          "कुंडली में मौजूद महत्वपूर्ण ग्रह संयोजनों और पारंपरिक योगों को जानें।",
+      },
+
+      marriageTiming: {
+        title: "विवाह का संभावित समय",
+        description:
+          "विवाह के समय से जुड़े पारंपरिक ज्योतिषीय संकेतों को समझें।",
+      },
+
+      careerChange: {
+        title: "करियर परिवर्तन",
+        description:
+          "करियर में बदलाव से जुड़े पारंपरिक ज्योतिषीय संकेतों को समझें।",
+      },
+
+      personalYearReport: {
+        title: "व्यक्तिगत वार्षिक रिपोर्ट",
+        description:
+          "अपने व्यक्तिगत वर्ष के प्रमुख विषयों और अवसरों को समझें।",
+      },
     },
-    "baby-name": {
-      title: "\u092c\u0947\u092c\u0940 \u0928\u0947\u092e",
-      shortTitle: "\u092c\u0947\u092c\u0940 \u0928\u0947\u092e",
-      delivery: "1-3 \u0918\u0902\u091f\u0947",
-      description:
-        "\u090f\u0915 \u0924\u0947\u091c\u093c \u0921\u093f\u0932\u093f\u0935\u0930\u0940 \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u091c\u093f\u0938\u092e\u0947\u0902 \u091c\u0928\u094d\u092e \u092f\u093e \u092a\u0930\u093f\u0935\u093e\u0930\u093f\u0915 \u092a\u0938\u0902\u0926 \u0915\u0947 \u0906\u0927\u093e\u0930 \u092a\u0930 \u091c\u094d\u092f\u094b\u0924\u093f\u0937 \u0905\u0928\u0941\u0915\u0942\u0932 \u0928\u093e\u092e \u0938\u0941\u091d\u093e\u0935 \u0926\u093f\u090f \u091c\u093e\u0924\u0947 \u0939\u0948\u0902.",
-      idealFor:
-        "\u092e\u093e\u0924\u093e-\u092a\u093f\u0924\u093e \u0914\u0930 \u092a\u0930\u093f\u0935\u093e\u0930\u094b\u0902 \u0915\u0947 \u0932\u093f\u090f \u091c\u094b \u0905\u0930\u094d\u0925\u092a\u0942\u0930\u094d\u0923 \u0914\u0930 \u0936\u0941\u092d \u092c\u0947\u092c\u0940 \u0928\u093e\u092e \u091c\u094d\u092f\u094b\u0924\u093f\u0937 \u0906\u0927\u093e\u0930\u093f\u0924 \u0926\u0943\u0937\u094d\u091f\u093f\u0915\u094b\u0923 \u0938\u0947 \u091a\u093e\u0939\u0924\u0947 \u0939\u0948\u0902.",
-      highlights: [
-        "\u091c\u094d\u092f\u094b\u0924\u093f\u0937 \u0905\u0928\u0941\u0915\u0942\u0932 \u0915\u094d\u092f\u0942\u0930\u0947\u091f\u0947\u0921 \u0928\u093e\u092e \u0938\u0941\u091d\u093e\u0935",
-        "\u0927\u094d\u0935\u0928\u093f, \u0905\u0930\u094d\u0925 \u0914\u0930 \u0938\u0915\u093e\u0930\u093e\u0924\u094d\u092e\u0915 \u0935\u093e\u0907\u092c\u094d\u0930\u0947\u0936\u0928 \u092a\u0930 \u0938\u0902\u0924\u0941\u0932\u093f\u0924 \u0927\u094d\u092f\u093e\u0928",
-        "\u0938\u092d\u0940 \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u092a\u094d\u0930\u0915\u093e\u0930\u094b\u0902 \u092e\u0947\u0902 \u0938\u092c\u0938\u0947 \u0924\u0947\u091c\u093c \u0921\u093f\u0932\u093f\u0935\u0930\u0940",
-      ],
-      includes: [
-        "\u0915\u0908 \u092c\u0947\u092c\u0940 \u0928\u093e\u092e \u0938\u0941\u091d\u093e\u0935",
-        "\u0907\u0928\u093f\u0936\u093f\u092f\u0932-\u0932\u0947\u091f\u0930 \u0917\u093e\u0907\u0921\u0947\u0902\u0938",
-        "\u0905\u0930\u094d\u0925-\u0906\u0927\u093e\u0930\u093f\u0924 \u0936\u0949\u0930\u094d\u091f\u0932\u093f\u0938\u094d\u091f",
-        "\u0928\u0947\u092e\u093f\u0902\u0917 \u0930\u093f\u0915\u092e\u0947\u0902\u0921\u0947\u0936\u0928 \u0938\u092e\u0930\u0940",
-      ],
-    },
-    vastu: {
-      title: "\u0935\u093e\u0938\u094d\u0924\u0941 \u0930\u093f\u092a\u094b\u0930\u094d\u091f",
-      shortTitle: "\u0935\u093e\u0938\u094d\u0924\u0941",
-      delivery: "24 \u0918\u0902\u091f\u0947",
-      description:
-        "\u090f\u0915 \u0918\u0930 \u0914\u0930 \u0938\u094d\u092a\u0947\u0938 \u0939\u093e\u0930\u094d\u092e\u0928\u0940 \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u091c\u094b \u090a\u0930\u094d\u091c\u093e \u092a\u094d\u0930\u0935\u093e\u0939, \u0915\u092e\u0930\u0947 \u0915\u0940 \u092a\u094d\u0932\u0947\u0938\u092e\u0947\u0902\u091f, \u0926\u093f\u0936\u093e \u0938\u0902\u0924\u0941\u0932\u0928 \u0914\u0930 \u0909\u092a\u093e\u092f\u094b\u0902 \u092a\u0930 \u0915\u0947\u0902\u0926\u094d\u0930\u093f\u0924 \u0939\u0948.",
-      idealFor:
-        "\u0909\u0928 \u0909\u092a\u092f\u094b\u0917\u0915\u0930\u094d\u0924\u093e\u0913\u0902 \u0915\u0947 \u0932\u093f\u090f \u091c\u094b \u0915\u093f\u0938\u0940 \u0918\u0930, \u0911\u092b\u093f\u0938, \u0915\u092e\u0930\u0947 \u0915\u0947 \u0938\u0947\u091f\u0905\u092a \u092f\u093e \u092a\u094d\u0930\u0949\u092a\u0930\u094d\u091f\u0940 \u0915\u0940 \u090a\u0930\u094d\u091c\u093e \u0938\u0902\u0924\u0941\u0932\u0928 \u0915\u093e \u092e\u0942\u0932\u094d\u092f\u093e\u0902\u0915\u0928 \u0915\u0930 \u0930\u0939\u0947 \u0939\u0948\u0902.",
-      highlights: [
-        "\u0926\u093f\u0936\u093e \u0914\u0930 \u092a\u094d\u0932\u0947\u0938\u092e\u0947\u0902\u091f \u0930\u093f\u0935\u094d\u092f\u0942",
-        "\u0918\u0930 \u0915\u0940 \u090a\u0930\u094d\u091c\u093e \u0938\u0902\u0924\u0941\u0932\u0928 \u0938\u093f\u092b\u093c\u093e\u0930\u093f\u0936\u0947\u0902",
-        "\u0935\u093e\u0938\u094d\u0924\u0941 \u0938\u0941\u0927\u093e\u0930 \u0914\u0930 \u0909\u092a\u093e\u092f \u0935\u093f\u091a\u093e\u0930",
-      ],
-      includes: [
-        "\u0926\u093f\u0936\u093e\u0924\u094d\u092e\u0915 \u0905\u0938\u0947\u0938\u092e\u0947\u0902\u091f",
-        "\u0915\u092e\u0930\u0947 \u0914\u0930 \u090f\u0902\u091f\u094d\u0930\u0947\u0902\u0938 \u0905\u0935\u0932\u094b\u0915\u0928",
-        "\u0938\u0941\u0927\u093e\u0930 \u0915\u0947 \u0938\u0941\u091d\u093e\u0935",
-        "\u092c\u0947\u0938\u093f\u0915 \u0909\u092a\u093e\u092f \u0917\u093e\u0907\u0921\u0947\u0902\u0938",
-      ],
-    },
+
+    comingSoon: "जल्द आ रहा है",
+
+    comingSoonMessage:
+      "यह रिपोर्ट जल्द ही उपलब्ध होगी।",
+
+    freeKundaliTitle: "कुंडली",
+
+    freeKundaliIntro:
+      "जानें कि आपकी जन्म कुंडली आपके व्यक्तित्व, शक्तियों, जीवन यात्रा और महत्वपूर्ण अवसरों के बारे में क्या बताती है।",
+
+    whatIsKundali: "कुंडली क्या है?",
+
+    whatIsKundaliBody:
+      "कुंडली आपके जन्म के सटीक समय और स्थान पर आकाश की स्थिति का चित्र है। इसमें ग्रहों और राशियों के आधार पर जीवन के विभिन्न क्षेत्रों को समझा जाता है।",
+
+    whyKundali: "कुंडली क्यों जरूरी है?",
+
+    whyKundaliBody:
+      "ज्योतिष के मार्गदर्शन से आपकी जन्म कुंडली आपके स्वभाव, रिश्तों, करियर और व्यक्तिगत विकास को समझने में मदद कर सकती है।",
+
+    kundaliBenefits: [
+      "अपने व्यक्तित्व और प्राकृतिक खूबियों को समझें",
+      "करियर और रिश्तों के पैटर्न जानें",
+      "अपने जीवन पर ग्रहों के प्रभाव को समझें",
+    ],
+
+    getFreeKundali: "फ्री कुंडली पाएं",
+    kundaliForm: { fullName: "पूरा नाम", dateOfBirth: "जन्म तिथि", timeOfBirth: "जन्म समय", birthLocation: "जन्म स्थान", dontKnowTime: "मुझे अपना जन्म समय नहीं पता", namePlaceholder: "अपना पूरा नाम दर्ज करें", locationPlaceholder: "अपना जन्म स्थान दर्ज करें", selectDate: "जन्म तिथि चुनें", selectTime: "जन्म समय चुनें", cancel: "रद्द करें", continue: "आगे बढ़ें", validation: "कृपया अपना नाम, जन्म तिथि, जन्म समय और जन्म स्थान सत्यापित करें।" },
+
+    reportDetailsTitle: "यह रिपोर्ट क्या है?",
+
+    reportDetailsBody:
+      "यह रिपोर्ट आपकी जन्म जानकारी के आधार पर ज्योतिष के माध्यम से जीवन के एक क्षेत्र को समझती है।",
+
+    getReport: "यह रिपोर्ट पाएं",
+
+    reportIntro: (title) =>
+      `जानें कि ${title} आपके जीवन और भविष्य के बारे में क्या बता सकती है।`,
+
+    whatReport: (title) => `${title} क्या है?`,
+
+    whyReport: (title) => `${title} क्यों जरूरी है?`,
+
+    reportBenefits: () => [
+      "जीवन के इस क्षेत्र के महत्वपूर्ण पैटर्न समझें",
+      "अपनी खूबियों, अवसरों और चुनौतियों को जानें",
+      "अपनी जन्म जानकारी के आधार पर मार्गदर्शन पाएं",
+    ],
   },
+
+  // ============================================================
+  // BENGALI
+  // ============================================================
+
   bn: {
-    marriage: {
-      title: "\u09ac\u09bf\u09ac\u09be\u09b9 \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f",
-      shortTitle: "\u09ac\u09bf\u09ac\u09be\u09b9",
-      delivery: "6-12 \u0998\u09a8\u09cd\u099f\u09be",
-      description:
-        "\u098f\u0995\u099f\u09bf \u0995\u09ae\u09cd\u09aa\u09cd\u09af\u09be\u099f\u09bf\u09ac\u09bf\u09b2\u09bf\u099f\u09bf-\u0995\u09c7\u09a8\u09cd\u09a6\u09cd\u09b0\u09bf\u0995 \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f \u09af\u09be \u09b8\u09ae\u09cd\u09aa\u09b0\u09cd\u0995\u09c7\u09b0 \u09b8\u09ae\u09af\u09bc, \u09ae\u09be\u09a8\u09b8\u09bf\u0995 \u09b8\u09be\u09ae\u099e\u09cd\u099c\u09b8\u09cd\u09af \u098f\u09ac\u0982 \u09ac\u09bf\u09ac\u09be\u09b9\u09c7\u09b0 \u09b8\u09ae\u09cd\u09ad\u09be\u09ac\u09a8\u09be \u09a8\u09bf\u09af\u09bc\u09c7 \u09a4\u09c8\u09b0\u09bf \u0995\u09b0\u09be \u09b9\u09af\u09bc.",
-      idealFor:
-        "\u09af\u09c7 \u09ac\u09cd\u09af\u09ac\u09b9\u09be\u09b0\u0995\u09be\u09b0\u09c0\u09b0\u09be \u09ac\u09bf\u09ac\u09be\u09b9\u09c7\u09b0 \u09aa\u09b0\u09bf\u0995\u09b2\u09cd\u09aa\u09a8\u09be \u0995\u09b0\u099b\u09c7\u09a8, \u09b8\u09be\u09ae\u099e\u09cd\u099c\u09b8\u09cd\u09af \u09ac\u09bf\u09b6\u09cd\u09b2\u09c7\u09b7\u09a3 \u0995\u09b0\u099b\u09c7\u09a8 \u09ac\u09be \u09b8\u09ae\u09cd\u09aa\u09b0\u09cd\u0995\u09c7\u09b0 \u09b8\u09ae\u09af\u09bc \u09a8\u09bf\u09af\u09bc\u09c7 \u09aa\u09b0\u09be\u09ae\u09b0\u09cd\u09b6 \u099a\u09be\u09a8.",
-      highlights: [
-        "\u09ac\u09bf\u09ac\u09be\u09b9\u09c7\u09b0 \u09b8\u09ae\u09af\u09bc \u098f\u09ac\u0982 \u0997\u09c1\u09b0\u09c1\u09a4\u09cd\u09ac\u09aa\u09c2\u09b0\u09cd\u09a3 \u09b0\u09bf\u09b2\u09c7\u09b6\u09a8\u09b6\u09bf\u09aa \u0989\u0987\u09a8\u09cd\u09a1\u09cb",
-        "\u099c\u09a8\u09cd\u09ae\u09a4\u09a5\u09cd\u09af\u09c7\u09b0 \u0989\u09aa\u09b0 \u09ad\u09bf\u09a4\u09cd\u09a4\u09bf \u0995\u09b0\u09c7 \u0995\u09ae\u09cd\u09aa\u09cd\u09af\u09be\u099f\u09bf\u09ac\u09bf\u09b2\u09bf\u099f\u09bf \u09a6\u09c3\u09b7\u09cd\u099f\u09bf\u0995\u09cb\u09a3",
-        "\u09ae\u09be\u09a8\u09b8\u09bf\u0995 \u09b8\u09be\u09ae\u099e\u09cd\u099c\u09b8\u09cd\u09af \u098f\u09ac\u0982 \u09a6\u09c0\u09b0\u09cd\u0998\u09ae\u09c7\u09af\u09bc\u09be\u09a6\u09bf \u09b8\u09cd\u09a5\u09bf\u09b0\u09a4\u09be \u09a8\u09bf\u09af\u09bc\u09c7 \u09aa\u09b0\u09be\u09ae\u09b0\u09cd\u09b6",
-      ],
-      includes: [
-        "\u09ac\u09bf\u09ac\u09be\u09b9\u09c7\u09b0 \u09b8\u09ae\u09af\u09bc \u09ac\u09bf\u09b6\u09cd\u09b2\u09c7\u09b7\u09a3",
-        "\u0995\u09ae\u09cd\u09aa\u09cd\u09af\u09be\u099f\u09bf\u09ac\u09bf\u09b2\u09bf\u099f\u09bf \u09aa\u09b0\u09cd\u09af\u09ac\u09c7\u0995\u09cd\u09b7\u09a3",
-        "\u09b6\u0995\u09cd\u09a4\u09bf \u098f\u09ac\u0982 \u099a\u09cd\u09af\u09be\u09b2\u09c7\u099e\u09cd\u099c\u09c7\u09b0 \u0995\u09cd\u09b7\u09c7\u09a4\u09cd\u09b0",
-        "\u09ac\u09cd\u09af\u09be\u09ac\u09b9\u09be\u09b0\u09bf\u0995 \u09aa\u09cd\u09b0\u09a4\u09bf\u0995\u09be\u09b0 \u098f\u09ac\u0982 \u09b8\u09c1\u09aa\u09be\u09b0\u09bf\u09b6",
-      ],
+    title: "রিপোর্ট",
+    subtitle:
+      "আপনার জন্মতথ্যের ভিত্তিতে বিভিন্ন জ্যোতিষ রিপোর্ট দেখুন",
+
+    allReports: "সব",
+
+    categories: {
+      basic: "বেসিক রিপোর্ট",
+      life: "জীবন রিপোর্ট",
+      family: "পরিবারের রিপোর্ট",
+      special: "বিশেষ রিপোর্ট",
     },
-    career: {
-      title: "\u0995\u09cd\u09af\u09be\u09b0\u09bf\u09df\u09be\u09b0 \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f",
-      shortTitle: "\u0995\u09cd\u09af\u09be\u09b0\u09bf\u09df\u09be\u09b0",
-      delivery: "6-12 \u0998\u09a8\u09cd\u099f\u09be",
-      description:
-        "\u098f\u0995\u099f\u09bf \u09aa\u09c7\u09b6\u09be\u0997\u09a4 \u09b0\u09cb\u09a1\u09ae\u09cd\u09af\u09be\u09aa \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f \u09af\u09be \u0995\u09cd\u09af\u09be\u09b0\u09bf\u09df\u09be\u09b0 \u0997\u09cd\u09b0\u09cb\u09a5, \u09b8\u09c1\u09af\u09cb\u0997, \u0986\u09b0\u09cd\u09a5\u09bf\u0995 \u09a7\u09be\u09b0\u09be \u098f\u09ac\u0982 \u099a\u09be\u0995\u09b0\u09bf \u09aa\u09b0\u09bf\u09ac\u09b0\u09cd\u09a4\u09a8\u09c7\u09b0 \u09b8\u09ae\u09af\u09bc \u09a8\u09bf\u09af\u09bc\u09c7 \u0995\u09c7\u09a8\u09cd\u09a6\u09cd\u09b0\u09bf\u09a4.",
-      idealFor:
-        "\u09af\u09c7 \u09ac\u09cd\u09af\u09ac\u09b9\u09be\u09b0\u0995\u09be\u09b0\u09c0\u09b0\u09be \u099a\u09be\u0995\u09b0\u09bf \u09aa\u09b0\u09bf\u09ac\u09b0\u09cd\u09a4\u09a8, \u0995\u09cd\u09af\u09be\u09b0\u09bf\u09df\u09be\u09b0 \u0986\u09aa\u0997\u09cd\u09b0\u09c7\u09a1, \u09ac\u09bf\u099c\u09a8\u09c7\u09b8 \u09a6\u09bf\u0995 \u09ac\u09be \u09a6\u09c0\u09b0\u09cd\u0998\u09ae\u09c7\u09af\u09bc\u09be\u09a6\u09bf \u09aa\u09c7\u09b6\u09be\u0997\u09a4 \u0989\u09a8\u09cd\u09a8\u09a4\u09bf \u09aa\u09b0\u09bf\u0995\u09b2\u09cd\u09aa\u09a8\u09be \u0995\u09b0\u099b\u09c7\u09a8.",
-      highlights: [
-        "\u0995\u09cd\u09af\u09be\u09b0\u09bf\u09df\u09be\u09b0 \u0997\u09cd\u09b0\u09cb\u09a5\u09c7\u09b0 \u09aa\u09b0\u09cd\u09af\u09be\u09df \u098f\u09ac\u0982 \u09b8\u09c1\u09af\u09cb\u0997\u09c7\u09b0 \u09b8\u09ae\u09af\u09bc",
-        "\u09b0\u09cb\u09b2 \u098f\u09ac\u0982 \u0987\u09a8\u09cd\u09a1\u09be\u09b8\u09cd\u099f\u09cd\u09b0\u09bf \u0989\u09aa\u09af\u09c1\u0995\u09cd\u09a4\u09a4\u09be\u09b0 \u0987\u0999\u09cd\u0997\u09bf\u09a4",
-        "\u0986\u09b0\u09cd\u09a5\u09bf\u0995 \u09a6\u09bf\u0995 \u098f\u09ac\u0982 \u0995\u09be\u099c\u09c7\u09b0 \u09b8\u09cd\u09a5\u09bf\u09b0\u09a4\u09be\u09b0 \u09a6\u09c3\u09b7\u09cd\u099f\u09bf\u0995\u09cb\u09a3",
-      ],
-      includes: [
-        "\u0995\u09cd\u09af\u09be\u09b0\u09bf\u09df\u09be\u09b0 \u09aa\u09be\u09a5 \u09a8\u09bf\u09b0\u09cd\u09a6\u09c7\u09b6\u09a8\u09be",
-        "\u099a\u09be\u0995\u09b0\u09bf \u09aa\u09b0\u09bf\u09ac\u09b0\u09cd\u09a4\u09a8\u09c7\u09b0 \u09b8\u09ae\u09af\u09bc",
-        "\u09aa\u09c7\u09b6\u09be\u0997\u09a4 \u09b6\u0995\u09cd\u09a4\u09bf\u09b0 \u09aa\u09b0\u09cd\u09af\u09be\u09b2\u09cb\u099a\u09a8\u09be",
-        "\u0989\u09a8\u09cd\u09a8\u09a4\u09bf \u098f\u09ac\u0982 \u09b8\u09a4\u09b0\u09cd\u0995\u09a4\u09be\u09b0 \u09b8\u09ae\u09af\u09bc\u09b8\u09c0\u09ae\u09be",
-      ],
+
+    reports: {
+      freeKundali: {
+        title: "কুণ্ডলী",
+        description:
+          "আপনার জন্মছক তৈরি করুন এবং এর গুরুত্বপূর্ণ দিকগুলি জানুন।",
+      },
+
+      kundaliSummary: {
+        title: "কুণ্ডলী সংক্ষিপ্ত বিশ্লেষণ",
+        description:
+          "আপনার জন্মছক ও প্রধান গ্রহের প্রভাবের একটি সহজ বিশ্লেষণ পান।",
+      },
+
+      planetaryReport: {
+        title: "গ্রহের অবস্থান",
+        description:
+          "আপনার কুণ্ডলীতে গ্রহগুলির অবস্থান ও প্রভাব সম্পর্কে জানুন।",
+      },
+
+      dashaReport: {
+        title: "দশা বিশ্লেষণ",
+        description:
+          "আপনার গ্রহের দশা এবং জীবনে তার প্রভাব সম্পর্কে জানুন।",
+      },
+
+      nakshatraReport: {
+        title: "নক্ষত্র বিশ্লেষণ",
+        description:
+          "আপনার জন্ম নক্ষত্র এবং তার জ্যোতিষীয় অর্থ সম্পর্কে জানুন।",
+      },
+
+      marriageReport: {
+        title: "বিবাহ ও দাম্পত্য জীবন",
+        description:
+          "বিবাহ, জীবনসঙ্গী এবং দাম্পত্য জীবন সম্পর্কে জ্যোতিষীয় বিশ্লেষণ পান।",
+      },
+
+      loveRelationship: {
+        title: "প্রেম ও সম্পর্ক",
+        description:
+          "সম্পর্ক, আবেগ এবং পারস্পরিক সামঞ্জস্য সম্পর্কে জানুন।",
+      },
+
+      careerReport: {
+        title: "ক্যারিয়ার ও কর্মজীবন",
+        description:
+          "ক্যারিয়ারের শক্তি, সুযোগ এবং পেশাগত দিক সম্পর্কে জানুন।",
+      },
+
+      financeReport: {
+        title: "অর্থ ও আর্থিক ভবিষ্যৎ",
+        description:
+          "অর্থনৈতিক পরিস্থিতি, সুযোগ এবং আর্থিক প্রবণতা সম্পর্কে জানুন।",
+      },
+
+      educationReport: {
+        title: "শিক্ষা ও পড়াশোনা",
+        description:
+          "শিক্ষার সম্ভাবনা, শেখার ধরন এবং সুযোগ সম্পর্কে জানুন।",
+      },
+
+      businessReport: {
+        title: "ব্যবসার ভবিষ্যৎ",
+        description:
+          "ব্যবসার সম্ভাবনা, সুযোগ এবং পেশাগত দিক সম্পর্কে জানুন।",
+      },
+
+      yearlyPrediction: {
+        title: "বার্ষিক ভবিষ্যৎ",
+        description:
+          "আগামী বছরের গুরুত্বপূর্ণ দিক এবং সম্ভাবনা সম্পর্কে জানুন।",
+      },
+
+      babyNameSuggestions: {
+        title: "শিশুর নাম নির্বাচন",
+        description:
+          "জন্মতথ্য ও জ্যোতিষের ভিত্তিতে শিশুর জন্য সুন্দর নাম খুঁজুন।",
+      },
+
+      childFuture: {
+        title: "সন্তানের ভবিষ্যৎ",
+        description:
+          "সন্তানের ভবিষ্যৎ সম্পর্কে প্রচলিত জ্যোতিষীয় বিশ্লেষণ জানুন।",
+      },
+
+      marriageCompatibility: {
+        title: "বিবাহ মিলান",
+        description:
+          "দুটি জন্মছকের ভিত্তিতে প্রচলিত সামঞ্জস্য সম্পর্কে জানুন।",
+      },
+
+      parentChildCompatibility: {
+        title: "অভিভাবক ও সন্তানের সামঞ্জস্য",
+        description:
+          "অভিভাবক ও সন্তানের মধ্যে প্রচলিত জ্যোতিষীয় সামঞ্জস্য সম্পর্কে জানুন।",
+      },
+
+      doshaReport: {
+        title: "দোষ বিশ্লেষণ",
+        description:
+          "আপনার জন্মছকে থাকা গুরুত্বপূর্ণ দোষ সম্পর্কিত বিষয়গুলি সম্পর্কে জানুন।",
+      },
+
+      manglikReport: {
+        title: "মাঙ্গলিক বিশ্লেষণ",
+        description:
+          "আপনার জন্মছকে মাঙ্গলিক অবস্থার প্রচলিত জ্যোতিষীয় দিকগুলি জানুন।",
+      },
+
+      yogaReport: {
+        title: "গুরুত্বপূর্ণ যোগ",
+        description:
+          "আপনার জন্মছকে থাকা গুরুত্বপূর্ণ গ্রহের সংযোগ ও যোগ সম্পর্কে জানুন।",
+      },
+
+      marriageTiming: {
+        title: "বিবাহের সম্ভাব্য সময়",
+        description:
+          "বিবাহের সময় সম্পর্কে প্রচলিত জ্যোতিষীয় ইঙ্গিতগুলি জানুন।",
+      },
+
+      careerChange: {
+        title: "ক্যারিয়ার পরিবর্তন",
+        description:
+          "ক্যারিয়ার পরিবর্তন সম্পর্কে প্রচলিত জ্যোতিষীয় ইঙ্গিতগুলি জানুন।",
+      },
+
+      personalYearReport: {
+        title: "ব্যক্তিগত বার্ষিক রিপোর্ট",
+        description:
+          "আপনার ব্যক্তিগত বছরের গুরুত্বপূর্ণ দিক ও সম্ভাবনা সম্পর্কে জানুন।",
+      },
     },
-    "baby-name": {
-      title: "\u09ac\u09c7\u09ac\u09bf \u09a8\u09be\u09ae ",
-      shortTitle: "\u09ac\u09c7\u09ac\u09bf \u09a8\u09be\u09ae",
-      delivery: "1-3 \u0998\u09a8\u09cd\u099f\u09be",
-      description:
-        "\u098f\u0995\u099f\u09bf \u09a6\u09cd\u09b0\u09c1\u09a4 \u09a1\u09c7\u09b2\u09bf\u09ad\u09be\u09b0\u09bf \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f \u09af\u09c7\u0996\u09be\u09a8\u09c7 \u099c\u09a8\u09cd\u09ae \u09a4\u09a5\u09cd\u09af \u09ac\u09be \u09aa\u09b0\u09bf\u09ac\u09be\u09b0\u09c7\u09b0 \u09aa\u099b\u09a8\u09cd\u09a6\u09c7\u09b0 \u0989\u09aa\u09b0 \u09ad\u09bf\u09a4\u09cd\u09a4\u09bf \u0995\u09b0\u09c7 \u099c\u09cd\u09af\u09cb\u09a4\u09bf\u09b7-\u09b8\u0982\u09ae\u09a4 \u09a8\u09be\u09ae \u09aa\u09cd\u09b0\u09b8\u09cd\u09a4\u09be\u09ac \u09a6\u09c7\u0993\u09af\u09bc\u09be \u09b9\u09af\u09bc.",
-      idealFor:
-        "\u09af\u09c7\u09b8\u09ac \u09ac\u09be\u09ac\u09be-\u09ae\u09be \u098f\u09ac\u0982 \u09aa\u09b0\u09bf\u09ac\u09be\u09b0 \u0985\u09b0\u09cd\u09a5\u09ac\u09b9 \u098f\u09ac\u0982 \u09b6\u09c1\u09ad \u09b6\u09bf\u09b6\u09c1\u09b0 \u09a8\u09be\u09ae \u099c\u09cd\u09af\u09cb\u09a4\u09bf\u09b7\u09ad\u09bf\u09a4\u09cd\u09a4\u09bf\u0995 \u09aa\u09a6\u09cd\u09a7\u09a4\u09bf\u09a4\u09c7 \u099a\u09be\u09a8.",
-      highlights: [
-        "\u099c\u09cd\u09af\u09cb\u09a4\u09bf\u09b7 \u0985\u09a8\u09c1\u0995\u09c2\u09b2 \u09a8\u09bf\u09b0\u09cd\u09ac\u09be\u099a\u09bf\u09a4 \u09a8\u09be\u09ae\u09c7\u09b0 \u09a4\u09be\u09b2\u09bf\u0995\u09be",
-        "\u09b6\u09ac\u09cd\u09a6, \u0985\u09b0\u09cd\u09a5 \u098f\u09ac\u0982 \u0987\u09a4\u09bf\u09ac\u09be\u099a\u0995 \u09ad\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b6\u09a8\u09c7\u09b0 \u09ae\u09a7\u09cd\u09af\u09c7 \u09b8\u09be\u09ae\u099e\u09cd\u099c\u09b8\u09cd\u09af",
-        "\u09b8\u09ac \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f\u09c7\u09b0 \u09ae\u09a7\u09cd\u09af\u09c7 \u09b8\u09ac\u099a\u09c7\u09df\u09c7 \u09a6\u09cd\u09b0\u09c1\u09a4 \u09a1\u09c7\u09b2\u09bf\u09ad\u09be\u09b0\u09bf",
-      ],
-      includes: [
-        "\u098f\u0995\u09be\u09a7\u09bf\u0995 \u09b6\u09bf\u09b6\u09c1\u09b0 \u09a8\u09be\u09ae \u09aa\u09cd\u09b0\u09b8\u09cd\u09a4\u09be\u09ac",
-        "\u0987\u09a8\u09bf\u09b6\u09bf\u09df\u09be\u09b2 \u09b2\u09c7\u099f\u09be\u09b0 \u0997\u09be\u0987\u09a1\u09c7\u09a8\u09cd\u09b8",
-        "\u0985\u09b0\u09cd\u09a5-\u09ad\u09bf\u09a4\u09cd\u09a4\u09bf\u0995 \u09b6\u09b0\u09cd\u099f\u09b2\u09bf\u09b8\u09cd\u099f",
-        "\u09a8\u09c7\u09ae\u09bf\u0982 \u09b0\u09c7\u0995\u09ae\u09c7\u09a8\u09cd\u09a1\u09c7\u09b6\u09a8 \u09b8\u09be\u09b0\u09be\u0982\u09b6",
-      ],
-    },
-    vastu: {
-      title: "\u09ac\u09be\u09b8\u09cd\u09a4\u09c1 \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f",
-      shortTitle: "\u09ac\u09be\u09b8\u09cd\u09a4\u09c1",
-      delivery: "24 \u0998\u09a8\u09cd\u099f\u09be",
-      description:
-        "\u098f\u0995\u099f\u09bf \u09ac\u09be\u09a1\u09bc\u09bf \u098f\u09ac\u0982 \u09b8\u09cd\u09aa\u09c7\u09b8 \u09b9\u09be\u09b0\u09ae\u09a8\u09bf \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f \u09af\u09be \u098f\u09a8\u09be\u09b0\u09cd\u099c\u09bf \u09ab\u09cd\u09b2\u09cb, \u0998\u09b0\u09c7\u09b0 \u0998\u09b0\u09c7\u09b0 \u09ac\u09b8\u09be\u09a8\u09cb, \u09a6\u09bf\u0995\u09c7\u09b0 \u09b8\u09be\u09ae\u099e\u09cd\u099c\u09b8\u09cd\u09af \u098f\u09ac\u0982 \u09aa\u09cd\u09b0\u09a4\u09bf\u0995\u09be\u09b0\u09c7\u09b0 \u0989\u09aa\u09b0 \u0995\u09c7\u09a8\u09cd\u09a6\u09cd\u09b0\u09bf\u09a4.",
-      idealFor:
-        "\u09af\u09c7 \u09ac\u09cd\u09af\u09ac\u09b9\u09be\u09b0\u0995\u09be\u09b0\u09c0\u09b0\u09be \u0995\u09cb\u09a8\u0993 \u09ac\u09be\u09a1\u09bc\u09bf, \u0985\u09ab\u09bf\u09b8, \u0998\u09b0\u09c7\u09b0 \u09b8\u09c7\u099f\u0986\u09aa \u09ac\u09be \u09b8\u09ae\u09cd\u09aa\u09a4\u09cd\u09a4\u09bf\u09b0 \u098f\u09a8\u09be\u09b0\u09cd\u099c\u09bf \u09ac\u09cd\u09af\u09be\u09b2\u09c7\u09a8\u09cd\u09b8 \u09aa\u09b0\u09cd\u09af\u09be\u09b2\u09cb\u099a\u09a8\u09be \u0995\u09b0\u099b\u09c7\u09a8.",
-      highlights: [
-        "\u09a6\u09bf\u0995 \u098f\u09ac\u0982 \u09aa\u09cd\u09b2\u09c7\u09b8\u09ae\u09c7\u09a8\u09cd\u099f \u09b0\u09bf\u09ad\u09bf\u0989",
-        "\u09ac\u09be\u09a1\u09bc\u09bf\u09b0 \u098f\u09a8\u09be\u09b0\u09cd\u099c\u09bf \u09ac\u09cd\u09af\u09be\u09b2\u09c7\u09a8\u09cd\u09b8 \u09b8\u09c1\u09aa\u09be\u09b0\u09bf\u09b6",
-        "\u09ac\u09be\u09b8\u09cd\u09a4\u09c1 \u09b8\u0982\u09b6\u09cb\u09a7\u09a8 \u098f\u09ac\u0982 \u09aa\u09cd\u09b0\u09a4\u09bf\u0995\u09be\u09b0\u09c7\u09b0 \u09a7\u09be\u09b0\u09a3\u09be",
-      ],
-      includes: [
-        "\u09a6\u09bf\u0995\u09a8\u09bf\u09b0\u09cd\u09ad\u09b0 \u0985\u09cd\u09af\u09be\u09b8\u09c7\u09b8\u09ae\u09c7\u09a8\u09cd\u099f",
-        "\u0995\u0995\u09cd\u09b7 \u098f\u09ac\u0982 \u098f\u09a8\u09cd\u099f\u09cd\u09b0\u09be\u09a8\u09cd\u09b8 \u09aa\u09b0\u09cd\u09af\u09ac\u09c7\u0995\u09cd\u09b7\u09a3",
-        "\u0989\u09a8\u09cd\u09a8\u09a4\u09bf\u09b0 \u09aa\u09b0\u09be\u09ae\u09b0\u09cd\u09b6",
-        "\u09ac\u09c7\u09b8\u09bf\u0995 \u09aa\u09cd\u09b0\u09a4\u09bf\u0995\u09be\u09b0\u09c7\u09b0 \u09a8\u09bf\u09b0\u09cd\u09a6\u09c7\u09b6\u09a8\u09be",
-      ],
-    },
+
+    comingSoon: "শীঘ্রই আসছে",
+
+    comingSoonMessage:
+      "এই রিপোর্টটি খুব শীঘ্রই উপলব্ধ হবে।",
+
+    freeKundaliTitle: "কুণ্ডলী",
+
+    freeKundaliIntro:
+      "আপনার জন্মছক আপনার ব্যক্তিত্ব, শক্তি, জীবনের পথ এবং গুরুত্বপূর্ণ সুযোগ সম্পর্কে কী বলে তা জানুন।",
+
+    whatIsKundali: "কুণ্ডলী কী?",
+
+    whatIsKundaliBody:
+      "কুণ্ডলী হল আপনার জন্মের সঠিক সময় ও স্থানে আকাশের অবস্থার একটি ছবি। গ্রহ ও রাশির অবস্থান দেখে জীবনের বিভিন্ন দিক বোঝা যায়।",
+
+    whyKundali: "কুণ্ডলী কেন প্রয়োজন?",
+
+    whyKundaliBody:
+      "জ্যোতিষের সাহায্যে আপনার জন্মছক স্বভাব, সম্পর্ক, কর্মজীবন এবং ব্যক্তিগত উন্নতি সম্পর্কে ভাবতে সাহায্য করতে পারে।",
+
+    kundaliBenefits: [
+      "আপনার ব্যক্তিত্ব ও স্বাভাবিক শক্তি বুঝুন",
+      "কর্মজীবন ও সম্পর্কের ধারা জানুন",
+      "আপনার জীবনে গ্রহের প্রভাব বুঝুন",
+    ],
+
+    getFreeKundali: "ফ্রি কুণ্ডলী নিন",
+    kundaliForm: { fullName: "পুরো নাম", dateOfBirth: "জন্ম তারিখ", timeOfBirth: "জন্ম সময়", birthLocation: "জন্মস্থান", dontKnowTime: "আমি আমার জন্ম সময় জানি না", namePlaceholder: "আপনার পুরো নাম লিখুন", locationPlaceholder: "আপনার জন্মস্থান লিখুন", selectDate: "জন্ম তারিখ নির্বাচন করুন", selectTime: "জন্ম সময় নির্বাচন করুন", cancel: "বাতিল", continue: "চালিয়ে যান", validation: "আপনার নাম, জন্ম তারিখ, জন্ম সময় এবং জন্মস্থান যাচাই করুন।" },
+
+    reportDetailsTitle: "এই রিপোর্টটি কী?",
+
+    reportDetailsBody:
+      "আপনার জন্মতথ্যের ভিত্তিতে জ্যোতিষের মাধ্যমে জীবনের একটি দিক এই রিপোর্টে বোঝানো হয়।",
+
+    getReport: "এই রিপোর্টটি নিন",
+
+    reportIntro: (title) =>
+      `${title} আপনার জীবন ও ভবিষ্যৎ সম্পর্কে কী জানাতে পারে তা জানুন।`,
+
+    whatReport: (title) => `${title} কী?`,
+
+    whyReport: (title) => `${title} কেন প্রয়োজন?`,
+
+    reportBenefits: () => [
+      "জীবনের এই ক্ষেত্রের গুরুত্বপূর্ণ ধারা বুঝুন",
+      "আপনার শক্তি, সুযোগ ও চ্যালেঞ্জ জানুন",
+      "আপনার জন্মতথ্যের ভিত্তিতে পরামর্শ পান",
+    ],
   },
 };
 
-const reportScreenTranslations: Record<SupportedLanguage, ReportScreenTranslations> =
-  {
-    en: {
-      premiumReports: "Premium Reports",
-      premiumReportsSubtitle:
-        "Choose a specialized astrology report prepared by expert astrologers.",
-      yourReports: "Your Reports",
-      viewAll: "View All",
-      continueExploring: "Continue Exploring Consultations",
-      continueExploringSubtitle:
-        "Return to the home experience whenever you want to connect live.",
-      reportNotFound: "Report not found",
-      reportNotFoundMessage: "The requested report type is not available.",
-      backToReports: "Back to Reports",
-      price: "Price",
-      delivery: "Delivery",
-      bestFor: "Best For",
-      whatYouGet: "What You Get",
-      keyHighlights: "Key Highlights",
-      howItWorks: "How It Works",
-      requestButton: (reportShortTitle) => `Request ${reportShortTitle} Report`,
-      requestAlertTitle: (reportShortTitle) => `${reportShortTitle} Report`,
-      requestAlertMessage:
-        "Report ordering UI is ready. The purchase flow can be connected next.",
-      yourReportStatusProcessing: "Processing...",
-      yourReportStatusCompleted: "Completed",
-      steps: [
-        "Submit your request and confirm the report type.",
-        "Our astrologer team reviews the details for this report.",
-        "You receive your completed report within the promised delivery window.",
-      ],
-    },
-    hi: {
-      premiumReports: "\u092a\u094d\u0930\u0940\u092e\u093f\u092f\u092e \u0930\u093f\u092a\u094b\u0930\u094d\u091f",
-      premiumReportsSubtitle:
-        "\u0905\u0928\u0941\u092d\u0935\u0940 \u091c\u094d\u092f\u094b\u0924\u093f\u0937\u093f\u092f\u094b\u0902 \u0926\u094d\u0935\u093e\u0930\u093e \u0924\u0948\u092f\u093e\u0930 \u0915\u0940 \u0917\u0908 \u0935\u093f\u0936\u0947\u0937 \u091c\u094d\u092f\u094b\u0924\u093f\u0937 \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u091a\u0941\u0928\u0947\u0902.",
-      yourReports: "\u0906\u092a\u0915\u0940 \u0930\u093f\u092a\u094b\u0930\u094d\u091f",
-      viewAll: "\u0938\u092d\u0940 \u0926\u0947\u0916\u0947\u0902",
-      continueExploring: "\u0915\u0902\u0938\u0932\u094d\u091f\u0947\u0936\u0928 \u090f\u0915\u094d\u0938\u092a\u094d\u0932\u094b\u0930 \u0915\u0930\u0928\u093e \u091c\u093e\u0930\u0940 \u0930\u0916\u0947\u0902",
-      continueExploringSubtitle:
-        "\u091c\u092c \u092d\u0940 \u0906\u092a \u0932\u093e\u0907\u0935 \u0915\u0928\u0947\u0915\u094d\u091f \u0915\u0930\u0928\u093e \u091a\u093e\u0939\u0947\u0902, \u0939\u094b\u092e \u0905\u0928\u0941\u092d\u0935 \u092a\u0930 \u0935\u093e\u092a\u0938 \u091c\u093e\u090f\u0902.",
-      reportNotFound:
-        "\u0930\u093f\u092a\u094b\u0930\u094d\u091f \u0928\u0939\u0940\u0902 \u092e\u093f\u0932\u0940",
-      reportNotFoundMessage:
-        "\u092e\u093e\u0902\u0917\u0940 \u0917\u0908 \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u091f\u093e\u0907\u092a \u0909\u092a\u0932\u092c\u094d\u0927 \u0928\u0939\u0940\u0902 \u0939\u0948.",
-      backToReports:
-        "\u0930\u093f\u092a\u094b\u0930\u094d\u091f \u092a\u0930 \u0935\u093e\u092a\u0938 \u091c\u093e\u090f\u0902",
-      price: "\u0915\u0940\u092e\u0924",
-      delivery: "\u0921\u093f\u0932\u093f\u0935\u0930\u0940",
-      bestFor: "\u0915\u093f\u0938\u0915\u0947 \u0932\u093f\u090f \u0938\u092c\u0938\u0947 \u0905\u091a\u094d\u091b\u093e",
-      whatYouGet: "\u0906\u092a\u0915\u094b \u0915\u094d\u092f\u093e \u092e\u093f\u0932\u0947\u0917\u093e",
-      keyHighlights:
-        "\u092e\u0941\u0916\u094d\u092f \u0939\u093e\u0907\u0932\u093e\u0907\u091f\u094d\u0938",
-      howItWorks:
-        "\u092f\u0939 \u0915\u0948\u0938\u0947 \u0915\u093e\u092e \u0915\u0930\u0924\u093e \u0939\u0948",
-      requestButton: (reportShortTitle) =>
-        `${reportShortTitle} \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u0915\u0947 \u0932\u093f\u090f \u0905\u0928\u0941\u0930\u094b\u0927 \u0915\u0930\u0947\u0902`,
-      requestAlertTitle: (reportShortTitle) =>
-        `${reportShortTitle} \u0930\u093f\u092a\u094b\u0930\u094d\u091f`,
-      requestAlertMessage:
-        "\u0930\u093f\u092a\u094b\u0930\u094d\u091f \u0911\u0930\u094d\u0921\u0930 \u092f\u0942\u0906\u0908 \u0924\u0948\u092f\u093e\u0930 \u0939\u0948. \u0905\u0917\u0932\u0947 \u091a\u0930\u0923 \u092e\u0947\u0902 \u092a\u0930\u091a\u0947\u091c\u093c \u092b\u094d\u0932\u094b \u0915\u0928\u0947\u0915\u094d\u091f \u0915\u093f\u092f\u093e \u091c\u093e \u0938\u0915\u0924\u093e \u0939\u0948.",
-      yourReportStatusProcessing:
-        "\u092a\u094d\u0930\u094b\u0938\u0947\u0938\u093f\u0902\u0917...",
-      yourReportStatusCompleted: "\u092a\u0942\u0930\u0940 \u0939\u094b \u0917\u0908",
-      steps: [
-        "\u0905\u092a\u0928\u093e \u0905\u0928\u0941\u0930\u094b\u0927 \u092d\u0947\u091c\u0947\u0902 \u0914\u0930 \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u091f\u093e\u0907\u092a \u0915\u0928\u094d\u092b\u0930\u094d\u092e \u0915\u0930\u0947\u0902.",
-        "\u0939\u092e\u093e\u0930\u0940 \u091c\u094d\u092f\u094b\u0924\u093f\u0937 \u091f\u0940\u092e \u0907\u0938 \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u0915\u0947 \u0932\u093f\u090f \u0921\u093f\u091f\u0947\u0932\u094d\u0938 \u0930\u093f\u0935\u094d\u092f\u0942 \u0915\u0930\u0924\u0940 \u0939\u0948.",
-        "\u0935\u093e\u0926\u0947 \u0915\u0940 \u0917\u0908 \u0921\u093f\u0932\u093f\u0935\u0930\u0940 \u0905\u0935\u0927\u093f \u092e\u0947\u0902 \u0906\u092a\u0915\u094b \u092a\u0942\u0930\u0940 \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u092e\u093f\u0932 \u091c\u093e\u090f\u0917\u0940.",
-      ],
-    },
-    bn: {
-      premiumReports: "\u09aa\u09cd\u09b0\u09bf\u09ae\u09bf\u09df\u09be\u09ae \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f",
-      premiumReportsSubtitle:
-        "\u0985\u09ad\u09bf\u099c\u09cd\u099e \u099c\u09cd\u09af\u09cb\u09a4\u09bf\u09b7\u09c0\u09a6\u09c7\u09b0 \u09a4\u09c8\u09b0\u09bf \u0995\u09b0\u09be \u09ac\u09bf\u09b6\u09c7\u09b7 \u099c\u09cd\u09af\u09cb\u09a4\u09bf\u09b7 \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f \u09ac\u09c7\u099b\u09c7 \u09a8\u09bf\u09a8\u0964",
-      yourReports: "\u0986\u09aa\u09a8\u09be\u09b0 \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f",
-      viewAll: "\u09b8\u09ac \u09a6\u09c7\u0996\u09c1\u09a8",
-      continueExploring:
-        "\u0995\u09a8\u09b8\u09be\u09b2\u099f\u09c7\u09b6\u09a8 \u098f\u0995\u09cd\u09b8\u09aa\u09cd\u09b2\u09cb\u09b0 \u099c\u09be\u09b0\u09bf \u09b0\u09be\u0996\u09c1\u09a8",
-      continueExploringSubtitle:
-        "\u09af\u0996\u09a8\u0987 \u0986\u09aa\u09a8\u09bf \u09b2\u09be\u0987\u09ad \u0995\u09a8\u09c7\u0995\u09cd\u099f \u0995\u09b0\u09a4\u09c7 \u099a\u09be\u09a8, \u09a4\u0996\u09a8\u0987 \u09b9\u09cb\u09ae \u0985\u09a8\u09c1\u09ad\u09ac\u09c7 \u09ab\u09bf\u09b0\u09c7 \u09af\u09c7\u09a4\u09c7 \u09aa\u09be\u09b0\u09c7\u09a8\u0964",
-      reportNotFound:
-        "\u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f \u09aa\u09be\u0993\u09df\u09be \u09af\u09be\u09df\u09a8\u09bf",
-      reportNotFoundMessage:
-        "\u0985\u09a8\u09c1\u09b0\u09cb\u09a7 \u0995\u09b0\u09be \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f \u099f\u09be\u0987\u09aa \u0989\u09aa\u09b2\u09ac\u09cd\u09a7 \u09a8\u09af\u09bc\u0964",
-      backToReports:
-        "\u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f\u09c7 \u09ab\u09bf\u09b0\u09c7 \u09af\u09be\u09a8",
-      price: "\u09ae\u09c2\u09b2\u09cd\u09af",
-      delivery: "\u09a1\u09c7\u09b2\u09bf\u09ad\u09be\u09b0\u09bf",
-      bestFor:
-        "\u0995\u09be\u09a6\u09c7\u09b0 \u099c\u09a8\u09cd\u09af \u09b8\u09c7\u09b0\u09be",
-      whatYouGet:
-        "\u0986\u09aa\u09a8\u09bf \u0995\u09c0 \u09aa\u09be\u09ac\u09c7\u09a8",
-      keyHighlights:
-        "\u09ae\u09c2\u09b2 \u09b9\u09be\u0987\u09b2\u09be\u0987\u099f\u09b8",
-      howItWorks:
-        "\u098f\u099f\u09bf \u0995\u09c0\u09ad\u09be\u09ac\u09c7 \u0995\u09be\u099c \u0995\u09b0\u09c7",
-      requestButton: (reportShortTitle) =>
-        `${reportShortTitle} \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f\u09c7\u09b0 \u0985\u09a8\u09c1\u09b0\u09cb\u09a7 \u0995\u09b0\u09c1\u09a8`,
-      requestAlertTitle: (reportShortTitle) =>
-        `${reportShortTitle} \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f`,
-      requestAlertMessage:
-        "\u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f \u0985\u09b0\u09cd\u09a1\u09be\u09b0 \u0987\u0989\u0986\u0987 \u09aa\u09cd\u09b0\u09b8\u09cd\u09a4\u09c1\u09a4 \u0986\u099b\u09c7\u0964 \u09aa\u09b0\u09c7\u09b0 \u09a7\u09be\u09aa\u09c7 \u09aa\u09b0\u099a\u09c7\u099c \u09ab\u09cd\u09b2\u09cb \u0995\u09a8\u09c7\u0995\u09cd\u099f \u0995\u09b0\u09be \u09af\u09c7\u09a4\u09c7 \u09aa\u09be\u09b0\u09c7\u0964",
-      yourReportStatusProcessing:
-        "\u09aa\u09cd\u09b0\u09b8\u09c7\u09b8\u09bf\u0982...",
-      yourReportStatusCompleted: "\u09b8\u09ae\u09cd\u09aa\u09c2\u09b0\u09cd\u09a3",
-      steps: [
-        "\u0986\u09aa\u09a8\u09be\u09b0 \u0985\u09a8\u09c1\u09b0\u09cb\u09a7 \u099c\u09ae\u09be \u09a6\u09bf\u09a8 \u098f\u09ac\u0982 \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f \u099f\u09be\u0987\u09aa \u09a8\u09bf\u09b6\u09cd\u099a\u09bf\u09a4 \u0995\u09b0\u09c1\u09a8\u0964",
-        "\u0986\u09ae\u09be\u09a6\u09c7\u09b0 \u099c\u09cd\u09af\u09cb\u09a4\u09bf\u09b7 \u099f\u09bf\u09ae \u098f\u0987 \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f\u09c7\u09b0 \u099c\u09a8\u09cd\u09af \u09a4\u09a5\u09cd\u09af \u09aa\u09b0\u09cd\u09af\u09be\u09b2\u09cb\u099a\u09a8\u09be \u0995\u09b0\u09c7\u0964",
-        "\u09a8\u09bf\u09b0\u09cd\u09a7\u09be\u09b0\u09bf\u09a4 \u09a1\u09c7\u09b2\u09bf\u09ad\u09be\u09b0\u09bf \u09b8\u09ae\u09af\u09bc\u09c7\u09b0 \u09ae\u09a7\u09cd\u09af\u09c7 \u0986\u09aa\u09a8\u09bf \u09b8\u09ae\u09cd\u09aa\u09c2\u09b0\u09cd\u09a3 \u09b0\u09bf\u09aa\u09cb\u09b0\u09cd\u099f \u09aa\u09c7\u09df\u09c7 \u09af\u09be\u09ac\u09c7\u09a8\u0964",
-      ],
-    },
-  };
-
-export const normalizeLanguage = (lang?: string | null): SupportedLanguage => {
-  if (lang === "hi" || lang === "bn") {
-    return lang;
-  }
-
-  return "en";
+export const normalizeLanguage = (
+  lang?: string | null
+): SupportedLanguage => {
+  return lang === "hi" || lang === "bn" ? lang : "en";
 };
 
 export const getReportCatalog = (
   lang: SupportedLanguage = "en"
-): ReportConfig[] =>
-  staticReportCatalog.map((report) => ({
-    ...report,
-    ...localizedReportCatalog[lang][report.slug],
-  }));
+): ReportConfig[] => {
+  const language = translations[lang];
+
+  return definitions.map((item) => {
+    const report = language.reports[item.translationKey];
+
+    const finalPrice =
+      item.originalPrice === 0
+        ? 0
+        : Math.round(
+            item.originalPrice *
+              (1 - item.discountPercentage / 100)
+          );
+
+    return {
+      slug: item.slug,
+      category: item.category,
+      title: report.title,
+      description: report.description,
+
+      image: item.image,
+
+      originalPrice: item.originalPrice,
+      discountPercentage: item.discountPercentage,
+      finalPrice,
+    };
+  });
+};
 
 export const getReportCatalogBySlug = (
   lang: SupportedLanguage = "en"
-): Record<ReportSlug, ReportConfig> =>
-  getReportCatalog(lang).reduce(
-    (acc, report) => {
-      acc[report.slug] = report;
-      return acc;
-    },
-    {} as Record<ReportSlug, ReportConfig>
-  );
+) =>
+  Object.fromEntries(
+    getReportCatalog(lang).map((item) => [
+      item.slug,
+      item,
+    ])
+  ) as Record<ReportSlug, ReportConfig>;
 
 export const getReportScreenTranslations = (
   lang: SupportedLanguage = "en"
-): ReportScreenTranslations => reportScreenTranslations[lang];
+): ReportScreenTranslations => {
+  return translations[lang];
+};
