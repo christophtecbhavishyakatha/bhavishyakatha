@@ -93,6 +93,7 @@ export default function VideoCallScreen() {
   const unansweredTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
+  const ringingFallbackRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [session, setSession] = useState<ActiveCallSession | null>(
     getCurrentCallSession()
   );
@@ -123,13 +124,21 @@ export default function VideoCallScreen() {
 }>();
   useKeepAwake();
 
-  const callId = String(id ?? "");
-  const callUserId = String(userId ?? "");
-  const callCustomerId = String(customerId ?? "");
-  const callFullName = String(fullName ?? "Consultant");
-const callDateOfBirth = String(dateOfBirth ?? "");
-const callTimeOfBirth = String(timeOfBirth ?? "");
-const callBirthLocation = String(birthLocation ?? "");
+  const currentSession = getCurrentCallSession();
+  const sessionMatch =
+    currentSession?.id === id || currentSession?.callType === "video"
+      ? currentSession
+      : null;
+
+  const callId = String(id ?? sessionMatch?.id ?? "");
+  const callUserId = String(userId ?? sessionMatch?.userId ?? "");
+  const callCustomerId = String(customerId ?? sessionMatch?.customerId ?? "");
+  const callFullName = String(fullName ?? sessionMatch?.fullName ?? "Consultant");
+  const callDateOfBirth = String(dateOfBirth ?? sessionMatch?.dateOfBirth ?? "");
+  const callTimeOfBirth = String(timeOfBirth ?? sessionMatch?.timeOfBirth ?? "");
+  const callBirthLocation = String(birthLocation ?? sessionMatch?.birthLocation ?? "");
+  const callLatitude = String(latitude ?? sessionMatch?.latitude ?? "");
+  const callLongitude = String(longitude ?? sessionMatch?.longitude ?? "");
 
 const [showCustomerInfo, setShowCustomerInfo] = useState(false);
   const API_BASE = "https://bhavishyakatha.in/express/astrologer";
@@ -284,6 +293,13 @@ const [showCustomerInfo, setShowCustomerInfo] = useState(false);
     }
   }, []);
 
+  const clearRingingFallback = useCallback(() => {
+    if (ringingFallbackRef.current) {
+      clearTimeout(ringingFallbackRef.current);
+      ringingFallbackRef.current = null;
+    }
+  }, []);
+
   const notifyBackendCallEnded = useCallback(
     async (reason: "manual" | "timeout") => {
       if (!callId) {
@@ -322,6 +338,7 @@ const [showCustomerInfo, setShowCustomerInfo] = useState(false);
 
     isCallEndingRef.current = true;
     clearUnansweredTimeout();
+    clearRingingFallback();
 
     const currentSession = getCurrentCallSession();
     const shouldNotifyMissed =
@@ -389,10 +406,18 @@ const [showCustomerInfo, setShowCustomerInfo] = useState(false);
     const eventHandler = {
       onJoinChannelSuccess: async () => {
         console.log("✅ [agora] onJoinChannelSuccess");
-        await updateActiveCallSession({ status: "ringing" });
+        const joinedSession = getCurrentCallSession();
+        if (
+          joinedSession?.id === callId &&
+          joinedSession.callType === "video" &&
+          joinedSession.status === "connecting"
+        ) {
+          await updateActiveCallSession({ status: "ringing" });
+        }
       },
       onUserJoined: async (_connection: unknown, joinedUid: number) => {
         console.log("✅ [agora] onUserJoined uid:", joinedUid);
+        clearRingingFallback();
         clearUnansweredTimeout();
         ensureForegroundService();
         await updateActiveCallSession({
@@ -496,6 +521,10 @@ const [showCustomerInfo, setShowCustomerInfo] = useState(false);
     setCallEngine(engine);
     console.log("🔧 [setupVideo] engine stored");
 
+    // Start the native session before publishing the JS session. This prevents
+    // the root layout from treating the call as stale during startup.
+    ensureForegroundService();
+
     await setActiveCallSession({
       callType: "video",
       id: callId,
@@ -511,9 +540,13 @@ const [showCustomerInfo, setShowCustomerInfo] = useState(false);
       isMuted: false,
       isVideoOff: false,
       isSpeakerOn: true,
+      dateOfBirth: callDateOfBirth,
+      timeOfBirth: callTimeOfBirth,
+      birthLocation: callBirthLocation,
+      latitude: callLatitude,
+      longitude: callLongitude,
     });
 
-    ensureForegroundService();
     startUnansweredTimeout();
 
     console.log(
@@ -591,7 +624,8 @@ const [showCustomerInfo, setShowCustomerInfo] = useState(false);
     engine.startPreview(VideoSourceType.VideoSourceCameraPrimary);
     console.log("🔧 [setupVideo] startPreview called after join");
 
-    setTimeout(() => {
+    clearRingingFallback();
+    ringingFallbackRef.current = setTimeout(() => {
       const currentSession = getCurrentCallSession();
       if (
         currentSession &&
@@ -599,8 +633,9 @@ const [showCustomerInfo, setShowCustomerInfo] = useState(false);
         currentSession.id === callId &&
         currentSession.status === "connecting"
       ) {
-        updateActiveCallSession({ status: "ringing" });
+        void updateActiveCallSession({ status: "ringing" });
       }
+      ringingFallbackRef.current = null;
     }, 3000);
   }, [
     callCustomerId,
@@ -610,6 +645,7 @@ const [showCustomerInfo, setShowCustomerInfo] = useState(false);
     ensureForegroundService,
     finishCall,
     clearUnansweredTimeout,
+    clearRingingFallback,
     requestPermissions,
     resetAgoraEngine,
     startUnansweredTimeout,
@@ -632,6 +668,9 @@ const [showCustomerInfo, setShowCustomerInfo] = useState(false);
           existingEngine
         ) {
           ensureForegroundService();
+          if (existingSession.status === "connecting") {
+            await updateActiveCallSession({ status: "ringing" });
+          }
           if (isMounted) {
             setLoading(false);
           }
@@ -674,6 +713,7 @@ const [showCustomerInfo, setShowCustomerInfo] = useState(false);
     return () => {
       isMounted = false;
       clearUnansweredTimeout();
+      clearRingingFallback();
     };
   }, [
     callCustomerId,
@@ -814,12 +854,12 @@ const [showCustomerInfo, setShowCustomerInfo] = useState(false);
       </View>
       {session?.status === "connected" && (
 <KundaliFloatingButton
-  userId={callUserId}
+  userId={callCustomerId || callUserId}
   dateOfBirth={callDateOfBirth}
   timeOfBirth={callTimeOfBirth}
   birthLocation={callBirthLocation}
-  longitude={Number(longitude)}
-  latitude={Number(latitude)}
+  longitude={Number(callLongitude)}
+  latitude={Number(callLatitude)}
   fullName={callFullName}
 />  
 )}
@@ -867,6 +907,7 @@ const styles = StyleSheet.create({
     left: 20,
     right: 150,
     backgroundColor: "rgba(8, 2, 53, 0.96)",
+    paddingLeft: 16,
   },
   overlayName: {
     color: "#fff",

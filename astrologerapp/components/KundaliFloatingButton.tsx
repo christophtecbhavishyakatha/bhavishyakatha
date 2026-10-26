@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Image as ExpoImage } from "expo-image";
 import {
   ActivityIndicator,
+  Animated,
+  Dimensions,
   Keyboard,
+  PanResponder,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type KundaliFloatingButtonProps = {
   userId: string | number;
@@ -38,6 +42,56 @@ export default function KundaliFloatingButton({
   const [kundaliData, setKundaliData] = useState<any>(null);
   const [activeSegment, setActiveSegment] = useState("overview");
   const [error, setError] = useState("");
+  const insets = useSafeAreaInsets();
+  const pan = useRef(new Animated.ValueXY()).current;
+  const buttonSize = useRef({ width: 0, height: 0 });
+  const position = useRef({ x: 0, y: 0 });
+  const dragStart = useRef({ x: 0, y: 0 });
+  const didDrag = useRef(false);
+
+  const clamp = (value: number, min: number, max: number) =>
+    Math.min(Math.max(value, min), Math.max(min, max));
+
+  const getDragBounds = () => {
+    const { width, height } = buttonSize.current;
+    const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+    const baseLeft = screenWidth - 16 - width;
+    const baseTop = screenHeight * 0.3 - 27;
+
+    return {
+      minX: 8 - baseLeft,
+      maxX: screenWidth - 8 - width - baseLeft,
+      minY: insets.top + 8 - baseTop,
+      maxY: screenHeight - insets.bottom - 8 - height - baseTop,
+    };
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        didDrag.current = false;
+        dragStart.current = position.current;
+      },
+      onPanResponderMove: (_event, gestureState) => {
+        if (Math.abs(gestureState.dx) > 4 || Math.abs(gestureState.dy) > 4) {
+          didDrag.current = true;
+        }
+        const bounds = getDragBounds();
+        const nextPosition = {
+          x: clamp(dragStart.current.x + gestureState.dx, bounds.minX, bounds.maxX),
+          y: clamp(dragStart.current.y + gestureState.dy, bounds.minY, bounds.maxY),
+        };
+        position.current = nextPosition;
+        pan.setValue(nextPosition);
+      },
+      onPanResponderRelease: () => {
+        if (!didDrag.current) {
+          openKundali();
+        }
+      },
+    }),
+  ).current;
 
   useEffect(() => {
     const showSubscription = Keyboard.addListener("keyboardDidShow", (event) => {
@@ -133,10 +187,21 @@ export default function KundaliFloatingButton({
   return (
     <>
       {/* Floating Button */}
-      <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={openKundali}
-        activeOpacity={0.5}
+      <Animated.View
+        {...panResponder.panHandlers}
+        onLayout={(event) => {
+          const { width, height } = event.nativeEvent.layout;
+          buttonSize.current = { width, height };
+        }}
+        style={[
+          styles.floatingButton,
+          {
+            transform: [
+              { translateX: pan.x },
+              { translateY: Animated.add(pan.y, -27) },
+            ],
+          },
+        ]}
       >
         <Text style={styles.icon}>♈</Text>
 
@@ -144,7 +209,7 @@ export default function KundaliFloatingButton({
           <Text style={styles.title}>Kundali</Text>
           <Text style={styles.subtitle}>View Kundali</Text>
         </View>
-      </TouchableOpacity>
+      </Animated.View>
 
       {/* Kundali Screen */}
       {visible ? (
@@ -410,16 +475,11 @@ const formatDate = (value?: string) =>
   value ? new Date(value).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" }) : "-";
 
 const styles = StyleSheet.create({
- floatingButton: {
+  floatingButton: {
   position: "absolute",
   right: 16,
 
-  top: "50%",
-  transform: [
-    {
-      translateY: -27, // half of height (54 / 2)
-    },
-  ],
+  top: "30%",
 
   minWidth: 112,
   height: 54,

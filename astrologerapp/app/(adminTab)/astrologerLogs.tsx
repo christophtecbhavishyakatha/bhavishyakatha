@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { openPhoneNumber } from "../../utils/openPhoneNumber";
 
 const API = "https://bhavishyakatha.in/express/api";
 const PAGE_SIZE = 50;
@@ -231,9 +232,15 @@ const AstrologerScreen = () => {
 
       <View style={styles.cardBody}>
         <Text style={styles.name}>{item.dp_name || item.full_name}</Text>
-        <Text style={styles.mobile}>
-          <Ionicons name="call-outline" size={11} color="#8893B5" /> {item.mobile}
-        </Text>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={`Call ${item.mobile}`}
+          onPress={() => void openPhoneNumber(item.mobile)}
+        >
+          <Text style={styles.mobile}>
+            <Ionicons name="call-outline" size={11} color="#8893B5" /> {item.mobile}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.walletBadge}>
@@ -256,9 +263,15 @@ const AstrologerScreen = () => {
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.callUserName}>{c.user_name}</Text>
-            <Text style={styles.modalMobileText}>
-              <Ionicons name="call-outline" size={10} color="#8893B5" /> {c.user_mobile}
-            </Text>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel={`Call ${c.user_mobile}`}
+              onPress={() => void openPhoneNumber(c.user_mobile)}
+            >
+              <Text style={styles.modalMobileText}>
+                <Ionicons name="call-outline" size={10} color="#8893B5" /> {c.user_mobile}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
         <CallTypeBadge type={c.call_type} />

@@ -1,5 +1,6 @@
 import {
   clearActiveCallSession,
+  getCurrentCallSession,
   setActiveCallSession,
 } from "@/utils/callSession";
 import { useKeepAwake } from "expo-keep-awake";
@@ -8,22 +9,29 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   AppState,
+  BackHandler,
   Dimensions,
   FlatList,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   NativeModules,
+  PanResponder,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
+  useWindowDimensions
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import ImageZoom from "react-native-image-pan-zoom";
-import KundaliFloatingButton from "../components/KundaliFloatingButton";
+import { Image as ExpoImage } from "expo-image";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -91,7 +99,87 @@ type ChatHistoryCursor = {
 const SOCKET_URL = "https://bhavishyakatha.in/";
 const CHAT_API = "https://bhavishyakatha.in/express/api/chat";
 const ASTROLOGER_API = "https://bhavishyakatha.in/express/astrologer";
+const KUNDALI_API =
+  "https://bhavishyakatha.in/express/astrologer/kundaliV1/generate";
 const UNANSWERED_CHAT_TIMEOUT_MS = 40 * 1000;
+
+const formatKundaliDate = (value?: string) =>
+  value
+    ? new Date(value).toLocaleDateString(undefined, {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "-";
+
+const KundaliInfoRow = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) => (
+  <View style={styles.kundaliInfoRow}>
+    <Text style={styles.kundaliInfoLabel}>{label}</Text>
+    <Text style={styles.kundaliInfoValue}>{value}</Text>
+  </View>
+);
+
+const KundaliChartCard = ({
+  title,
+  imageData,
+  onPressImage,
+}: {
+  title: string;
+  imageData?: string;
+  onPressImage?: () => void;
+}) => (
+  <View style={styles.kundaliCard}>
+    <View style={styles.kundaliChartHeader}>
+      <Text style={styles.kundaliCardTitle}>{title}</Text>
+      {imageData ? (
+        <Text style={styles.kundaliZoomHint}>Tap to zoom 🔍</Text>
+      ) : null}
+    </View>
+    {imageData ? (
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={onPressImage}
+        disabled={!onPressImage}
+      >
+        <ExpoImage
+          source={{
+            uri: imageData.startsWith("data:")
+              ? imageData
+              : `data:image/png;base64,${imageData.replace(/\s/g, "")}`,
+          }}
+          style={styles.kundaliChartImage}
+          contentFit="contain"
+          cachePolicy="memory-disk"
+        />
+      </TouchableOpacity>
+    ) : (
+      <Text style={styles.kundaliChartPlaceholder}>Chart unavailable</Text>
+    )}
+  </View>
+);
+
+const KundaliDashaRow = ({
+  lord,
+  start,
+  end,
+}: {
+  lord?: unknown;
+  start?: string;
+  end?: string;
+}) => (
+  <View style={styles.kundaliDashaRow}>
+    <Text style={styles.kundaliDashaLord}>{String(lord || "-")}</Text>
+    <Text style={styles.kundaliDashaDate}>
+      {String(formatKundaliDate(start))} - {String(formatKundaliDate(end))}
+    </Text>
+  </View>
+);
 
 const formatMessageDate = (value?: string | null) => {
   if (!value) {
@@ -225,6 +313,7 @@ const normalizeMessages = (messages: ChatPayloadLike[]) =>
   );
 
 export default function ChatScreen() {
+  const { width: screenWidth } = useWindowDimensions();
   useKeepAwake();
 
   const insets = useSafeAreaInsets();
@@ -273,6 +362,21 @@ const {
   const [quickMessageModal, setQuickMessageModal] = useState(false);
   const [loadingQuickMessages, setLoadingQuickMessages] = useState(false);
 
+  const [kundaliVisible, setKundaliVisible] = useState(false);
+  const [kundaliData, setKundaliData] = useState<any>(null);
+  const [loadingKundali, setLoadingKundali] = useState(false);
+  const [kundaliError, setKundaliError] = useState("");
+  const [activeKundaliSegment, setActiveKundaliSegment] = useState("overview");
+  const [expandedMahadasha, setExpandedMahadasha] = useState<number | null>(null);
+  const [expandedAntardasha, setExpandedAntardasha] = useState<string | null>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  const kundaliPan = useRef(new Animated.ValueXY()).current;
+  const kundaliButtonSize = useRef({ width: 0, height: 0 });
+  const kundaliPosition = useRef({ x: 0, y: 0 });
+  const kundaliDragStart = useRef({ x: 0, y: 0 });
+  const kundaliDidDrag = useRef(false);
+
   const listRef = useRef<FlatList<Message> | null>(null);
   const socketRef = useRef<Socket | null>(null);
   const didEndRef = useRef(false);
@@ -288,16 +392,213 @@ const {
   const pendingInitialScrollRef = useRef(false);
   const { CallService } = NativeModules;
 
-  const resolvedCallId = String(id ?? "");
-  const resolvedUserId = String(userId ?? "");
-  const resolvedCustomerId = String(customerId ?? "");
-  const resolvedFullName = String(fullName ?? "Consultant");
-  const resolvedDateOfBirth = String(dateOfBirth ?? "");
-const resolvedTimeOfBirth = String(timeOfBirth ?? "");
-const resolvedBirthLocation = String(birthLocation ?? "");
+  const clampKundaliPosition = (value: number, min: number, max: number) =>
+    Math.min(Math.max(value, min), Math.max(min, max));
+
+  const getKundaliDragBounds = () => {
+    const { width: buttonWidth, height: buttonHeight } = kundaliButtonSize.current;
+    const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+    const baseLeft = screenWidth - 16 - buttonWidth;
+    const baseTop = screenHeight * 0.3 - 27;
+
+    return {
+      minX: 8 - baseLeft,
+      maxX: screenWidth - 8 - buttonWidth - baseLeft,
+      minY: insets.top + 8 - baseTop,
+      maxY: screenHeight - insets.bottom - 8 - buttonHeight - baseTop,
+    };
+  };
+
+  const kundaliPanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        kundaliDidDrag.current = false;
+        kundaliDragStart.current = kundaliPosition.current;
+      },
+      onPanResponderMove: (_event, gestureState) => {
+        if (Math.abs(gestureState.dx) > 4 || Math.abs(gestureState.dy) > 4) {
+          kundaliDidDrag.current = true;
+        }
+        const bounds = getKundaliDragBounds();
+        const nextPosition = {
+          x: clampKundaliPosition(
+            kundaliDragStart.current.x + gestureState.dx,
+            bounds.minX,
+            bounds.maxX,
+          ),
+          y: clampKundaliPosition(
+            kundaliDragStart.current.y + gestureState.dy,
+            bounds.minY,
+            bounds.maxY,
+          ),
+        };
+        kundaliPosition.current = nextPosition;
+        kundaliPan.setValue(nextPosition);
+      },
+      onPanResponderRelease: () => {
+        if (!kundaliDidDrag.current) {
+          openKundali();
+        }
+      },
+    }),
+  ).current;
+
+  const currentSession = getCurrentCallSession();
+  const sessionMatch =
+    currentSession?.id === id || currentSession?.callType === "chat"
+      ? currentSession
+      : null;
+
+  const resolvedCallId = String(id ?? sessionMatch?.id ?? "");
+  const resolvedUserId = String(userId ?? sessionMatch?.userId ?? "");
+  const resolvedCustomerId = String(customerId ?? sessionMatch?.customerId ?? "");
+  const resolvedFullName = String(fullName ?? sessionMatch?.fullName ?? "Consultant");
+  const resolvedDateOfBirth = String(dateOfBirth ?? sessionMatch?.dateOfBirth ?? "");
+  const resolvedTimeOfBirth = String(timeOfBirth ?? sessionMatch?.timeOfBirth ?? "");
+  const resolvedBirthLocation = String(birthLocation ?? sessionMatch?.birthLocation ?? "");
+  const resolvedLatitude = String(latitude ?? sessionMatch?.latitude ?? "");
+  const resolvedLongitude = String(longitude ?? sessionMatch?.longitude ?? "");
+  const fallbackChannelName = String(
+    initialChannelName ||
+      initialChannelNameSnakeCase ||
+      sessionMatch?.channelName ||
+      "",
+  );
+
+  const generateKundali = useCallback(async () => {
+    try {
+      setLoadingKundali(true);
+      setKundaliError("");
+      setKundaliData(null);
+      setActiveKundaliSegment("overview");
+
+      const payload = {
+        user_id: Number(resolvedCustomerId || resolvedUserId || 0),
+        date_of_birth: resolvedDateOfBirth,
+        time_of_birth: resolvedTimeOfBirth,
+        latitude: Number(resolvedLatitude),
+        longitude: Number(resolvedLongitude),
+        name: resolvedFullName,
+      };
+
+      const response = await fetch(KUNDALI_API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data?.success === false) {
+        throw new Error(data?.message || "Failed to generate Kundali");
+      }
+
+      setKundaliData(data);
+    } catch (err: any) {
+      console.log("Kundali error:", err);
+      setKundaliError(err?.message || "Unable to generate Kundali");
+    } finally {
+      setLoadingKundali(false);
+    }
+  }, [
+    resolvedCustomerId,
+    resolvedDateOfBirth,
+    resolvedFullName,
+    resolvedLatitude,
+    resolvedLongitude,
+    resolvedTimeOfBirth,
+    resolvedUserId,
+  ]);
+
+  const openKundali = useCallback(() => {
+    setKundaliVisible(true);
+    if (!kundaliData && !loadingKundali) {
+      void generateKundali();
+    }
+  }, [generateKundali, kundaliData, loadingKundali]);
+
+  useEffect(() => {
+    if (!resolvedCallId) return;
+
+    const existing = getCurrentCallSession();
+    if (
+      !existing ||
+      existing.id !== resolvedCallId ||
+      existing.callType !== "chat"
+    ) {
+      void setActiveCallSession({
+        callType: "chat",
+        id: resolvedCallId,
+        userId: resolvedUserId,
+        customerId: resolvedCustomerId,
+        fullName: resolvedFullName,
+        status: "connected",
+        startedAt: startedAtMs ?? Date.now(),
+        expiresAt: expiresAtMs,
+        remoteUid: null,
+        isMuted: false,
+        isVideoOff: false,
+        isSpeakerOn: true,
+        dateOfBirth: resolvedDateOfBirth,
+        timeOfBirth: resolvedTimeOfBirth,
+        birthLocation: resolvedBirthLocation,
+        latitude: resolvedLatitude,
+        longitude: resolvedLongitude,
+        channelName: channelName || fallbackChannelName,
+      });
+    }
+  }, [
+    channelName,
+    expiresAtMs,
+    fallbackChannelName,
+    resolvedBirthLocation,
+    resolvedCallId,
+    resolvedCustomerId,
+    resolvedDateOfBirth,
+    resolvedFullName,
+    resolvedLatitude,
+    resolvedLongitude,
+    resolvedTimeOfBirth,
+    resolvedUserId,
+    startedAtMs,
+  ]);
+
+  const kundali = kundaliData?.data ?? kundaliData;
+  const chartImages = kundali?.charts?.images ?? kundali?.images;
+  const lagnaImage = chartImages?.lagna?.data;
+  const navamshaImage = chartImages?.navamsa?.data;
+  const moonImage = chartImages?.moon?.data;
+  const birth = kundali?.birth;
+  const birthDate = birth?.date || resolvedDateOfBirth;
+  const birthTime = birth?.time || resolvedTimeOfBirth;
+  const birthPlace =
+    birth?.place?.displayName ||
+    resolvedBirthLocation ||
+    `${latitude}, ${longitude}`;
+  const d1 = kundali?.charts?.d1;
+  const d9 = kundali?.charts?.d9;
+  const moonChart = kundali?.charts?.moon;
+  const planets = d1?.planets || {};
+  const dashas = kundali?.dashas?.vimshottari?.mahadashas || [];
+  const dashaDateWidth = Math.min(150, Math.max(96, screenWidth * 0.34));
+
+  const kundaliSegments = [
+    { key: "overview", label: "Overview" },
+    { key: "lagna", label: "Lagna (D1)" },
+    { key: "navamsha", label: "Navamsha (D9)" },
+    { key: "moon", label: "Moon Chart" },
+    { key: "dashas", label: "Dashas" },
+  ];
+
+  const lastCustomerMessage = [...messages]
+    .reverse()
+    .find((m) => m.sender === "other");
   const resolvedChannelName =
     channelName ||
-    String(initialChannelName || initialChannelNameSnakeCase || "");
+    fallbackChannelName;
   const hasChatStarted = startedAtMs !== null;
   const showWaitingModal = !loading && !hasChatStarted && !didEndRef.current;
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -310,6 +611,46 @@ const resolvedBirthLocation = String(birthLocation ?? "");
       listRef.current?.scrollToEnd({ animated });
     });
   }, []);
+
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSub = Keyboard.addListener(showEvent, (e) => {
+      setKeyboardHeight(e.endCoordinates?.height || 0);
+      if (!kundaliVisible && isNearBottomRef.current) {
+        requestAnimationFrame(() => scrollToBottom(false));
+      }
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [kundaliVisible, scrollToBottom]);
+
+  useEffect(() => {
+    if (!kundaliVisible) {
+      return;
+    }
+
+    const backAction = () => {
+      setKundaliVisible(false);
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [kundaliVisible]);
 
   const handleContentSizeChange = useCallback(() => {
     if (!pendingScrollToBottomRef.current) {
@@ -471,17 +812,31 @@ const resolvedBirthLocation = String(birthLocation ?? "");
         fullName: resolvedFullName,
         status: "connected",
         startedAt: nextStartedAtMs ?? Date.now(),
+        expiresAt: nextExpiresAtMs,
         remoteUid: null,
         isMuted: false,
         isVideoOff: false,
         isSpeakerOn: true,
+        dateOfBirth: resolvedDateOfBirth,
+        timeOfBirth: resolvedTimeOfBirth,
+        birthLocation: resolvedBirthLocation,
+        latitude: resolvedLatitude,
+        longitude: resolvedLongitude,
+        channelName: channelName || fallbackChannelName,
       });
     },
     [
+      channelName,
       clearUnansweredTimeout,
+      fallbackChannelName,
+      resolvedBirthLocation,
       resolvedCallId,
       resolvedCustomerId,
+      resolvedDateOfBirth,
       resolvedFullName,
+      resolvedLatitude,
+      resolvedLongitude,
+      resolvedTimeOfBirth,
       resolvedUserId,
     ],
   );
@@ -1136,47 +1491,339 @@ const resolvedBirthLocation = String(birthLocation ?? "");
       </View>
 
       <KeyboardAvoidingView
-        style={styles.content}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? insets.top + 12 : 24}
+        style={[
+          styles.content,
+          Platform.OS === "android" && {
+            paddingBottom: Math.max(0, keyboardHeight ),
+          },
+        ]}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? insets.top + 76 : 0}
         enabled
       >
         <View style={styles.chatSurface}>
-          <View style={styles.wallpaperOrbOne} />
-          <View style={styles.wallpaperOrbTwo} />
-
-          {loading ? (
-            <View style={styles.loaderWrap}>
-              <ActivityIndicator size="large" color="#1F8B5F" />
-            </View>
-          ) : (
-            <FlatList
-              ref={listRef}
-              data={messages}
-              keyExtractor={(item) => item.id}
-              renderItem={renderItem}
-              style={styles.list}
-              contentContainerStyle={styles.listContent}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-              maintainVisibleContentPosition={{ minIndexForVisible: 1 }}
-              onContentSizeChange={handleContentSizeChange}
-              onScroll={handleListScroll}
-              scrollEventThrottle={16}
-              ListHeaderComponent={historyHeader}
-              ListEmptyComponent={
-                <View style={styles.emptyState}>
-                  <View style={styles.emptyBadge}>
-                    <Text style={styles.emptyBadgeText}>Chat</Text>
+          {kundaliVisible ? (
+            <View style={styles.kundaliContainer}>
+              <View style={styles.kundaliHeader}>
+                <View style={styles.kundaliHeaderLeft}>
+                  <View style={styles.kundaliTitleRow}>
+                    <Text style={styles.kundaliHeaderIcon}>♈</Text>
+                    <Text style={styles.kundaliHeaderTitle}>Kundali</Text>
                   </View>
-                  <Text style={styles.emptyTitle}>No previous chat yet</Text>
-                  <Text style={styles.emptyText}>
-                    Previous messages will appear here once the backend returns
-                    them for this call channel.
+                  <Text style={styles.kundaliHeaderSubtitle} numberOfLines={1}>
+                    {resolvedFullName || "Customer"}
                   </Text>
                 </View>
-              }
-            />
+
+                <TouchableOpacity
+                  style={styles.kundaliCloseBtn}
+                  onPress={() => setKundaliVisible(false)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.kundaliCloseText}>✕ Close</Text>
+                </TouchableOpacity>
+              </View>
+
+              {lastCustomerMessage && (
+                <TouchableOpacity
+                  style={styles.kundaliNewMsgBanner}
+                  activeOpacity={0.8}
+                  onPress={() => setKundaliVisible(false)}
+                >
+                  <Text style={styles.kundaliNewMsgIcon}>💬</Text>
+                  <View style={styles.kundaliNewMsgTextWrap}>
+                    <Text style={styles.kundaliNewMsgSender} numberOfLines={1}>
+                      {resolvedFullName}:
+                    </Text>
+                    <Text style={styles.kundaliNewMsgText} numberOfLines={1}>
+                      {lastCustomerMessage.text || "Sent an image"}
+                    </Text>
+                  </View>
+                  <Text style={styles.kundaliNewMsgAction}>View Chat ›</Text>
+                </TouchableOpacity>
+              )}
+
+              {loadingKundali ? (
+                <View style={styles.kundaliCenter}>
+                  <ActivityIndicator size="large" color="#1F8B5F" />
+                  <Text style={styles.kundaliLoadingTitle}>
+                    Generating Kundali...
+                  </Text>
+                  <Text style={styles.kundaliLoadingText}>Please wait...</Text>
+                </View>
+              ) : kundaliError ? (
+                <View style={styles.kundaliCenter}>
+                  <Text style={styles.kundaliErrorIcon}>⚠️</Text>
+                  <Text style={styles.kundaliErrorTitle}>
+                    Unable to generate Kundali
+                  </Text>
+                  <Text style={styles.kundaliErrorText}>{kundaliError}</Text>
+                  <TouchableOpacity
+                    style={styles.kundaliRetryBtn}
+                    onPress={generateKundali}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.kundaliRetryText}>Try Again</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : kundaliData ? (
+                <View style={styles.kundaliBody}>
+                  <View style={styles.kundaliSegmentBarWrap}>
+                    <ScrollView
+                      horizontal
+                      style={styles.kundaliSegmentScroll}
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.kundaliSegmentBar}
+                      keyboardShouldPersistTaps="handled"
+                    >
+                      {kundaliSegments.map((segment) => (
+                        <TouchableOpacity
+                          key={segment.key}
+                          style={[
+                            styles.kundaliSegment,
+                            activeKundaliSegment === segment.key &&
+                              styles.kundaliActiveSegment,
+                          ]}
+                          onPress={() => setActiveKundaliSegment(segment.key)}
+                        >
+                          <Text
+                            style={[
+                              styles.kundaliSegmentText,
+                              activeKundaliSegment === segment.key &&
+                                styles.kundaliActiveSegmentText,
+                            ]}
+                          >
+                            {segment.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+
+                  <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.kundaliContent}
+                    keyboardShouldPersistTaps="handled"
+                  >
+                    {activeKundaliSegment === "overview" && (
+                      <>
+                        <Text style={styles.kundaliSuccessTitle}>
+                          Kundali Generated
+                        </Text>
+                        <View style={styles.kundaliCard}>
+                          <Text style={styles.kundaliCardTitle}>Birth Details</Text>
+                          <KundaliInfoRow label="Date" value={birthDate} />
+                          <KundaliInfoRow label="Time" value={birthTime} />
+                          <KundaliInfoRow label="Location" value={birthPlace} />
+                          <KundaliInfoRow
+                            label="Ayanamsha"
+                            value={
+                              kundali?.provider?.calculation?.ayanamsha || "-"
+                            }
+                          />
+                        </View>
+                        <View style={styles.kundaliCard}>
+                          <Text style={styles.kundaliCardTitle}>Ascendant</Text>
+                          <Text style={styles.kundaliAscendantValue}>
+                            {d1?.ascendant?.position?.sign?.name || "-"}
+                          </Text>
+                          <Text style={styles.kundaliNakshatraText}>
+                            {d1?.ascendant?.position?.degree ?? "-"}°{" "}
+                            {d1?.ascendant?.position?.minutes ?? "-"}'
+                            {"  "}Nakshatra:{" "}
+                            {d1?.ascendant?.nakshatra?.name || "-"}
+                          </Text>
+                        </View>
+                        <KundaliChartCard
+                          title="Lagna Chart"
+                          imageData={lagnaImage}
+                          onPressImage={() => {
+                            if (lagnaImage) {
+                              setSelectedImage(
+                                lagnaImage.startsWith("data:")
+                                  ? lagnaImage
+                                  : `data:image/png;base64,${lagnaImage.replace(/\s/g, "")}`
+                              );
+                            }
+                          }}
+                        />
+                      </>
+                    )}
+
+                    {activeKundaliSegment === "lagna" && (
+                      <>
+                        <KundaliChartCard
+                          title="Lagna Chart"
+                          imageData={lagnaImage}
+                          onPressImage={() => {
+                            if (lagnaImage) {
+                              setSelectedImage(
+                                lagnaImage.startsWith("data:")
+                                  ? lagnaImage
+                                  : `data:image/png;base64,${lagnaImage.replace(/\s/g, "")}`
+                              );
+                            }
+                          }}
+                        />
+                        <View style={styles.kundaliCard}>
+                          <Text style={styles.kundaliCardTitle}>
+                            D1 Planet Positions
+                          </Text>
+                          {Object.values(planets).map((planet: any) => (
+                            <KundaliInfoRow
+                              key={planet.name}
+                              label={planet.name}
+                              value={`${planet.position?.sign?.name || "-"} | House ${planet.house ?? "-"}${planet.position?.retrograde ? " | Retrograde" : ""}`}
+                            />
+                          ))}
+                        </View>
+                      </>
+                    )}
+
+                    {activeKundaliSegment === "navamsha" && (
+                      <>
+                        <KundaliChartCard
+                          title="Navamsha Chart (D9)"
+                          imageData={navamshaImage}
+                          onPressImage={() => {
+                            if (navamshaImage) {
+                              setSelectedImage(
+                                navamshaImage.startsWith("data:")
+                                  ? navamshaImage
+                                  : `data:image/png;base64,${navamshaImage.replace(/\s/g, "")}`
+                              );
+                            }
+                          }}
+                        />
+                        <View style={styles.kundaliCard}>
+                          <Text style={styles.kundaliCardTitle}>
+                            Navamsha (D9) Placements
+                          </Text>
+                          <KundaliInfoRow
+                            label="Reference Sign"
+                            value={d9?.referenceSign || "-"}
+                          />
+                          {Object.entries(d9?.placements || {}).map(
+                            ([name, placement]: [string, any]) => (
+                              <KundaliInfoRow
+                                key={name}
+                                label={name}
+                                value={`${placement.sign || "-"} | House ${placement.house ?? "-"}`}
+                              />
+                            )
+                          )}
+                        </View>
+                      </>
+                    )}
+
+                    {activeKundaliSegment === "moon" && (
+                      <>
+                        <KundaliChartCard
+                          title="Moon Chart"
+                          imageData={moonImage}
+                          onPressImage={() => {
+                            if (moonImage) {
+                              setSelectedImage(
+                                moonImage.startsWith("data:")
+                                  ? moonImage
+                                  : `data:image/png;base64,${moonImage.replace(/\s/g, "")}`
+                              );
+                            }
+                          }}
+                        />
+                        <View style={styles.kundaliCard}>
+                          <Text style={styles.kundaliCardTitle}>
+                            Moon Chart Placements
+                          </Text>
+                          <KundaliInfoRow
+                            label="Reference Sign"
+                            value={moonChart?.referenceSign || "-"}
+                          />
+                          {Object.values(moonChart?.planets || {}).map(
+                            (planet: any) => (
+                              <KundaliInfoRow
+                                key={planet.name}
+                                label={planet.name}
+                                value={`${planet.sign || "-"} | House ${planet.house ?? "-"}`}
+                              />
+                            )
+                          )}
+                        </View>
+                      </>
+                    )}
+
+                    {activeKundaliSegment === "dashas" && (
+                      <View style={styles.kundaliCard}>
+                        <Text style={styles.kundaliCardTitle}>Vimshottari Dasha</Text>
+                        {Array.isArray(dashas) && dashas.map((dasha: any, index: number) => {
+                          const mahadashaOpen = expandedMahadasha === index;
+                          return (
+                            <View style={styles.kundaliDashaBlock} key={`${String(dasha?.lord || "unknown")}-${String(dasha?.start || "")}`}>
+                              <TouchableOpacity hitSlop={6} activeOpacity={0.7} style={styles.kundaliDashaRow} onPress={() => { setExpandedMahadasha(mahadashaOpen ? null : index); setExpandedAntardasha(null); }}>
+                                <View style={styles.kundaliDashaMain}><Text style={styles.kundaliDashaLevel}>MAHADASHA</Text><Text style={styles.kundaliDashaLord}>{String(dasha?.lord || "-")}</Text></View>
+                                <Text style={[styles.kundaliDashaDate, { width: dashaDateWidth }]}>{formatKundaliDate(dasha?.start)} - {formatKundaliDate(dasha?.end)}</Text><Ionicons name={mahadashaOpen ? "chevron-up" : "chevron-down"} size={20} color="#1F8B5F" style={styles.kundaliDashaChevronIcon} />
+                                <Text style={styles.kundaliDashaChevron}>{mahadashaOpen ? "⌃" : "⌄"}</Text>
+                              </TouchableOpacity>
+                              {mahadashaOpen && Array.isArray(dasha?.antardashas) ? <View style={styles.kundaliAntardashaList}>{dasha.antardashas.map((antar: any, antarIndex: number) => {
+                                const antarKey = `${index}-${antarIndex}`;
+                                const antardashaOpen = expandedAntardasha === antarKey;
+                                return <View key={antarKey}>
+                                  <TouchableOpacity hitSlop={6} activeOpacity={0.7} style={styles.kundaliAntardashaRow} onPress={() => setExpandedAntardasha(antardashaOpen ? null : antarKey)}>
+                                    <View style={styles.kundaliDashaMain}><Text style={styles.kundaliDashaLevel}>ANTARDASHA</Text><Text style={styles.kundaliAntardashaLord}>{String(antar?.lord || "-")}</Text></View>
+                                    <Text style={[styles.kundaliDashaDate, { width: dashaDateWidth }]}>{formatKundaliDate(antar?.start)} - {formatKundaliDate(antar?.end)}</Text><Ionicons name={antardashaOpen ? "chevron-up" : "chevron-down"} size={20} color="#1F8B5F" style={styles.kundaliDashaChevronIcon} />
+                                    <Text style={styles.kundaliDashaChevron}>{antardashaOpen ? "⌃" : "⌄"}</Text>
+                                  </TouchableOpacity>
+                                  {antardashaOpen && Array.isArray(antar?.pratyantardashas) ? <View style={styles.kundaliPratyantardashaList}>{antar.pratyantardashas.map((praty: any, pratyIndex: number) => <View style={styles.kundaliPratyantardashaRow} key={`${antarKey}-${pratyIndex}`}><Text style={styles.kundaliPratyantardashaLord}>{String(praty?.lord || "-")}</Text><Text style={styles.kundaliDashaDate}>{formatKundaliDate(praty?.start)} - {formatKundaliDate(praty?.end)}</Text></View>)}</View> : null}
+                                </View>;
+                              })}</View> : null}
+                            </View>
+                          );
+                        })}
+                      </View>
+                    )}
+                  </ScrollView>
+                </View>
+              ) : null}
+            </View>
+          ) : (
+            <>
+              <View style={styles.wallpaperOrbOne} />
+              <View style={styles.wallpaperOrbTwo} />
+
+              {loading ? (
+                <View style={styles.loaderWrap}>
+                  <ActivityIndicator size="large" color="#1F8B5F" />
+                </View>
+              ) : (
+                <FlatList
+                  ref={listRef}
+                  data={messages}
+                  keyExtractor={(item) => item.id}
+                  renderItem={renderItem}
+                  style={styles.list}
+                  contentContainerStyle={styles.listContent}
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                  maintainVisibleContentPosition={{ minIndexForVisible: 1 }}
+                  onContentSizeChange={handleContentSizeChange}
+                  onScroll={handleListScroll}
+                  scrollEventThrottle={16}
+                  ListHeaderComponent={historyHeader}
+                  ListEmptyComponent={
+                    <View style={styles.emptyState}>
+                      <View style={styles.emptyBadge}>
+                        <Text style={styles.emptyBadgeText}>Chat</Text>
+                      </View>
+                      <Text style={styles.emptyTitle}>No previous chat yet</Text>
+                      <Text style={styles.emptyText}>
+                        Previous messages will appear here once the backend returns
+                        them for this call channel.
+                      </Text>
+                    </View>
+                  }
+                />
+              )}
+            </>
           )}
         </View>
 
@@ -1223,15 +1870,32 @@ const resolvedBirthLocation = String(birthLocation ?? "");
           </View>
         </View>
       </KeyboardAvoidingView>
-<KundaliFloatingButton
-  userId={resolvedCustomerId}
-  dateOfBirth={resolvedDateOfBirth}
-  timeOfBirth={resolvedTimeOfBirth}
-  latitude={Number(latitude)}
-  longitude={Number(longitude)}
-  birthLocation={resolvedBirthLocation}
-  fullName={resolvedFullName}
-/>
+
+      {!kundaliVisible && (
+        <Animated.View
+          {...kundaliPanResponder.panHandlers}
+          onLayout={(event) => {
+            const { width, height } = event.nativeEvent.layout;
+            kundaliButtonSize.current = { width, height };
+          }}
+          style={[
+            styles.floatingKundaliBtn,
+            {
+              transform: [
+                { translateX: kundaliPan.x },
+                { translateY: Animated.add(kundaliPan.y, -27) },
+              ],
+            },
+          ]}
+        >
+          <Text style={styles.floatingKundaliIcon}>♈</Text>
+
+          <View>
+            <Text style={styles.floatingKundaliTitle}>Kundali</Text>
+            <Text style={styles.floatingKundaliSub}>View Kundali</Text>
+          </View>
+        </Animated.View>
+      )}
       <Modal
         visible={quickMessageModal}
         transparent
@@ -1927,5 +2591,371 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "700",
+  },
+  floatingKundaliBtn: {
+    position: "absolute",
+    right: 16,
+    top: "30%",
+    minWidth: 112,
+    height: 54,
+    paddingHorizontal: 13,
+    borderRadius: 28,
+    backgroundColor: "#1F8B5F",
+    flexDirection: "row",
+    alignItems: "center",
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    zIndex: 100,
+  },
+  floatingKundaliIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    color: "#FFFFFF",
+    fontSize: 17,
+    fontWeight: "800",
+    textAlign: "center",
+    textAlignVertical: "center",
+    lineHeight: 34,
+    marginRight: 8,
+  },
+  floatingKundaliTitle: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  floatingKundaliSub: {
+    color: "rgba(255,255,255,0.75)",
+    fontSize: 9,
+    marginTop: 1,
+  },
+  kundaliContainer: {
+    flex: 1,
+    backgroundColor: "#F7F6F2",
+    flexDirection: "column",
+  },
+  kundaliHeader: {
+    height: 58,
+    paddingHorizontal: 16,
+    backgroundColor: "#0F5D43",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  kundaliHeaderLeft: {
+    flex: 1,
+    marginRight: 10,
+  },
+  kundaliTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  kundaliHeaderIcon: {
+    fontSize: 16,
+    color: "#FFD166",
+  },
+  kundaliHeaderTitle: {
+    color: "#FFFFFF",
+    fontSize: 17,
+    fontWeight: "800",
+  },
+  kundaliHeaderSubtitle: {
+    color: "rgba(255,255,255,0.75)",
+    fontSize: 11,
+    marginTop: 1,
+  },
+  kundaliCloseBtn: {
+    backgroundColor: "rgba(255,255,255,0.16)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  kundaliCloseText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  kundaliNewMsgBanner: {
+    backgroundColor: "#E2F2E9",
+    borderBottomWidth: 1,
+    borderBottomColor: "#C5E4D2",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  kundaliNewMsgIcon: {
+    fontSize: 14,
+  },
+  kundaliNewMsgTextWrap: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  kundaliNewMsgSender: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#17382F",
+    marginRight: 4,
+  },
+  kundaliNewMsgText: {
+    fontSize: 12,
+    color: "#41564F",
+    flex: 1,
+  },
+  kundaliNewMsgAction: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#1F8B5F",
+    marginLeft: 6,
+  },
+  kundaliBody: {
+    flex: 1,
+  },
+  kundaliSegmentBarWrap: {
+    backgroundColor: "#EAF1EC",
+    borderBottomWidth: 1,
+    borderBottomColor: "#D9E4DC",
+  },
+  kundaliSegmentScroll: {
+    flexGrow: 0,
+    minHeight: 60,
+  },
+  kundaliSegmentBar: {
+    minHeight: 60,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    alignItems: "center",
+    gap: 8,
+  },
+  kundaliSegment: {
+    minHeight: 40,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    justifyContent: "center",
+    borderRadius: 18,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#D9E4DC",
+  },
+  kundaliActiveSegment: {
+    backgroundColor: "#1F8B5F",
+    borderColor: "#1F8B5F",
+  },
+  kundaliSegmentText: {
+    color: "#527064",
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: "700",
+  },
+  kundaliActiveSegmentText: {
+    color: "#FFFFFF",
+  },
+  kundaliContent: {
+    padding: 14,
+    paddingBottom: 28,
+  },
+  kundaliSuccessTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#17382F",
+    marginBottom: 10,
+  },
+  kundaliCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#E3E7E3",
+  },
+  kundaliCardTitle: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#17382F",
+    marginBottom: 10,
+  },
+  kundaliChartHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  kundaliZoomHint: {
+    fontSize: 11,
+    color: "#1F8B5F",
+    fontWeight: "600",
+  },
+  kundaliInfoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 7,
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEF0ED",
+  },
+  kundaliInfoLabel: {
+    color: "#748078",
+    fontSize: 12,
+  },
+  kundaliInfoValue: {
+    color: "#263832",
+    fontSize: 12,
+    fontWeight: "700",
+    maxWidth: "60%",
+    textAlign: "right",
+  },
+  kundaliChartImage: {
+    width: "100%",
+    height: 260,
+    backgroundColor: "#FAFAF7",
+    borderRadius: 12,
+  },
+  kundaliChartPlaceholder: {
+    color: "#89938E",
+    fontSize: 13,
+    textAlign: "center",
+    paddingVertical: 30,
+  },
+  kundaliAscendantValue: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#1F8B5F",
+  },
+  kundaliNakshatraText: {
+    marginTop: 4,
+    color: "#69756F",
+    fontSize: 12,
+  },
+  kundaliDashaRow: {
+    width: "100%",
+    minHeight: 56,
+    paddingVertical: 10,
+    paddingRight: 2,
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEF0ED",
+  },
+  kundaliDashaBlock: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEF0ED",
+  },
+  kundaliDashaLevel: {
+    color: "#63A982",
+    fontSize: 9,
+    fontWeight: "800",
+    letterSpacing: 0.7,
+  },
+  kundaliDashaChevron: {
+    position: "absolute",
+    right: 2,
+    top: 14,
+    color: "transparent",
+    fontSize: 0,
+  },
+  kundaliDashaChevronIcon: {
+    width: 28,
+    marginLeft: 4,
+  },
+  kundaliDashaMain: {
+    flex: 1,
+    minWidth: 0,
+  },
+  kundaliAntardashaList: {
+    marginLeft: 10,
+    paddingLeft: 10,
+    borderLeftWidth: 2,
+    borderLeftColor: "#C5E4D2",
+  },
+  kundaliAntardashaRow: {
+    width: "100%",
+    minHeight: 46,
+    paddingVertical: 8,
+    paddingRight: 2,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  kundaliAntardashaLord: {
+    color: "#176B48",
+    fontSize: 13,
+    fontWeight: "700",
+    marginTop: 2,
+  },
+  kundaliPratyantardashaList: {
+    marginLeft: 10,
+    paddingLeft: 10,
+    borderLeftWidth: 1,
+    borderLeftColor: "#D9E4DC",
+  },
+  kundaliPratyantardashaRow: {
+    paddingVertical: 7,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  kundaliPratyantardashaLord: {
+    color: "#2D8A60",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  kundaliDashaLord: {
+    color: "#1F8B5F",
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  kundaliDashaDate: {
+    marginTop: 0,
+    flexShrink: 1,
+    color: "#69756F",
+    fontSize: 11,
+  },
+  kundaliCenter: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 30,
+  },
+  kundaliLoadingTitle: {
+    marginTop: 14,
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#17382F",
+  },
+  kundaliLoadingText: {
+    marginTop: 5,
+    color: "#68756F",
+    fontSize: 12,
+  },
+  kundaliErrorIcon: {
+    fontSize: 34,
+  },
+  kundaliErrorTitle: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#17382F",
+  },
+  kundaliErrorText: {
+    marginTop: 6,
+    textAlign: "center",
+    color: "#69756F",
+    fontSize: 12,
+  },
+  kundaliRetryBtn: {
+    marginTop: 16,
+    paddingHorizontal: 22,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: "#1F8B5F",
+  },
+  kundaliRetryText: {
+    color: "#FFFFFF",
+    fontWeight: "800",
+    fontSize: 13,
   },
 });

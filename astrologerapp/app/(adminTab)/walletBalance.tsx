@@ -11,9 +11,12 @@ import {
   Alert,
   StatusBar,
   RefreshControl,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { openPhoneNumber } from "../../utils/openPhoneNumber";
 
 type Astrologer = {
   id: number;
@@ -174,7 +177,6 @@ const AdminWallet = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor="#1A1A2E" />
-
       {/* Header */}
       <View style={styles.header}>
         <View>
@@ -205,7 +207,13 @@ const AdminWallet = () => {
               <View style={styles.astroInfo}>
                 <Text style={styles.dpName}>{astro.dp_name}</Text>
                 <Text style={styles.fullName}>{astro.full_name}</Text>
-                <Text style={styles.mobile}>📞 {astro.mobile}</Text>
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel={`Call ${astro.mobile}`}
+                  onPress={() => void openPhoneNumber(astro.mobile)}
+                >
+                  <Text style={styles.mobile}>📞 {astro.mobile}</Text>
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -305,8 +313,18 @@ const AdminWallet = () => {
       </ScrollView>
 
       {/* Transfer Modal */}
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        statusBarTranslucent
+        navigationBarTranslucent
+      >
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
+        >
           <View style={styles.modalBox}>
             <View style={styles.modalHandle} />
 
@@ -348,7 +366,7 @@ const AdminWallet = () => {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );

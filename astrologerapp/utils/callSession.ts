@@ -18,6 +18,12 @@ export type ActiveCallSession = {
   isMuted: boolean;
   isVideoOff: boolean;
   isSpeakerOn: boolean;
+  dateOfBirth?: string;
+  timeOfBirth?: string;
+  birthLocation?: string;
+  latitude?: string;
+  longitude?: string;
+  channelName?: string;
 };
 
 const STORAGE_KEY = "@active_call_session";

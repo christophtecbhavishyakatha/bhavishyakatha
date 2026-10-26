@@ -44,7 +44,10 @@ const formatTimestamp = (value?: string | null) => {
 };
 
 const openPhoneNumber = async (value?: string | null) => {
-  const phoneNumber = String(value ?? "").replace(/[\s()-]/g, "");
+  const phoneNumber = String(value ?? "")
+    .trim()
+    .replace(/[^\d+]/g, "")
+    .replace(/(?!^)\+/g, "");
 
   if (!phoneNumber) {
     return;
@@ -53,14 +56,7 @@ const openPhoneNumber = async (value?: string | null) => {
   const phoneUrl = `tel:${phoneNumber}`;
 
   try {
-    if (await Linking.canOpenURL(phoneUrl)) {
-      await Linking.openURL(phoneUrl);
-    } else {
-      Alert.alert(
-        "Unable to call",
-        "This device cannot open the phone dialer.",
-      );
-    }
+    await Linking.openURL(phoneUrl);
   } catch (error) {
     console.error("Open phone number error:", error);
     Alert.alert("Unable to call", "Could not open the phone dialer.");

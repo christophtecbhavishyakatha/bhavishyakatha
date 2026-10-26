@@ -276,7 +276,6 @@ export default function SocialPostsScreen() {
         throw new Error(json.message || "Unable to load posts");
 
       setPosts(json.data);
-      setExpandedComments({});
     } catch (error) {
       console.error("Load admin social posts error:", error);
       Alert.alert("Error", "Unable to load posts right now");

@@ -11,11 +11,15 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
+    useWindowDimensions,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const API_BASE = "https://bhavishyakatha.in/express/api/admin";
+
+// Cap the content width on tablets / web so cards don't stretch edge-to-edge
+const MAX_CONTENT_WIDTH = 560;
 
 const MENU_ITEMS = [
   {
@@ -94,6 +98,10 @@ export default function AdminDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [pendingTicketCount, setPendingTicketCount] = useState(0);
 
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 700;
+  const contentWidth = Math.min(width, MAX_CONTENT_WIDTH);
+
   useEffect(() => {
     loadAdmin();
   }, []);
@@ -165,85 +173,118 @@ export default function AdminDashboard() {
         style={StyleSheet.absoluteFillObject}
       />
 
-      {/* Top Bar */}
-      <View style={styles.topBar}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarText}>
-              {adminName ? adminName[0].toUpperCase() : "A"}
-            </Text>
-          </View>
-          <View>
-            <Text style={styles.welcome}>Welcome back 👋</Text>
-            <Text style={styles.adminName}>{adminName}</Text>
-          </View>
-        </View>
-
-        {/* Logout */}
-        <TouchableOpacity style={styles.logoutButton} onPress={logOut}>
-          <Ionicons name="log-out-outline" size={20} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel="Refresh admin dashboard"
-          style={styles.refreshButton}
-          onPress={onRefresh}
-        >
-          <Ionicons name="refresh-outline" size={20} color="#fff" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Divider */}
-      <View style={styles.divider} />
-
-      {/* Scrollable Cards */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#fff"
-          />
-        }
-      >
-        <Text style={styles.sectionLabel}>Quick Actions</Text>
-        {MENU_ITEMS.map((item, index) => (
-          <TouchableOpacity
-            key={index}
-            activeOpacity={0.85}
-            onPress={() => router.push(item.route)}
-          >
-            <LinearGradient
-              colors={item.colors}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.card}
-            >
-              <View style={styles.iconBox}>{item.icon}</View>
-              <View style={styles.cardTitleWrap}>
-                <Text style={styles.cardTitle}>{item.label}</Text>
-                {item.route === "/(adminTab)/ticket" &&
-                pendingTicketCount > 0 ? (
-                  <View style={styles.ticketBadge}>
-                    <Text style={styles.ticketBadgeText}>
-                      {pendingTicketCount}
-                    </Text>
-                  </View>
-                ) : null}
+      {/* Centered, width-capped wrapper so layout stays comfortable on tablets/web */}
+      <View style={styles.pageWrap}>
+        <View style={[styles.inner, { width: contentWidth }]}>
+          {/* Top Bar */}
+          <View style={styles.topBar}>
+            {/* Header */}
+            <View style={styles.header}>
+              <View style={styles.avatarCircle}>
+                <Text style={styles.avatarText}>
+                  {adminName ? adminName[0].toUpperCase() : "A"}
+                </Text>
               </View>
-              <Ionicons
-                name="chevron-forward"
-                size={18}
-                color="rgba(255,255,255,0.6)"
-                style={styles.chevron}
+              <View style={styles.headerText}>
+                <Text style={styles.welcome} numberOfLines={1}>
+                  Welcome back 👋
+                </Text>
+                <Text style={styles.adminName} numberOfLines={1}>
+                  {adminName}
+                </Text>
+              </View>
+            </View>
+
+            {/* Actions */}
+            <View style={styles.actionsRow}>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Refresh admin dashboard"
+                style={styles.refreshButton}
+                onPress={onRefresh}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons name="refresh-outline" size={20} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel="Log out"
+                style={styles.logoutButton}
+                onPress={logOut}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons name="log-out-outline" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Divider */}
+          <View style={styles.divider} />
+
+          {/* Scrollable Cards */}
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollContent}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor="#fff"
               />
-            </LinearGradient>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+            }
+          >
+            <Text style={styles.sectionLabel}>Quick Actions</Text>
+
+            <View
+              style={[
+                styles.grid,
+                isTablet && styles.gridTwoColumn,
+              ]}
+            >
+              {MENU_ITEMS.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  activeOpacity={0.85}
+                  onPress={() => router.push(item.route)}
+                  style={isTablet ? styles.gridItemHalf : styles.gridItemFull}
+                >
+                  <LinearGradient
+                    colors={item.colors}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.card}
+                  >
+                    <View style={styles.iconBox}>{item.icon}</View>
+                    <View style={styles.cardTitleWrap}>
+                      <Text
+                        style={styles.cardTitle}
+                        numberOfLines={2}
+                        adjustsFontSizeToFit
+                      >
+                        {item.label}
+                      </Text>
+                      {item.route === "/(adminTab)/ticket" &&
+                      pendingTicketCount > 0 ? (
+                        <View style={styles.ticketBadge}>
+                          <Text style={styles.ticketBadgeText}>
+                            {pendingTicketCount}
+                          </Text>
+                        </View>
+                      ) : null}
+                    </View>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={18}
+                      color="rgba(255,255,255,0.6)"
+                      style={styles.chevron}
+                    />
+                  </LinearGradient>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+      </View>
     </SafeAreaView>
   );
 }
@@ -259,15 +300,25 @@ const styles = StyleSheet.create({
     backgroundColor: "#0F0C29",
   },
 
+  /* Width control wrapper — keeps content readable & centered on any screen size */
+  pageWrap: {
+    flex: 1,
+    alignItems: "center",
+  },
+  inner: {
+    flex: 1,
+    maxWidth: "100%",
+  },
+
   /* Top bar */
   topBar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 16,
-    gap: 12,
+    gap: 10,
   },
   header: {
     flexDirection: "row",
@@ -276,10 +327,14 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
   },
+  headerText: {
+    flexShrink: 1,
+    minWidth: 0,
+  },
   avatarCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: "#7C3AED",
     justifyContent: "center",
     alignItems: "center",
@@ -288,23 +343,29 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
     elevation: 6,
+    flexShrink: 0,
   },
   avatarText: {
     color: "#fff",
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
   },
   welcome: {
-    fontSize: 13,
+    fontSize: 12,
     color: "rgba(255,255,255,0.5)",
     letterSpacing: 0.3,
   },
   adminName: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
     color: "#fff",
     letterSpacing: 0.2,
-    flexShrink: 1,
+  },
+  actionsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flexShrink: 0,
   },
   logoutButton: {
     backgroundColor: "rgba(239,68,68,0.85)",
@@ -317,23 +378,25 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   refreshButton: {
-    padding: 8,
-    marginLeft: 4,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    padding: 10,
+    borderRadius: 12,
   },
 
   /* Divider */
   divider: {
     height: 1,
     backgroundColor: "rgba(255,255,255,0.08)",
-    marginHorizontal: 20,
+    marginHorizontal: 16,
     marginBottom: 8,
   },
 
   /* Scroll */
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 24,
+    paddingHorizontal: 16,
+    paddingBottom: 32,
     paddingTop: 8,
+    flexGrow: 1,
   },
   sectionLabel: {
     fontSize: 12,
@@ -345,14 +408,31 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
+  /* Grid — single column on phones, two columns on wider/tablet screens */
+  grid: {
+    flexDirection: "column",
+  },
+  gridTwoColumn: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  gridItemFull: {
+    width: "100%",
+  },
+  gridItemHalf: {
+    width: "48%",
+  },
+
   /* Card */
   card: {
     flexDirection: "row",
     alignItems: "center",
     borderRadius: 16,
     paddingVertical: 16,
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
     marginBottom: 12,
+    minHeight: 68,
     shadowColor: "#000",
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -360,18 +440,19 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   iconBox: {
-    width: 38,
-    height: 38,
+    width: 36,
+    height: 36,
     borderRadius: 10,
     backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 14,
+    marginRight: 12,
+    flexShrink: 0,
   },
   cardTitle: {
     flex: 1,
     color: "#fff",
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600",
     letterSpacing: 0.2,
   },
@@ -382,21 +463,23 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   ticketBadge: {
-    minWidth: 24,
-    height: 24,
+    minWidth: 22,
+    height: 22,
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: 10,
+    marginLeft: 8,
     paddingHorizontal: 6,
-    borderRadius: 12,
+    borderRadius: 11,
     backgroundColor: "#DC2626",
+    flexShrink: 0,
   },
   ticketBadgeText: {
     color: "#FFFFFF",
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "800",
   },
   chevron: {
     marginLeft: 4,
+    flexShrink: 0,
   },
 });

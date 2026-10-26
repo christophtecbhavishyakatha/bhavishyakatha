@@ -259,6 +259,12 @@ export default function RootLayout() {
         userId: activeCall.userId,
         customerId: activeCall.customerId,
         fullName: activeCall.fullName,
+        latitude: activeCall.latitude ?? "",
+        longitude: activeCall.longitude ?? "",
+        dateOfBirth: activeCall.dateOfBirth ?? "",
+        timeOfBirth: activeCall.timeOfBirth ?? "",
+        birthLocation: activeCall.birthLocation ?? "",
+        channelName: activeCall.channelName ?? "",
       },
     });
   };

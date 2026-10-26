@@ -82,6 +82,7 @@ export default function AudioCallScreen() {
   const unansweredTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
+  const ringingFallbackRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [session, setSession] = useState<ActiveCallSession | null>(
     getCurrentCallSession()
   );
@@ -111,13 +112,21 @@ const {
   latitude?: string;
 }>();
 
-  const callId = String(id ?? "");
-  const callUserId = String(userId ?? "");
-  const callCustomerId = String(customerId ?? "");
-  const callFullName = String(fullName ?? "Consultant");
-const callDateOfBirth = String(dateOfBirth ?? "");
-const callTimeOfBirth = String(timeOfBirth ?? "");
-const callBirthLocation = String(birthLocation ?? "");
+  const currentSession = getCurrentCallSession();
+  const sessionMatch =
+    currentSession?.id === id || currentSession?.callType === "audio"
+      ? currentSession
+      : null;
+
+  const callId = String(id ?? sessionMatch?.id ?? "");
+  const callUserId = String(userId ?? sessionMatch?.userId ?? "");
+  const callCustomerId = String(customerId ?? sessionMatch?.customerId ?? "");
+  const callFullName = String(fullName ?? sessionMatch?.fullName ?? "Consultant");
+  const callDateOfBirth = String(dateOfBirth ?? sessionMatch?.dateOfBirth ?? "");
+  const callTimeOfBirth = String(timeOfBirth ?? sessionMatch?.timeOfBirth ?? "");
+  const callBirthLocation = String(birthLocation ?? sessionMatch?.birthLocation ?? "");
+  const callLatitude = String(latitude ?? sessionMatch?.latitude ?? "");
+  const callLongitude = String(longitude ?? sessionMatch?.longitude ?? "");
   const uid = Number(callUserId);
   const API_BASE = "https://bhavishyakatha.in/express/astrologer";
 
@@ -244,6 +253,13 @@ const callBirthLocation = String(birthLocation ?? "");
     }
   };
 
+  const clearRingingFallback = () => {
+    if (ringingFallbackRef.current) {
+      clearTimeout(ringingFallbackRef.current);
+      ringingFallbackRef.current = null;
+    }
+  };
+
   const notifyBackendCallEnded = async (reason: "manual" | "timeout") => {
     if (!callId) {
       return;
@@ -342,9 +358,17 @@ const callBirthLocation = String(birthLocation ?? "");
 
     engine.registerEventHandler({
       onJoinChannelSuccess: async () => {
-        await updateActiveCallSession({ status: "ringing" });
+        const joinedSession = getCurrentCallSession();
+        if (
+          joinedSession?.id === callId &&
+          joinedSession.callType === "audio" &&
+          joinedSession.status === "connecting"
+        ) {
+          await updateActiveCallSession({ status: "ringing" });
+        }
       },
       onUserJoined: async () => {
+        clearRingingFallback();
         clearUnansweredTimeout();
         ensureForegroundService();
         await updateActiveCallSession({
@@ -390,6 +414,10 @@ const callBirthLocation = String(birthLocation ?? "");
 
     setCallEngine(engine);
 
+    // Start the native session before publishing the JS session. This prevents
+    // the root layout from treating the call as stale during startup.
+    ensureForegroundService();
+
     await setActiveCallSession({
       callType: "audio",
       id: callId,
@@ -405,9 +433,13 @@ const callBirthLocation = String(birthLocation ?? "");
       isMuted: false,
       isVideoOff: false,
       isSpeakerOn: true,
+      dateOfBirth: callDateOfBirth,
+      timeOfBirth: callTimeOfBirth,
+      birthLocation: callBirthLocation,
+      latitude: callLatitude,
+      longitude: callLongitude,
     });
 
-    ensureForegroundService();
     startUnansweredTimeout();
 
     const joinResult = engine.joinChannel(
@@ -427,7 +459,8 @@ const callBirthLocation = String(birthLocation ?? "");
       console.warn("Unexpected Agora join result:", joinResult);
     }
 
-    setTimeout(() => {
+    clearRingingFallback();
+    ringingFallbackRef.current = setTimeout(() => {
       const currentSession = getCurrentCallSession();
       if (
         currentSession &&
@@ -435,8 +468,9 @@ const callBirthLocation = String(birthLocation ?? "");
         currentSession.id === callId &&
         currentSession.status === "connecting"
       ) {
-        updateActiveCallSession({ status: "ringing" });
+        void updateActiveCallSession({ status: "ringing" });
       }
+      ringingFallbackRef.current = null;
     }, 3000);
 
   };
@@ -458,6 +492,9 @@ const callBirthLocation = String(birthLocation ?? "");
           existingEngine
         ) {
           ensureForegroundService();
+          if (existingSession.status === "connecting") {
+            await updateActiveCallSession({ status: "ringing" });
+          }
           if (isMounted) {
             setLoading(false);
           }
@@ -496,6 +533,7 @@ const callBirthLocation = String(birthLocation ?? "");
     return () => {
       isMounted = false;
       clearUnansweredTimeout();
+      clearRingingFallback();
     };
   }, [callCustomerId, callFullName, callId, callUserId]);
 
@@ -569,15 +607,13 @@ const callBirthLocation = String(birthLocation ?? "");
       {session?.status === "connected" && (
         
 <KundaliFloatingButton
-  userId={callUserId}
+  userId={callCustomerId || callUserId}
   dateOfBirth={callDateOfBirth}
   timeOfBirth={callTimeOfBirth}
-  latitude={Number(latitude)}
-  longitude={Number(longitude)}
-
+  latitude={Number(callLatitude)}
+  longitude={Number(callLongitude)}
   birthLocation={callBirthLocation}
   fullName={callFullName}
-
 />
       )}
       <View style={styles.controls}>

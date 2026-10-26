@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   Image,
   TextInput,
-  Linking,
   Alert,
   Platform,
   RefreshControl,
@@ -19,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { openPhoneNumber } from '../../utils/openPhoneNumber';
 
 const API = 'https://bhavishyakatha.in/express/api/admin';
 
@@ -203,7 +203,7 @@ console.log(json.data[0].category);
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.safeArea} edges={['right']}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -347,7 +347,11 @@ console.log(json.data[0].category);
                   <View style={styles.cardInfo}>
                     <Text style={styles.cardDpName} numberOfLines={1}>{dpName}</Text>
                     <Text style={styles.cardFullName} numberOfLines={1}>{fullName}</Text>
-                    <TouchableOpacity onPress={() => Linking.openURL(`tel:${item.phone_number}`)}>
+                    <TouchableOpacity
+                      accessibilityRole="button"
+                      accessibilityLabel={`Call ${item.phone_number}`}
+                      onPress={() => void openPhoneNumber(item.phone_number)}
+                    >
                       <Text style={styles.cardPhone}>📞 {item.phone_number}</Text>
                     </TouchableOpacity>
                   </View>
@@ -421,7 +425,11 @@ setChatCommission(String(item.chat_platform_commission || 30));
       {/* ─── MODAL ─── */}
       <Modal visible={!!selected} animationType="slide" transparent>
         {selected && (
-          <View style={styles.modalBackdrop}>
+          <KeyboardAvoidingView
+            style={styles.modalBackdrop}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 24}
+          >
             <View style={styles.modalSheet}>
               {/* Drag handle */}
               <View style={styles.dragHandle} />
@@ -435,8 +443,12 @@ setChatCommission(String(item.chat_platform_commission || 30));
 </TouchableOpacity>
 
 
-              <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalKeyboard}>
-              <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+              <ScrollView
+                style={styles.modalScroll}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={styles.modalScrollContent}
+              >
                 {/* Modal Header */}
                 <View style={styles.modalHeader}>
                   <View style={styles.modalAvatarWrap}>
@@ -457,7 +469,13 @@ setChatCommission(String(item.chat_platform_commission || 30));
                 {/* Basic Info */}
                 <View style={styles.infoCard}>
                   <InfoRow icon="🪪" label="Astrologer ID" value={String(selected.astrologer_id)} />
-                  <InfoRow icon="📱" label="Phone" value={safeString(selected.phone_number)} last />
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityLabel={`Call ${selected.phone_number}`}
+                    onPress={() => void openPhoneNumber(selected.phone_number)}
+                  >
+                    <InfoRow icon="📱" label="Phone" value={safeString(selected.phone_number)} last />
+                  </TouchableOpacity>
                 </View>
 
                 {/* Display Name */}
@@ -684,11 +702,11 @@ setChatCommission(String(item.chat_platform_commission || 30));
 
                 <View style={{ height: 20 }} />
               </ScrollView>
-              </KeyboardAvoidingView>
             </View>
-          </View>
+          </KeyboardAvoidingView>
         )}
       </Modal>
+
     </SafeAreaView>
   );
 }
@@ -752,7 +770,7 @@ const styles = StyleSheet.create({
   /* Header */
   headerSection: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingTop: 20, paddingBottom: 16,
+    paddingTop: 0, paddingBottom: 16,
     gap: 12,
   },
   headerTitle: { fontSize: 28, fontWeight: '800', color: '#1E1B4B', letterSpacing: -0.5, flexShrink: 1 },
@@ -872,6 +890,12 @@ category:{color:'#4F46E5', fontSize:12, fontWeight:'600',  right:0},
   modalSheet: {
     backgroundColor: '#fff', borderTopLeftRadius: 28, borderTopRightRadius: 28,
     padding: 24, maxHeight: '92%',
+  },
+  modalScroll: {
+    flexGrow: 0,
+  },
+  modalScrollContent: {
+    paddingBottom: 16,
   },
   dragHandle: {
     width: 40, height: 4, borderRadius: 2, backgroundColor: '#E0E7FF',
@@ -1050,5 +1074,4 @@ category:{color:'#4F46E5', fontSize:12, fontWeight:'600',  right:0},
   fontWeight: '700',
   },
   refreshButton: { padding: 8, marginLeft: 8 },
-  modalKeyboard: { flex: 1 },
 });

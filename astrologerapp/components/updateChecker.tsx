@@ -11,7 +11,7 @@ import {
   BackHandler,
 } from "react-native";
 
-const APP_VERSION = "10";
+const APP_VERSION = "12";
   const API_BASE = "https://bhavishyakatha.in/express";
 
 export default function ForceUpdateChecker() {

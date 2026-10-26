@@ -10,6 +10,7 @@ import {
     View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { openPhoneNumber } from "../../utils/openPhoneNumber";
 
 const API = "https://bhavishyakatha.in/express/api";
 
@@ -318,9 +319,15 @@ const CallLogsScreen = () => {
                     <Text style={styles.astrologerName}>
                       {item.astrologer_name}
                     </Text>
-                    <Text style={styles.mobileText}>
-                      📞 {item.astrologer_mobile}
-                    </Text>
+                    <TouchableOpacity
+                      accessibilityRole="button"
+                      accessibilityLabel={`Call ${item.astrologer_mobile}`}
+                      onPress={() => void openPhoneNumber(item.astrologer_mobile)}
+                    >
+                      <Text style={styles.mobileText}>
+                        📞 {item.astrologer_mobile}
+                      </Text>
+                    </TouchableOpacity>
                   </View>
 
                   <View
@@ -350,7 +357,13 @@ const CallLogsScreen = () => {
                   <View style={styles.userInfo}>
                     <Text style={styles.userLabel}>USER</Text>
                     <Text style={styles.userName}>{item.user_name}</Text>
-                    <Text style={styles.mobileText}>📞 {item.user_mobile}</Text>
+                    <TouchableOpacity
+                      accessibilityRole="button"
+                      accessibilityLabel={`Call ${item.user_mobile}`}
+                      onPress={() => void openPhoneNumber(item.user_mobile)}
+                    >
+                      <Text style={styles.mobileText}>📞 {item.user_mobile}</Text>
+                    </TouchableOpacity>
                   </View>
                   <View style={styles.callTypePill}>
                     <Text style={styles.callTypePillText}>

@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { openPhoneNumber } from "../../utils/openPhoneNumber";
 
 const API = "https://bhavishyakatha.in/express/api";
 
@@ -167,7 +168,13 @@ setData((prev) => {
         </View>
         <View style={styles.userInfo}>
           <Text style={styles.name}>{item.full_name}</Text>
-          <Text style={styles.mobile}>📞 {item.mobile}</Text>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel={`Call ${item.mobile}`}
+            onPress={() => void openPhoneNumber(item.mobile)}
+          >
+            <Text style={styles.mobile}>📞 {item.mobile}</Text>
+          </TouchableOpacity>
         </View>
         <View
           style={[
@@ -370,9 +377,15 @@ setData((prev) => {
                         </View>
                       </View>
 
-                      <Text style={styles.modalCardSub}>
-                        📞 {item.phone_number}
-                      </Text>
+                      <TouchableOpacity
+                        accessibilityRole="button"
+                        accessibilityLabel={`Call ${item.phone_number}`}
+                        onPress={() => void openPhoneNumber(item.phone_number)}
+                      >
+                        <Text style={styles.modalCardSub}>
+                          📞 {item.phone_number}
+                        </Text>
+                      </TouchableOpacity>
 
                       {/* Razorpay ID */}
                       {item.razorpay_payment_id ? (

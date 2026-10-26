@@ -12,6 +12,7 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { openPhoneNumber } from "../../utils/openPhoneNumber";
 const API = "https://bhavishyakatha.in/express/api";
 
 const RechargeLogsScreen = () => {
@@ -308,7 +309,13 @@ const RechargeLogsScreen = () => {
               <View style={styles.cardHeader}>
                 <View>
                   <Text style={styles.cardName}>{item.user_name}</Text>
-                  <Text style={styles.cardPhone}>📞 {item.phone_number}</Text>
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityLabel={`Call ${item.phone_number}`}
+                    onPress={() => void openPhoneNumber(item.phone_number)}
+                  >
+                    <Text style={styles.cardPhone}>📞 {item.phone_number}</Text>
+                  </TouchableOpacity>
                 </View>
                 <View
                   style={[

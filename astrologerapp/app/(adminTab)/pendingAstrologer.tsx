@@ -8,7 +8,7 @@ import {
   Modal,
   ActivityIndicator,
   Image,
-  TextInput, Linking,
+  TextInput,
   RefreshControl,
   KeyboardAvoidingView,
   Platform,
@@ -17,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from "expo-router";
 import { useCallback } from "react";
+import { openPhoneNumber } from "../../utils/openPhoneNumber";
 const API = 'https://bhavishyakatha.in/express/api/admin';
 const COMMISSION_OPTIONS = [30, 35, 40, 45, 50];
 
@@ -266,7 +267,9 @@ useFocusEffect(
                     <View style={styles.nameSection}>
                       <Text style={styles.name}>{fullName}</Text>
                       <TouchableOpacity
-                        onPress={() => Linking.openURL(`tel:${item.phone_number}`)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Call ${item.phone_number}`}
+                        onPress={() => void openPhoneNumber(item.phone_number)}
                       >
                         <Text style={styles.phone}>{item.phone_number}</Text>
                       </TouchableOpacity>
@@ -323,7 +326,11 @@ useFocusEffect(
         }}
       >
         {selected && (
-          <View style={styles.modalOverlay}>
+          <KeyboardAvoidingView
+            style={styles.modalOverlay}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 24}
+          >
             <View style={styles.modal}>
               <TouchableOpacity
                 style={styles.modalCloseButton}
@@ -336,8 +343,12 @@ useFocusEffect(
               >
                 <Text style={styles.modalCloseText}>X</Text>
               </TouchableOpacity>
-              <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalKeyboard}>
-              <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+              <ScrollView
+                style={styles.modalScroll}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={styles.modalScrollContent}
+              >
                 {/* Profile Photo in Modal */}
                 <View style={styles.modalPhotoSection}>
                   {selected.profile_photo ? (
@@ -359,7 +370,13 @@ useFocusEffect(
                 <View style={styles.detailSection}>
                   <Text style={styles.sectionTitle}>Basic Information</Text>
                   <DetailRow label="Full Name" value={safeString(selected.full_name)} />
-                  <DetailRow label="Phone Number" value={safeString(selected.phone_number)} />
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityLabel={`Call ${selected.phone_number}`}
+                    onPress={() => void openPhoneNumber(selected.phone_number)}
+                  >
+                    <DetailRow label="Phone Number" value={safeString(selected.phone_number)} />
+                  </TouchableOpacity>
                   <DetailRow label="Profile Completed" value={selected.profile_completed ? 'Yes' : 'No'} />
                 </View>
 
@@ -543,9 +560,8 @@ useFocusEffect(
                   </TouchableOpacity>
                 </View>
               </ScrollView>
-              </KeyboardAvoidingView>
             </View>
-          </View>
+          </KeyboardAvoidingView>
         )}
       </Modal>
     </SafeAreaView>
@@ -717,6 +733,12 @@ const styles = StyleSheet.create({
     padding: 24,
     maxHeight: '90%',
     position: 'relative',
+  },
+  modalScroll: {
+    flexGrow: 0,
+  },
+  modalScrollContent: {
+    paddingBottom: 16,
   },
   modalCloseButton: {
     position: 'absolute',
@@ -953,6 +975,5 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   refreshButton: { padding: 8 },
-  modalKeyboard: { flex: 1 },
 });
 
